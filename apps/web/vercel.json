@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd ../.. && pnpx turbo build --filter=@effect-workos/web",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && pnpm install --filter=@effect-workos/web "
+}

@@ -1,18 +1,18 @@
 {
   "name": "@effect-workos/workos",
   "version": "0.1.0",
+  "devDependencies": {
+    "@effect/platform": "^0.93.0",
+    "@effect/platform-node": "^0.103.0",
+    "effect": "^3.19.0",
+    "jose": "^6.1.0"
+  },
   "exports": {
     "./*": "./dist/src/*"
   },
-  "devDependencies": {
-    "effect": "^3.19.0",
-    "@effect/platform": "^0.93.0",
-    "@effect/platform-node": "^0.103.0",
-    "jose": "^6.1.0"
-  },
   "peerDependencies": {
-    "effect": "^3.19.0",
     "@effect/platform": "^0.93.0",
+    "effect": "^3.19.0",
     "jose": "^6.1.0"
   },
   "private": true,
@@ -22,8 +22,8 @@
     "dev": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
     "test": "vitest",
-    "test:once": "vitest run",
     "test:integration": "vitest --config ./vitest.integration.config.ts",
+    "test:once": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "type": "module"
