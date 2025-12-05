@@ -1,0 +1,23 @@
+# Version control
+.gitignore
+
+# Node
+node_modules
+
+# Build
+dist
+
+# IDE
+.vscode
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Environment
+.env
+.env.*
+
+# Misc
+README.md
+LICENSE

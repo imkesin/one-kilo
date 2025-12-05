@@ -1,0 +1,16 @@
+node_modules
+
+data
+dist
+
+.env.local
+.env.test.local
+
+# macos
+.DS_Store
+
+# turborepo
+.turbo
+
+# vercel
+.vercel
