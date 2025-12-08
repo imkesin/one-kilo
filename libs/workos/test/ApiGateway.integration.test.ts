@@ -14,12 +14,12 @@ const apiClient = ApiClient.layerConfig({
   )
 })
 
-const layerIntegrationTest = pipe(
+const integrationTestLayer = pipe(
   ApiGateway.layer(),
   Layer.provide(apiClient),
   Layer.provide(NodeHttpClient.layer)
 )
 
 describe("ApiGateway - Integration", () => {
-  layer(layerIntegrationTest, { excludeTestServices: true })(createUserManagementTests())
+  layer(integrationTestLayer, { excludeTestServices: true })(createUserManagementTests())
 })

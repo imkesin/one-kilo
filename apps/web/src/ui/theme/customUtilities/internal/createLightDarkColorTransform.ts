@@ -1,8 +1,11 @@
 import { PropertyConfig } from "@pandacss/dev"
 
-type TransformArgs = Exclude<PropertyConfig["transform"], undefined> extends (value: any, args: infer U) => any
-  ? U
-  : never
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+type TransformFn = Exclude<PropertyConfig["transform"], undefined>
+type TransformArgs = TransformFn extends (value: any, args: infer U) => any ? U : never
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 function handleColorMix({
   property,

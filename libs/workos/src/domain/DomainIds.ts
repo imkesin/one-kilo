@@ -8,6 +8,12 @@ export const AccessToken = pipe(
 )
 export type AccessToken = typeof AccessToken.Type
 
+export const AuthenticationCode = pipe(
+  S.NonEmptyTrimmedString,
+  S.brand("@effect-workos/workos/AuthenticationCode")
+)
+export type AuthenticationCode = typeof AuthenticationCode.Type
+
 /**
  * The WorkOS Connect Application’s client ID.
  */

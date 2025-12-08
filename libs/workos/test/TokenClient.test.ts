@@ -7,13 +7,13 @@ import { generateSessionId, generateUserId } from "../src/domain/DomainIds.ts"
 import * as TokenClient from "../src/TokenClient.ts"
 import * as TokenGenerator from "../src/TokenGenerator.ts"
 
-export const layerUnitTest = Layer.merge(
+export const unitTestLayer = Layer.merge(
   TokenClient.layerKeyPairTest(),
   TokenGenerator.layerKeyPairTest()
 )
 
 describe("TokenClient - Unit", () => {
-  layer(layerUnitTest)((it) => {
+  layer(unitTestLayer)((it) => {
     it.effect("a minimal token that can be decoded and verified", () =>
       Effect.gen(function*() {
         const { generator } = yield* TokenGenerator.TokenGenerator

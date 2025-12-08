@@ -13,11 +13,11 @@ const store = pipe(
   Layer.provide(TokenGenerator.layerKeyPairTest())
 )
 
-const layerUnitTest = pipe(
+const unitTestLayer = pipe(
   ApiGateway.layerTest(),
   Layer.provide(store)
 )
 
 describe("ApiGateway - Unit", () => {
-  layer(layerUnitTest)(createUserManagementTests())
+  layer(unitTestLayer)(createUserManagementTests())
 })

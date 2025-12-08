@@ -1,6 +1,100 @@
 import { pipe } from "effect/Function"
+import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { ClientId, EmailAddress } from "../../domain/DomainIds.ts"
+import { AuthenticationCode, ClientId, EmailAddress, RefreshToken } from "../../domain/DomainIds.ts"
+
+const AuthenticateCommonFields = {
+  clientId: pipe(
+    ClientId,
+    S.propertySignature,
+    S.fromKey("client_id")
+  ),
+  ipAddress: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional,
+    S.fromKey("ip_address")
+  ),
+  userAgent: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional,
+    S.fromKey("user_agent")
+  )
+} as const
+
+const AuthenticateWithSecretFields = {
+  clientSecret: pipe(
+    S.NonEmptyTrimmedString,
+    S.propertySignature,
+    S.fromKey("client_secret")
+  ),
+
+  ...AuthenticateCommonFields
+} as const
+
+export class AuthenticateWithCodeParameters
+  extends S.Class<AuthenticateWithCodeParameters>("AuthenticateWithCodeParameters")({
+    code: AuthenticationCode,
+    grantType: pipe(
+      S.requiredToOptional(
+        S.Literal("authorization_code"),
+        S.Literal("authorization_code"),
+        {
+          decode: () => Option.some("authorization_code" as const),
+          encode: () => "authorization_code" as const
+        }
+      )
+    ),
+
+    ...AuthenticateWithSecretFields
+  })
+{}
+
+export class AuthenticateWithPKCEParameters
+  extends S.Class<AuthenticateWithPKCEParameters>("AuthenticateWithPKCEParameters")({
+    code: AuthenticationCode,
+    codeVerifier: pipe(
+      S.NonEmptyTrimmedString,
+      S.propertySignature,
+      S.fromKey("code_verifier")
+    ),
+    grantType: pipe(
+      S.requiredToOptional(
+        S.Literal("authorization_code"),
+        S.Literal("authorization_code"),
+        {
+          decode: () => Option.some("authorization_code" as const),
+          encode: () => "authorization_code" as const
+        }
+      ),
+      S.fromKey("grant_type")
+    ),
+
+    ...AuthenticateCommonFields
+  })
+{}
+
+export class AuthenticateWithRefreshTokenParameters
+  extends S.Class<AuthenticateWithRefreshTokenParameters>("AuthenticateWithRefreshTokenParameters")({
+    refreshToken: pipe(
+      RefreshToken,
+      S.propertySignature,
+      S.fromKey("refresh_token")
+    ),
+    grantType: pipe(
+      S.requiredToOptional(
+        S.Literal("refresh_token"),
+        S.Literal("refresh_token"),
+        {
+          decode: () => Option.some("refresh_token" as const),
+          encode: () => "refresh_token" as const
+        }
+      ),
+      S.fromKey("grant_type")
+    ),
+
+    ...AuthenticateWithSecretFields
+  })
+{}
 
 export class CreateUserParameters extends S.Class<CreateUserParameters>("CreateUserParameters")({
   email: EmailAddress,
@@ -34,18 +128,3 @@ export class CreateUserParameters extends S.Class<CreateUserParameters>("CreateU
     S.optional
   )
 }) {}
-
-export class AuthenticateWithRefreshTokenParameters
-  extends S.Class<AuthenticateWithRefreshTokenParameters>("AuthenticateWithRefreshTokenParameters")({
-    clientId: pipe(
-      ClientId,
-      S.propertySignature,
-      S.fromKey("client_id")
-    ),
-    clientSecret: pipe(
-      S.NonEmptyTrimmedString,
-      S.propertySignature,
-      S.fromKey("client_secret")
-    )
-  })
-{}

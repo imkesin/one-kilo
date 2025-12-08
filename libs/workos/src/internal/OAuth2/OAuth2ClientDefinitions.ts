@@ -13,13 +13,12 @@ import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
 import { AccessToken } from "../../domain/DomainIds.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
-
+import { InvalidUrlError } from "../CommonErrors.ts"
 import {
   AuthorizeDeviceParameters,
   AuthorizeDeviceResponse,
   BuildAuthorizeUrlParameters,
   DeviceCodeAuthorizationTerminated,
-  InvalidUrlError,
   RetrieveTokenByAuthorizationCodeParameters,
   type RetrieveTokenByAuthorizationCodeParameters_Redacted,
   RetrieveTokenByAuthorizationCodeResponse,

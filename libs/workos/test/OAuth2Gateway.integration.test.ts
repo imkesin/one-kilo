@@ -44,7 +44,7 @@ const testSuiteContext = Layer.effect(
 //   NodeSocket.layerWebSocketConstructor
 // )
 
-const layerIntegrationTest = pipe(
+const integrationTestLayer = pipe(
   Layer.mergeAll(
     oauth2Gateway,
     tokenClient,
@@ -54,5 +54,5 @@ const layerIntegrationTest = pipe(
 )
 
 describe("OAuth2Client - Integration", () => {
-  layer(layerIntegrationTest, { excludeTestServices: true })(OAuth2TestSuite.createOAuth2Tests())
+  layer(integrationTestLayer, { excludeTestServices: true })(OAuth2TestSuite.createOAuth2Tests())
 })

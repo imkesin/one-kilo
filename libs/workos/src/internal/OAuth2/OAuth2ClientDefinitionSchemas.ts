@@ -86,12 +86,6 @@ export class BuildAuthorizeUrlParameters extends S.Class<BuildAuthorizeUrlParame
     S.fromKey("code_challenge_method")
   )
 }) {}
-export class InvalidUrlError extends S.TaggedError<InvalidUrlError>("@effect-workos/workos/InvalidUrlError")(
-  "InvalidUrlError",
-  {
-    cause: S.Defect
-  }
-) {}
 
 const RetrieveTokenParameters_CommonFields = {
   clientId: pipe(

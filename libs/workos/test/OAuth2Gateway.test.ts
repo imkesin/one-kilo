@@ -39,12 +39,12 @@ const oauth2Gateway = pipe(
 
 const tokenClient = TokenClient.layerKeyPairTest()
 
-const layerUnitTest = Layer.mergeAll(
+const unitTestLayer = Layer.mergeAll(
   oauth2Gateway,
   tokenClient,
   testSuiteContext
 )
 
 describe("OAuth2Gateway - Unit", () => {
-  layer(layerUnitTest)(OAuth2TestSuite.createOAuth2Tests())
+  layer(unitTestLayer)(OAuth2TestSuite.createOAuth2Tests())
 })
