@@ -19,6 +19,8 @@ const signInRoute = Effect.gen(function*() {
 })
 
 export async function GET(request: NextRequest) {
+  console.log("Going to sign-in", request.url)
+
   return runWithServerRuntime(
     signInRoute,
     { signal: request.signal }

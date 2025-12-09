@@ -1,3 +1,4 @@
+import { withAuth } from "@workos-inc/authkit-nextjs"
 import { Effect } from "effect"
 import { runWithServerRuntime } from "~/infra/Runtime/server/runWithServerRuntime"
 
@@ -8,5 +9,7 @@ const workspacesPage = Effect.succeed(
 )
 
 export default async function WorkspacesPage() {
+  await withAuth({ ensureSignedIn: true })
+
   return runWithServerRuntime(workspacesPage)
 }

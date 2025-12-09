@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react"
-import Link from "next/link"
 import { signInRouteUrl } from "~/app/(auth)/sign-in/url"
 import { css } from "~/generated/styled-system/css"
 import { HStack } from "~/generated/styled-system/jsx"
@@ -9,7 +8,7 @@ import { Button } from "~/ui/components/button/Button"
 function Navigation() {
   return (
     <nav className={hstack({ justifyContent: "end" })}>
-      <Button render={<Link href={signInRouteUrl} />}>
+      <Button render={<a href={signInRouteUrl} />}>
         Sign in
         <ChevronRight size={20} />
       </Button>
