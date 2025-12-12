@@ -70,5 +70,19 @@ export class User extends S.Class<User>("@effect-workos/workos/User")({
     S.propertySignature,
     S.fromKey("updated_at")
   )
-}) {
-}
+}) {}
+
+export const AuthenticationMethod = pipe(
+  S.Literal(
+    "SSO",
+    "Password",
+    "AppleOAuth",
+    "GithubOAuth",
+    "GoogleOAuth",
+    "MicrosoftOAuth",
+    "MagicAuth",
+    "Impersonation"
+  ),
+  S.brand("@effect-workos/workos/AuthenticationMethod")
+)
+export type AuthenticationMethod = typeof AuthenticationMethod.Type

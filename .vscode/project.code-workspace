@@ -86,7 +86,10 @@
       "typescriptreact"
     ],
     "search.exclude": {
-      "**/dist": true
+      "**/.turbo": true,
+      "**/dist": true,
+      "**/node_modules": true,
+      "pnpm-lock.yaml": true
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.preferences.importModuleSpecifierEnding": "js"

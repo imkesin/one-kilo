@@ -10,10 +10,19 @@ import { User } from "../../domain/DomainEntities.ts"
 import { ResourceNotFoundError } from "../../domain/DomainErrors.ts"
 import type { UserId } from "../../domain/DomainIds.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
-import { CreateUserParameters } from "./ApiClientDefinitionSchemas.ts"
+import {
+  AuthenticateWithCodeParameters,
+  AuthenticateWithCodeResponse,
+  CreateUserParameters
+} from "./ApiClientDefinitionSchemas.ts"
 
 export interface Client {
   readonly httpClient: HttpClient.HttpClient
+
+  readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters) => Effect.Effect<
+    AuthenticateWithCodeResponse,
+    HttpClientError.HttpClientError | ParseError
+  >
 
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
     User,
@@ -49,6 +58,24 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
 
   return {
     httpClient,
+
+    authenticateWithCode: (parameters) =>
+      pipe(
+        parameters,
+        S.encode(AuthenticateWithCodeParameters),
+        Effect.map((_) =>
+          pipe(
+            HttpClientRequest.post("/authenticate"),
+            HttpClientRequest.bodyUnsafeJson(_)
+          )
+        ),
+        flatMapResponse(
+          HttpClientResponse.matchStatus({
+            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithCodeResponse),
+            orElse: HttpResponseExtensions.unexpectedStatus
+          })
+        )
+      ),
 
     createUser: (parameters) =>
       pipe(

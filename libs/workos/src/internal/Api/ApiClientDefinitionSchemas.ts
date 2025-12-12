@@ -1,7 +1,15 @@
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { AuthenticationCode, ClientId, EmailAddress, RefreshToken } from "../../domain/DomainIds.ts"
+import { User } from "../../domain/DomainEntities.ts"
+import {
+  AccessToken,
+  AuthenticationCode,
+  ClientId,
+  EmailAddress,
+  OrganizationId,
+  RefreshToken
+} from "../../domain/DomainIds.ts"
 
 const AuthenticateCommonFields = {
   clientId: pipe(
@@ -46,6 +54,26 @@ export class AuthenticateWithCodeParameters
     ),
 
     ...AuthenticateWithSecretFields
+  })
+{}
+export class AuthenticateWithCodeResponse
+  extends S.Class<AuthenticateWithCodeResponse>("AuthenticateWithCodeResponse")({
+    user: User,
+    organizationId: pipe(
+      OrganizationId,
+      S.optional,
+      S.fromKey("organization_id")
+    ),
+    accessToken: pipe(
+      AccessToken,
+      S.propertySignature,
+      S.fromKey("access_token")
+    ),
+    refreshToken: pipe(
+      RefreshToken,
+      S.propertySignature,
+      S.fromKey("refresh_token")
+    )
   })
 {}
 
