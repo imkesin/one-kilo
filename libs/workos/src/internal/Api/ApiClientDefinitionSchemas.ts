@@ -1,7 +1,7 @@
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { User } from "../../domain/DomainEntities.ts"
+import { Impersonator, User } from "../../domain/DomainEntities.ts"
 import {
   AccessToken,
   AuthenticationCode,
@@ -73,6 +73,10 @@ export class AuthenticateWithCodeResponse
       RefreshToken,
       S.propertySignature,
       S.fromKey("refresh_token")
+    ),
+    impersonator: pipe(
+      Impersonator,
+      S.optional
     )
   })
 {}

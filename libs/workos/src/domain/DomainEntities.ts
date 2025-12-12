@@ -2,6 +2,38 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { EmailAddress, UserId } from "./DomainIds.ts"
 
+export const AuthenticationMethod = pipe(
+  S.Literal(
+    "SSO",
+    "Password",
+    "AppleOAuth",
+    "GithubOAuth",
+    "GoogleOAuth",
+    "MicrosoftOAuth",
+    "MagicAuth",
+    "Impersonation"
+  ),
+  S.brand("@effect-workos/workos/AuthenticationMethod")
+)
+export type AuthenticationMethod = typeof AuthenticationMethod.Type
+
+export class Impersonator extends S.Class<Impersonator>("@effect-workos/workos/Impersonator")({
+  _tag: pipe(
+    S.Literal("Impersonator"),
+    S.optional,
+    S.withDefaults({
+      constructor: () => "Impersonator" as const,
+      decoding: () => "Impersonator" as const
+    })
+  ),
+
+  email: EmailAddress,
+  reason: pipe(
+    S.String,
+    S.optional
+  )
+}) {}
+
 export class User extends S.Class<User>("@effect-workos/workos/User")({
   _tag: pipe(
     S.Literal("User"),
@@ -71,18 +103,3 @@ export class User extends S.Class<User>("@effect-workos/workos/User")({
     S.fromKey("updated_at")
   )
 }) {}
-
-export const AuthenticationMethod = pipe(
-  S.Literal(
-    "SSO",
-    "Password",
-    "AppleOAuth",
-    "GithubOAuth",
-    "GoogleOAuth",
-    "MicrosoftOAuth",
-    "MagicAuth",
-    "Impersonation"
-  ),
-  S.brand("@effect-workos/workos/AuthenticationMethod")
-)
-export type AuthenticationMethod = typeof AuthenticationMethod.Type
