@@ -2,15 +2,9 @@ import * as Data from "effect/Data"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { Impersonator, User } from "../../domain/DomainEntities.ts"
-import {
-  AccessToken,
-  AuthenticationCode,
-  ClientId,
-  EmailAddress,
-  OrganizationId,
-  RefreshToken
-} from "../../domain/DomainIds.ts"
+import { User } from "../../domain/DomainEntities.ts"
+import { ClientId, OrganizationId } from "../../domain/DomainIds.ts"
+import { AccessToken, AuthenticationCode, Impersonator, RefreshToken } from "../../domain/DomainValues.ts"
 
 const AuthenticateCommonFields = {
   clientId: pipe(
@@ -130,7 +124,7 @@ export class AuthenticateWithRefreshTokenParameters
 {}
 
 export class CreateUserParameters extends S.Class<CreateUserParameters>("CreateUserParameters")({
-  email: EmailAddress,
+  email: S.NonEmptyTrimmedString,
 
   password: pipe(
     S.NonEmptyTrimmedString,

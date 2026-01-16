@@ -4,7 +4,8 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import { AccessToken, type ClientId, type OrganizationId, type SessionId, type UserId } from "../domain/DomainIds.ts"
+import type { ClientId, OrganizationId, SessionId, UserId } from "../domain/DomainIds.ts"
+import { AccessToken } from "../domain/DomainValues.ts"
 import { generateUlid } from "../lib/ULID.ts"
 
 class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect-workos/workos/GenerateTokenError")(

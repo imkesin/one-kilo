@@ -6,34 +6,26 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
-import { User } from "../../domain/DomainEntities.ts"
+import { Organization } from "../../domain/DomainEntities.ts"
 import { ResourceNotFoundError } from "../../domain/DomainErrors.ts"
-import type { UserId } from "../../domain/DomainIds.ts"
+import type { OrganizationId } from "../../domain/DomainIds.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
-import {
-  AuthenticateWithCodeParameters,
-  AuthenticateWithCodeResponse,
-  CreateUserParameters,
-  DeleteUserResponse
-} from "./ApiClientDefinitionSchemas.ts"
+import { CreateOrganizationParameters, DeleteOrganizationResponse } from "./OrganizationsApiClientDefinitionSchemas.ts"
 
 export interface Client {
   readonly httpClient: HttpClient.HttpClient
 
-  readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters) => Effect.Effect<
-    AuthenticateWithCodeResponse,
-    HttpClientError.HttpClientError | ParseError
-  >
+  readonly createOrganization: (
+    parameters: typeof CreateOrganizationParameters.Type
+  ) => Effect.Effect<Organization, HttpClientError.HttpClientError | ParseError>
 
-  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
-    User,
-    HttpClientError.HttpClientError | ParseError
-  >
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse, HttpClientError.HttpClientError>
-  readonly retrieveUser: (userId: UserId) => Effect.Effect<
-    User,
-    HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
-  >
+  readonly deleteOrganization: (
+    organizationId: OrganizationId
+  ) => Effect.Effect<DeleteOrganizationResponse, HttpClientError.HttpClientError>
+
+  readonly retrieveOrganization: (
+    organizationId: OrganizationId
+  ) => Effect.Effect<Organization, HttpClientError.HttpClientError | ResourceNotFoundError | ParseError>
 }
 
 export const make = (httpClient: HttpClient.HttpClient): Client => {
@@ -61,58 +53,40 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
   return {
     httpClient,
 
-    authenticateWithCode: (parameters) =>
+    createOrganization: (parameters) =>
       pipe(
         parameters,
-        S.encode(AuthenticateWithCodeParameters),
+        S.encode(CreateOrganizationParameters),
         Effect.map((_) =>
           pipe(
-            HttpClientRequest.post("/authenticate"),
+            HttpClientRequest.post("/organizations"),
             HttpClientRequest.bodyUnsafeJson(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithCodeResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(Organization),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
       ),
-
-    createUser: (parameters) =>
+    deleteOrganization: (organizationId) =>
       pipe(
-        parameters,
-        S.encode(CreateUserParameters),
-        Effect.map((_) =>
-          pipe(
-            HttpClientRequest.post("/users"),
-            HttpClientRequest.bodyUnsafeJson(_)
-          )
-        ),
-        flatMapResponse(
-          HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
-            orElse: HttpResponseExtensions.unexpectedStatus
-          })
-        )
-      ),
-    deleteUser: (userId) =>
-      pipe(
-        HttpClientRequest.del(`/users/${userId}`),
+        HttpClientRequest.del(`/organizations/${organizationId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": () => Effect.succeed(DeleteUserResponse.Success()),
-            "404": () => Effect.succeed(DeleteUserResponse.NotFound()),
+            "2xx": () => Effect.succeed(DeleteOrganizationResponse.Success()),
+            "404": () => Effect.succeed(DeleteOrganizationResponse.NotFound()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
       ),
-    retrieveUser: (userId) =>
+    retrieveOrganization: (organizationId) =>
       pipe(
-        HttpClientRequest.get(`/users/${userId}`),
+        HttpClientRequest.get(`/organizations/${organizationId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "2xx": HttpResponseExtensions.decodeExpected(Organization),
             "404": () => Effect.fail(new ResourceNotFoundError()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })

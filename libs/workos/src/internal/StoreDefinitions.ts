@@ -9,8 +9,9 @@ import * as S from "effect/Schema"
 import { User } from "../domain/DomainEntities.ts"
 import { ResourceNotFoundError, UnauthorizedError } from "../domain/DomainErrors.ts"
 import { ClientId, generateUserId, OrganizationId, UserId } from "../domain/DomainIds.ts"
+import { EmailAddress } from "../domain/DomainValues.ts"
 import * as TokenGenerator from "../TokenGenerator.ts"
-import { type CreateUserParameters, DeleteUserResponse } from "./Api/ApiClientDefinitionSchemas.js"
+import { type CreateUserParameters, DeleteUserResponse } from "./Api/UserManagementApiClientDefinitionSchemas.ts"
 import {
   type RetrieveTokenByClientCredentialsParameters_Redacted,
   RetrieveTokenByClientCredentialsResponse
@@ -36,8 +37,8 @@ class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
 }) {}
 
 interface UserManagement {
-  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<User, never>
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse, never>
+  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<User>
+  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<User, ResourceNotFoundError>
 }
 
@@ -176,7 +177,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
             const user = UsersModel.make({
               id: generateUserId(),
-              email: parameters.email,
+              email: EmailAddress.make(parameters.email),
               emailVerified: false,
               password: parameters.password ?? null,
               firstName: parameters.firstName ?? null,

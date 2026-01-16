@@ -1,36 +1,80 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { EmailAddress, UserId } from "./DomainIds.ts"
+import { OrganizationDomainId, OrganizationId, UserId } from "./DomainIds.ts"
+import { EmailAddress, OrganizationDomainState, OrganizationDomainVerificationStrategy } from "./DomainValues.ts"
 
-export const AuthenticationMethod = pipe(
-  S.Literal(
-    "SSO",
-    "Password",
-    "AppleOAuth",
-    "GithubOAuth",
-    "GoogleOAuth",
-    "MicrosoftOAuth",
-    "MagicAuth",
-    "Impersonation"
-  ),
-  S.brand("@effect-workos/workos/AuthenticationMethod")
-)
-export type AuthenticationMethod = typeof AuthenticationMethod.Type
-
-export class Impersonator extends S.Class<Impersonator>("@effect-workos/workos/Impersonator")({
+export class OrganizationDomain extends S.Class<OrganizationDomain>("@effect-workos/workos/OrganizationDomain")({
   _tag: pipe(
-    S.Literal("Impersonator"),
+    S.Literal("OrganizationDomain"),
     S.optional,
     S.withDefaults({
-      constructor: () => "Impersonator" as const,
-      decoding: () => "Impersonator" as const
+      constructor: () => "OrganizationDomain" as const,
+      decoding: () => "OrganizationDomain" as const
     })
   ),
 
-  email: EmailAddress,
-  reason: pipe(
-    S.String,
-    S.optional
+  id: OrganizationDomainId,
+  organizationId: pipe(
+    OrganizationId,
+    S.propertySignature,
+    S.fromKey("organization_id")
+  ),
+  domain: S.NonEmptyTrimmedString,
+  state: OrganizationDomainState,
+  verificationStrategy: pipe(
+    OrganizationDomainVerificationStrategy,
+    S.propertySignature,
+    S.fromKey("verification_strategy")
+  ),
+  verificationToken: pipe(
+    S.NonEmptyTrimmedString,
+    S.propertySignature,
+    S.fromKey("verification_token")
+  )
+}) {}
+
+export class Organization extends S.Class<Organization>("@effect-workos/workos/Organization")({
+  _tag: pipe(
+    S.Literal("Organization"),
+    S.optional,
+    S.withDefaults({
+      constructor: () => "Organization" as const,
+      decoding: () => "Organization" as const
+    })
+  ),
+
+  id: OrganizationId,
+  name: S.NonEmptyTrimmedString,
+
+  domains: S.Array(OrganizationDomain),
+
+  stripeCustomerId: pipe(
+    S.NonEmptyTrimmedString,
+    S.NullOr,
+    S.propertySignature,
+    S.fromKey("stripe_customer_id")
+  ),
+  externalId: pipe(
+    S.NonEmptyTrimmedString,
+    S.NullOr,
+    S.propertySignature,
+    S.fromKey("external_id")
+  ),
+
+  metadata: S.Record({
+    key: S.String,
+    value: S.Unknown
+  }),
+
+  createdAt: pipe(
+    S.Date,
+    S.propertySignature,
+    S.fromKey("created_at")
+  ),
+  updatedAt: pipe(
+    S.Date,
+    S.propertySignature,
+    S.fromKey("updated_at")
   )
 }) {}
 

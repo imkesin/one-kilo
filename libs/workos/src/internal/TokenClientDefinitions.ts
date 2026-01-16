@@ -5,8 +5,8 @@ import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import { ClientId, EmailAddress, type IdToken, OrganizationId, UserId } from "../domain/DomainIds.ts"
-import { AccessToken } from "../domain/DomainIds.ts"
+import { ClientId, OrganizationId, UserId } from "../domain/DomainIds.ts"
+import { AccessToken, EmailAddress, type IdToken } from "../domain/DomainValues.ts"
 import { OAuthUserInfoFields } from "./CommonDefinitions.ts"
 
 const DateFromSeconds = S.transform(

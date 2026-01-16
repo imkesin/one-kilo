@@ -2,18 +2,6 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { makePrefixedUlidGenerator } from "../lib/ULID.ts"
 
-export const AccessToken = pipe(
-  S.NonEmptyTrimmedString,
-  S.brand("@effect-workos/workos/AccessToken")
-)
-export type AccessToken = typeof AccessToken.Type
-
-export const AuthenticationCode = pipe(
-  S.NonEmptyTrimmedString,
-  S.brand("@effect-workos/workos/AuthenticationCode")
-)
-export type AuthenticationCode = typeof AuthenticationCode.Type
-
 /**
  * The WorkOS Connect Application’s client ID.
  */
@@ -25,17 +13,13 @@ export const ClientId = pipe(
 export type ClientId = typeof ClientId.Type
 export const generateClientId = makePrefixedUlidGenerator(ClientId, "client")
 
-export const EmailAddress = pipe(
+export const OrganizationDomainId = pipe(
   S.NonEmptyTrimmedString,
-  S.brand("@effect-workos/workos/EmailAddress")
+  S.startsWith("org_domain_"),
+  S.brand("@effect-workos/workos/OrganizationDomainId")
 )
-export type EmailAddress = typeof EmailAddress.Type
-
-export const IdToken = pipe(
-  S.NonEmptyTrimmedString,
-  S.brand("@effect-workos/workos/IdToken")
-)
-export type IdToken = typeof IdToken.Type
+export type OrganizationDomainId = typeof OrganizationDomainId.Type
+export const generateOrganizationDomainId = makePrefixedUlidGenerator(OrganizationDomainId, "org_domain")
 
 export const OrganizationId = pipe(
   S.NonEmptyTrimmedString,
@@ -44,20 +28,13 @@ export const OrganizationId = pipe(
 export type OrganizationId = typeof OrganizationId.Type
 export const generateOrganizationId = makePrefixedUlidGenerator(OrganizationId, "org")
 
-export const RefreshToken = pipe(
-  S.NonEmptyTrimmedString,
-  S.brand("@effect-workos/workos/RefreshToken")
-)
-export type RefreshToken = typeof RefreshToken.Type
-
 export const SessionId = pipe(
   S.NonEmptyTrimmedString,
   S.startsWith("session_"),
   S.brand("@effect-workos/workos/SessionId")
 )
-export const generateSessionId = makePrefixedUlidGenerator(SessionId, "session")
-
 export type SessionId = typeof SessionId.Type
+export const generateSessionId = makePrefixedUlidGenerator(SessionId, "session")
 
 export const UserId = pipe(
   S.NonEmptyTrimmedString,

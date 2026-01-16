@@ -4,7 +4,8 @@ import * as Option from "effect/Option"
 import * as ParseResult from "effect/ParseResult"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
-import { AccessToken, ClientId, IdToken, RefreshToken } from "../../domain/DomainIds.ts"
+import { ClientId } from "../../domain/DomainIds.ts"
+import { AccessToken, IdToken, RefreshToken } from "../../domain/DomainValues.ts"
 import { OAuthUserInfoFields } from "../CommonDefinitions.ts"
 
 type WithRedactedClientSecret<T extends { clientSecret: string }> = {

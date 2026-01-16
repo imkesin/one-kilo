@@ -1,7 +1,7 @@
 import { expect, type Vitest } from "@effect/vitest"
 import * as Effect from "effect/Effect"
 import * as ApiGateway from "../src/ApiGateway.ts"
-import { EmailAddress } from "../src/domain/DomainIds.ts"
+import { EmailAddress } from "../src/domain/DomainValues.ts"
 
 export const createUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway, boolean>) => {
   it.effect("can create a user via UserManagement API", () =>

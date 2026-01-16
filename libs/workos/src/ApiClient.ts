@@ -7,11 +7,13 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
-import * as UserManagementClientDefinitions from "./internal/Api/ApiClientDefinitions.ts"
+import * as OrganizationsClientDefinitions from "./internal/Api/OrganizationsApiClientDefinitions.ts"
+import * as UserManagementClientDefinitions from "./internal/Api/UserManagementApiClientDefinitions.ts"
 
 export interface Service {
   readonly client: {
     readonly userManagement: UserManagementClientDefinitions.Client
+    readonly organizations: OrganizationsClientDefinitions.Client
   }
 }
 
@@ -42,10 +44,15 @@ export const make = (
       baseHttpClient,
       HttpClientRequest.prependUrl(`${apiPath}/user_management`)
     )
+    const organizationsHttpClient = HttpClient.mapRequest(
+      baseHttpClient,
+      HttpClientRequest.prependUrl(`${apiPath}/organizations`)
+    )
 
     return ApiClient.of({
       client: {
-        userManagement: UserManagementClientDefinitions.make(userManagementHttpClient)
+        userManagement: UserManagementClientDefinitions.make(userManagementHttpClient),
+        organizations: OrganizationsClientDefinitions.make(organizationsHttpClient)
       }
     })
   })
