@@ -4,10 +4,10 @@
   "dependencies": {
     "@effect-workos/lib": "workspace:*",
     "@effect-workos/workos": "workspace:*",
-    "@effect/platform": "^0.93.6",
-    "@effect/platform-node": "^0.103.0",
+    "@effect/platform": "^0.94.0",
+    "@effect/platform-node": "^0.104.0",
     "@workos-inc/node": "^7.77.0",
-    "effect": "^3.19.10"
+    "effect": "^3.19.14"
   },
   "keywords": [],
   "license": "ISC",

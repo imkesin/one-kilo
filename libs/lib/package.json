@@ -2,13 +2,13 @@
   "name": "@effect-workos/lib",
   "version": "0.1.0",
   "devDependencies": {
-    "effect": "^3.19.10"
+    "effect": "^3.19.14"
   },
   "exports": {
     "./*": "./dist/src/*.js"
   },
   "peerDependencies": {
-    "effect": "^3.19.0"
+    "effect": "^3.19.14"
   },
   "private": true,
   "scripts": {
