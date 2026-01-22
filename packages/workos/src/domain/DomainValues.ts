@@ -69,8 +69,18 @@ export const OrganizationDomainVerificationStrategy = pipe(
 )
 export type OrganizationDomainVerificationStrategy = typeof OrganizationDomainVerificationStrategy.Type
 
+export const OrganizationMembershipStatus = pipe(
+  S.Literal("active", "inactive", "pending"),
+  S.brand("@effect-workos/workos/OrganizationMembershipStatus")
+)
+export type OrganizationMembershipStatus = typeof OrganizationMembershipStatus.Type
+
 export const RefreshToken = pipe(
   S.NonEmptyTrimmedString,
   S.brand("@effect-workos/workos/RefreshToken")
 )
 export type RefreshToken = typeof RefreshToken.Type
+
+export class Role extends S.Class<Role>("@effect-workos/workos/Role")({
+  slug: S.NonEmptyTrimmedString
+}) {}

@@ -6,14 +6,16 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
-import { User } from "../../domain/DomainEntities.ts"
+import { OrganizationMembership, User } from "../../domain/DomainEntities.ts"
 import { ResourceNotFoundError } from "../../domain/DomainErrors.ts"
-import type { UserId } from "../../domain/DomainIds.ts"
+import type { OrganizationMembershipId, UserId } from "../../domain/DomainIds.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
 import {
   AuthenticateWithCodeParameters,
   AuthenticateWithCodeResponse,
+  CreateOrganizationMembershipParameters,
   CreateUserParameters,
+  DeleteOrganizationMembershipResponse,
   DeleteUserResponse
 } from "./UserManagementApiClientDefinitionSchemas.ts"
 
@@ -34,6 +36,14 @@ export interface Client {
     User,
     HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
   >
+
+  readonly createOrganizationMembership: (
+    parameters: typeof CreateOrganizationMembershipParameters.Type
+  ) => Effect.Effect<OrganizationMembership, HttpClientError.HttpClientError | ParseError>
+
+  readonly deleteOrganizationMembership: (
+    organizationMembershipId: OrganizationMembershipId
+  ) => Effect.Effect<DeleteOrganizationMembershipResponse, HttpClientError.HttpClientError>
 }
 
 export const make = (httpClient: HttpClient.HttpClient): Client => {
@@ -114,6 +124,35 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
             "404": () => Effect.fail(new ResourceNotFoundError()),
+            orElse: HttpResponseExtensions.unexpectedStatus
+          })
+        )
+      ),
+
+    createOrganizationMembership: (parameters) =>
+      pipe(
+        parameters,
+        S.encode(CreateOrganizationMembershipParameters),
+        Effect.map((_) =>
+          pipe(
+            HttpClientRequest.post("/organization_memberships"),
+            HttpClientRequest.bodyUnsafeJson(_)
+          )
+        ),
+        flatMapResponse(
+          HttpClientResponse.matchStatus({
+            "2xx": HttpResponseExtensions.decodeExpected(OrganizationMembership),
+            orElse: HttpResponseExtensions.unexpectedStatus
+          })
+        )
+      ),
+    deleteOrganizationMembership: (organizationMembershipId) =>
+      pipe(
+        HttpClientRequest.del(`/organization_memberships/${organizationMembershipId}`),
+        mapResponse(
+          HttpClientResponse.matchStatus({
+            "2xx": () => Effect.succeed(DeleteOrganizationMembershipResponse.Success()),
+            "404": () => Effect.succeed(DeleteOrganizationMembershipResponse.NotFound()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

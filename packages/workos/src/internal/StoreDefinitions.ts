@@ -1,25 +1,65 @@
 import * as KeyValueStore from "@effect/platform/KeyValueStore"
+import * as Arr from "effect/Array"
 import * as DateTime from "effect/DateTime"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HashMap from "effect/HashMap"
 import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
-import { Organization, User } from "../domain/DomainEntities.ts"
+import { Organization, OrganizationMembership, User } from "../domain/DomainEntities.ts"
 import { ResourceNotFoundError, UnauthorizedError } from "../domain/DomainErrors.ts"
-import { ClientId, generateOrganizationId, generateUserId, OrganizationId, UserId } from "../domain/DomainIds.ts"
-import { EmailAddress } from "../domain/DomainValues.ts"
+import {
+  ClientId,
+  generateOrganizationId,
+  generateOrganizationMembershipId,
+  generateUserId,
+  OrganizationId,
+  OrganizationMembershipId,
+  UserId
+} from "../domain/DomainIds.ts"
+import { EmailAddress, OrganizationMembershipStatus, Role } from "../domain/DomainValues.ts"
 import * as TokenGenerator from "../TokenGenerator.ts"
 import {
   type CreateOrganizationParameters,
   DeleteOrganizationResponse
 } from "./Api/OrganizationsApiClientDefinitionSchemas.ts"
-import { type CreateUserParameters, DeleteUserResponse } from "./Api/UserManagementApiClientDefinitionSchemas.ts"
+import {
+  CreateOrganizationMembershipParameters,
+  type CreateUserParameters,
+  DeleteOrganizationMembershipResponse,
+  DeleteUserResponse
+} from "./Api/UserManagementApiClientDefinitionSchemas.ts"
 import {
   type RetrieveTokenByClientCredentialsParameters_Redacted,
   RetrieveTokenByClientCredentialsResponse
 } from "./OAuth2/OAuth2ClientDefinitionSchemas.js"
+
+class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
+  id: ClientId,
+  orgId: OrganizationId,
+  secret: S.NonEmptyTrimmedString
+}) {}
+
+class OrganizationsModel extends S.Class<OrganizationsModel>("OrganizationModel")({
+  ...Organization.fields
+}) {
+  asEntity() {
+    return Organization.make(this)
+  }
+}
+
+class OrganizationMembershipsModel extends S.Class<OrganizationMembershipsModel>("OrganizationMembershipsModel")({
+  ...OrganizationMembership.normalizedFields
+}) {
+  asEntity(organizationName: string) {
+    return OrganizationMembership.make({
+      ...this,
+      organizationName
+    })
+  }
+}
 
 class UsersModel extends S.Class<UsersModel>("UserModel")({
   ...User.fields,
@@ -34,24 +74,17 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
   }
 }
 
-class OrganizationsModel extends S.Class<OrganizationsModel>("OrganizationModel")({
-  ...Organization.fields
-}) {
-  asEntity() {
-    return Organization.make(this)
-  }
-}
-
-class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
-  id: ClientId,
-  orgId: OrganizationId,
-  secret: S.NonEmptyTrimmedString
-}) {}
-
 interface UserManagement {
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<User>
   readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<User, ResourceNotFoundError>
+
+  readonly createOrganizationMembership: (
+    parameters: typeof CreateOrganizationMembershipParameters.Type
+  ) => Effect.Effect<OrganizationMembership>
+  readonly deleteOrganizationMembership: (
+    organizationMembershipId: OrganizationMembershipId
+  ) => Effect.Effect<DeleteOrganizationMembershipResponse>
 }
 
 interface Organizations {
@@ -94,14 +127,14 @@ export const make = (options?: MakeOptions): Effect.Effect<
       KeyValueStore.KeyValueStore,
       (store) => store.forSchema(S.ReadonlyMap({ key: UserId, value: UsersModel }))
     )
-    const findUsers = pipe(
+    const loadAllUsers = pipe(
       usersStore.get("users"),
       Effect.map(Option.getOrElse<ReadonlyMap<UserId, UsersModel>>(() => new Map())),
       Effect.orDie
     )
     const findUserById = (userId: UserId) =>
       pipe(
-        findUsers,
+        loadAllUsers,
         Effect.map((users) =>
           pipe(
             users.get(userId),
@@ -121,13 +154,13 @@ export const make = (options?: MakeOptions): Effect.Effect<
       )
     const insertUser = (user: UsersModel) =>
       pipe(
-        findUsers,
+        loadAllUsers,
         Effect.flatMap((existingUsers) => setUsers(new Map(existingUsers).set(user.id, user))),
         Effect.orDie
       )
     const deleteUser = (userId: UserId) =>
       pipe(
-        findUsers,
+        loadAllUsers,
         Effect.flatMap((existingUsers) => {
           const users = new Map(existingUsers)
           const userExisted = users.delete(userId)
@@ -165,7 +198,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          /**
+          /*
            * The absence of a client ID is a special case
            */
           () => new UnauthorizedError()
@@ -177,14 +210,14 @@ export const make = (options?: MakeOptions): Effect.Effect<
       KeyValueStore.KeyValueStore,
       (store) => store.forSchema(S.ReadonlyMap({ key: OrganizationId, value: OrganizationsModel }))
     )
-    const findOrganizations = pipe(
+    const loadAllOrganizations = pipe(
       organizationsStore.get("organizations"),
       Effect.map(Option.getOrElse<ReadonlyMap<OrganizationId, OrganizationsModel>>(() => new Map())),
       Effect.orDie
     )
     const findOrganizationById = (organizationId: OrganizationId) =>
       pipe(
-        findOrganizations,
+        loadAllOrganizations,
         Effect.map((organizations) =>
           pipe(
             organizations.get(organizationId),
@@ -204,7 +237,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
       )
     const insertOrganization = (organization: OrganizationsModel) =>
       pipe(
-        findOrganizations,
+        loadAllOrganizations,
         Effect.flatMap((existingOrganizations) =>
           setOrganizations(new Map(existingOrganizations).set(organization.id, organization))
         ),
@@ -212,7 +245,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
       )
     const deleteOrganization = (organizationId: OrganizationId) =>
       pipe(
-        findOrganizations,
+        loadAllOrganizations,
         Effect.flatMap((existingOrganizations) => {
           const organizations = new Map(existingOrganizations)
           const organizationExisted = organizations.delete(organizationId)
@@ -223,6 +256,71 @@ export const make = (options?: MakeOptions): Effect.Effect<
           )
         }),
         Effect.orDie
+      )
+
+    const organizationMembershipsStore = yield* Effect.map(
+      KeyValueStore.KeyValueStore,
+      (store) => store.forSchema(S.HashMap({ key: OrganizationMembershipId, value: OrganizationMembershipsModel }))
+    )
+    const loadAllOrganizationMemberships = pipe(
+      organizationMembershipsStore.get("organization_memberships"),
+      Effect.map(Option.getOrElse(HashMap.empty<OrganizationMembershipId, OrganizationMembershipsModel>)),
+      Effect.orDie
+    )
+    const findOrganizationMemberships = (filterOptions: {
+      readonly organizationId?: OrganizationId
+      readonly userId?: UserId
+    }) =>
+      pipe(
+        loadAllOrganizationMemberships,
+        Effect.map((organizationMemberships) =>
+          pipe(
+            organizationMemberships,
+            HashMap.filter(({ organizationId, userId }) =>
+              organizationId === filterOptions.organizationId && userId === filterOptions.userId
+            ),
+            HashMap.toValues
+          )
+        )
+      )
+    const setOrganizationMemberships = (
+      organizationMemberships: HashMap.HashMap<OrganizationMembershipId, OrganizationMembershipsModel>
+    ) =>
+      pipe(
+        organizationMembershipsStore.set("organization_memberships", organizationMemberships),
+        Effect.orDie
+      )
+    const insertOrganizationMembership = (organizationMembership: OrganizationMembershipsModel) =>
+      pipe(
+        loadAllOrganizationMemberships,
+        Effect.flatMap((organizationMemberships) =>
+          pipe(
+            organizationMemberships,
+            HashMap.set(organizationMembership.id, organizationMembership),
+            setOrganizationMemberships
+          )
+        )
+      )
+    const deleteOrganizationMembership = (organizationMembershipId: OrganizationMembershipId) =>
+      pipe(
+        loadAllOrganizationMemberships,
+        Effect.flatMap((organizationMemberships) => {
+          const organizationMembershipsExisted = HashMap.has(organizationMemberships, organizationMembershipId)
+          const exit = Effect.succeed({ organizationMembershipsExisted })
+
+          if (!organizationMembershipsExisted) {
+            return exit
+          }
+
+          return Effect.zipRight(
+            pipe(
+              organizationMemberships,
+              HashMap.remove(organizationMembershipId),
+              setOrganizationMemberships
+            ),
+            exit
+          )
+        })
       )
 
     if (options?.initialMachineClients) {
@@ -279,10 +377,65 @@ export const make = (options?: MakeOptions): Effect.Effect<
             pipe(
               findUserById(userId),
               Effect.map((user) => user.asEntity())
+            ),
+
+          createOrganizationMembership: Effect.fn(function*(parameters) {
+            const [now, organization, user] = yield* pipe(
+              Effect.all([
+                DateTime.nowAsDate,
+                findOrganizationById(parameters.organizationId),
+                findUserById(parameters.userId)
+              ]),
+              Effect.orDie
+            )
+
+            const membership = yield* pipe(
+              findOrganizationMemberships({
+                organizationId: parameters.organizationId,
+                userId: parameters.userId
+              }),
+              Effect.map(Arr.head),
+              Effect.flatMap(
+                Option.match({
+                  onNone: () => {
+                    const newMembership = OrganizationMembershipsModel.make({
+                      id: generateOrganizationMembershipId(),
+                      userId: user.id,
+                      organizationId: organization.id,
+                      roles: parameters.roles.map((slug) => Role.make({ slug })),
+                      status: OrganizationMembershipStatus.make("active"),
+                      createdAt: now,
+                      updatedAt: now
+                    })
+
+                    return Effect.zipRight(
+                      insertOrganizationMembership(newMembership),
+                      Effect.succeed(newMembership)
+                    )
+                  },
+                  /*
+                   * This is a significant oversimplification of the true logic. I may revisit if we need to
+                   * anticipate unusual states.
+                   */
+                  onSome: (existingMembership) => Effect.succeed(existingMembership)
+                })
+              )
+            )
+
+            return membership.asEntity(organization.name)
+          }),
+          deleteOrganizationMembership: (organizationMembershipId) =>
+            pipe(
+              deleteOrganizationMembership(organizationMembershipId),
+              Effect.map(({ organizationMembershipsExisted }) => (
+                organizationMembershipsExisted
+                  ? DeleteOrganizationMembershipResponse.Success()
+                  : DeleteOrganizationMembershipResponse.NotFound()
+              ))
             )
         },
         organizations: {
-          createOrganization: Effect.fn(function*(parameters: typeof CreateOrganizationParameters.Type) {
+          createOrganization: Effect.fn(function*(parameters) {
             const now = yield* DateTime.nowAsDate
 
             const organization = OrganizationsModel.make({
@@ -300,7 +453,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
             return organization.asEntity()
           }),
-          deleteOrganization: (organizationId: OrganizationId) =>
+          deleteOrganization: (organizationId) =>
             pipe(
               deleteOrganization(organizationId),
               Effect.map(({ organizationExisted }) => (
@@ -309,7 +462,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
                   : DeleteOrganizationResponse.NotFound()
               ))
             ),
-          retrieveOrganization: (organizationId: OrganizationId) =>
+          retrieveOrganization: (organizationId) =>
             pipe(
               findOrganizationById(organizationId),
               Effect.map((organization) => organization.asEntity())

@@ -3,7 +3,7 @@ import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { User } from "../../domain/DomainEntities.ts"
-import { ClientId, OrganizationId } from "../../domain/DomainIds.ts"
+import { ClientId, OrganizationId, UserId } from "../../domain/DomainIds.ts"
 import { AccessToken, AuthenticationCode, Impersonator, RefreshToken } from "../../domain/DomainValues.ts"
 
 const AuthenticateCommonFields = {
@@ -161,3 +161,38 @@ export type DeleteUserResponse = Data.TaggedEnum<{
   NotFound: Record<never, never>
 }>
 export const DeleteUserResponse = Data.taggedEnum<DeleteUserResponse>()
+
+export class CreateOrganizationMembershipParameters
+  extends S.Class<CreateOrganizationMembershipParameters>("CreateOrganizationMembershipParameters")({
+    userId: pipe(
+      UserId,
+      S.propertySignature,
+      S.fromKey("user_id")
+    ),
+    organizationId: pipe(
+      OrganizationId,
+      S.propertySignature,
+      S.fromKey("organization_id")
+    ),
+    roles: pipe(
+      S.Array(S.NonEmptyTrimmedString),
+      S.propertySignature,
+      S.fromKey("role_slugs")
+    )
+  })
+{}
+export class UpdateOrganizationMembershipParameters
+  extends S.Class<UpdateOrganizationMembershipParameters>("UpdateOrganizationMembershipParameters")({
+    roles: pipe(
+      S.Array(S.NonEmptyTrimmedString),
+      S.propertySignature,
+      S.fromKey("role_slugs")
+    )
+  })
+{}
+
+export type DeleteOrganizationMembershipResponse = Data.TaggedEnum<{
+  Success: Record<never, never>
+  NotFound: Record<never, never>
+}>
+export const DeleteOrganizationMembershipResponse = Data.taggedEnum<DeleteOrganizationMembershipResponse>()

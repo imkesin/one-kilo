@@ -53,6 +53,17 @@ export const make = (): Effect.Effect<Service, never, ApiClient.ApiClient> =>
                 "ResponseError": Effect.die,
                 "ParseError": Effect.die
               })
+            ),
+
+          createOrganizationMembership: (parameters) =>
+            pipe(
+              client.userManagement.createOrganizationMembership(parameters),
+              Effect.orDie
+            ),
+          deleteOrganizationMembership: (organizationMembershipId) =>
+            pipe(
+              client.userManagement.deleteOrganizationMembership(organizationMembershipId),
+              Effect.orDie
             )
         },
         organizations: {

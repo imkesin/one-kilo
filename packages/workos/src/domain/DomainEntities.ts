@@ -1,7 +1,13 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { OrganizationDomainId, OrganizationId, UserId } from "./DomainIds.ts"
-import { EmailAddress, OrganizationDomainState, OrganizationDomainVerificationStrategy } from "./DomainValues.ts"
+import { OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./DomainIds.ts"
+import {
+  EmailAddress,
+  OrganizationDomainState,
+  OrganizationDomainVerificationStrategy,
+  OrganizationMembershipStatus,
+  Role
+} from "./DomainValues.ts"
 
 export class OrganizationDomain extends S.Class<OrganizationDomain>("@effect-workos/workos/OrganizationDomain")({
   _tag: pipe(
@@ -50,7 +56,9 @@ export class Organization extends S.Class<Organization>("@effect-workos/workos/O
 
   stripeCustomerId: pipe(
     S.NonEmptyTrimmedString,
+    S.NullOr,
     S.optional,
+    S.withDecodingDefault(() => null),
     S.fromKey("stripe_customer_id")
   ),
   externalId: pipe(
@@ -76,6 +84,56 @@ export class Organization extends S.Class<Organization>("@effect-workos/workos/O
     S.fromKey("updated_at")
   )
 }) {}
+
+const OrganizationMembershipBaseFields = {
+  _tag: pipe(
+    S.Literal("OrganizationMembership"),
+    S.optional,
+    S.withDefaults({
+      constructor: () => "OrganizationMembership" as const,
+      decoding: () => "OrganizationMembership" as const
+    })
+  ),
+
+  id: OrganizationMembershipId,
+  userId: pipe(
+    UserId,
+    S.propertySignature,
+    S.fromKey("user_id")
+  ),
+  organizationId: pipe(
+    OrganizationId,
+    S.propertySignature,
+    S.fromKey("organization_id")
+  ),
+  roles: S.Array(Role),
+  status: OrganizationMembershipStatus,
+
+  createdAt: pipe(
+    S.Date,
+    S.propertySignature,
+    S.fromKey("created_at")
+  ),
+  updatedAt: pipe(
+    S.Date,
+    S.propertySignature,
+    S.fromKey("updated_at")
+  )
+} as const
+
+export class OrganizationMembership extends S.Class<OrganizationMembership>(
+  "@effect-workos/workos/OrganizationMembership"
+)({
+  ...OrganizationMembershipBaseFields,
+
+  organizationName: pipe(
+    S.NonEmptyTrimmedString,
+    S.propertySignature,
+    S.fromKey("organization_name")
+  )
+}) {
+  static normalizedFields = OrganizationMembershipBaseFields
+}
 
 export class User extends S.Class<User>("@effect-workos/workos/User")({
   _tag: pipe(

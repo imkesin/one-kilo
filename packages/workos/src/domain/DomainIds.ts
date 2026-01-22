@@ -36,6 +36,14 @@ export const SessionId = pipe(
 export type SessionId = typeof SessionId.Type
 export const generateSessionId = makePrefixedUlidGenerator(SessionId, "session")
 
+export const OrganizationMembershipId = pipe(
+  S.NonEmptyTrimmedString,
+  S.startsWith("om_"),
+  S.brand("@effect-workos/workos/OrganizationMembershipId")
+)
+export type OrganizationMembershipId = typeof OrganizationMembershipId.Type
+export const generateOrganizationMembershipId = makePrefixedUlidGenerator(OrganizationMembershipId, "om")
+
 export const UserId = pipe(
   S.NonEmptyTrimmedString,
   S.startsWith("user_"),
