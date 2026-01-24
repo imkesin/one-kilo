@@ -11,7 +11,7 @@ export default defineConfig({
 
   include: [
     "./src/app/**/*.{ts,tsx}",
-    "./src/modules/**/*.{ts,tsx}",
+    "./src/content/**/*.{ts,tsx}",
     "./src/ui/**/*.{ts,tsx}"
   ],
 
