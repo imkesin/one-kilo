@@ -1,12 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
-    "composite": false,
-    "tsBuildInfoFile": "./dist/tsbuildinfo.test"
+    "emitDeclarationOnly": true,
+    "declarationMap": false
   },
   "include": [
     "test/**/*.ts",
     "vitest.*.ts"
+  ],
+  "references": [
+    { "path": "./tsconfig.src.json" }
   ]
 }
