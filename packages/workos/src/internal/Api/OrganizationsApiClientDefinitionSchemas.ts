@@ -1,7 +1,7 @@
 import * as Data from "effect/Data"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { OrganizationDomainState } from "../../domain/DomainValues.ts"
+import { OrganizationDomainState } from "../../domain/Values.ts"
 
 /**
  * Domain data for creating an organization.

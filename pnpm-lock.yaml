@@ -127,6 +127,15 @@ importers:
         specifier: 16.0.8
         version: 16.0.8(@typescript-eslint/parser@8.54.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3)
 
+  libs/domain:
+    dependencies:
+      '@effect-workos/workos':
+        specifier: workspace:*
+        version: link:../../packages/workos
+      effect:
+        specifier: ^3.19.15
+        version: 3.19.15
+
   libs/lib:
     devDependencies:
       effect:

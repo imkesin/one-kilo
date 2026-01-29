@@ -21,9 +21,6 @@
     /* If your code doesn't run in the DOM: */
     "lib": ["ES2024"]
   },
-  "include": [],
-  "references": [
-    { "path": "./tsconfig.src.json" },
-    { "path": "./tsconfig.test.json" }
-  ]
+  "include": ["src/**/*.ts"]
 }
+

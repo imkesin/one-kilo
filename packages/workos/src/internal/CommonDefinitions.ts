@@ -1,6 +1,6 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { EmailAddress } from "../domain/DomainValues.ts"
+import { EmailAddress } from "../domain/Values.ts"
 
 export const OAuthUserInfoFields = {
   name: pipe(

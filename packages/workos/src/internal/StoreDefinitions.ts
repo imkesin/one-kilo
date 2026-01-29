@@ -8,8 +8,8 @@ import * as HashMap from "effect/HashMap"
 import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
-import { Organization, OrganizationMembership, User } from "../domain/DomainEntities.ts"
-import { ResourceNotFoundError, UnauthorizedError } from "../domain/DomainErrors.ts"
+import { Organization, OrganizationMembership, User } from "../domain/Entities.ts"
+import { ResourceNotFoundError, UnauthorizedError } from "../domain/Errors.ts"
 import {
   ClientId,
   generateOrganizationId,
@@ -18,8 +18,8 @@ import {
   OrganizationId,
   OrganizationMembershipId,
   UserId
-} from "../domain/DomainIds.ts"
-import { EmailAddress, OrganizationMembershipStatus, Role } from "../domain/DomainValues.ts"
+} from "../domain/Ids.ts"
+import { EmailAddress, OrganizationMembershipStatus, Role } from "../domain/Values.ts"
 import * as TokenGenerator from "../TokenGenerator.ts"
 import {
   type CreateOrganizationParameters,

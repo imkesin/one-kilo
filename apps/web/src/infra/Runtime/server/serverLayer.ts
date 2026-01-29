@@ -1,11 +1,11 @@
-import { ClientId } from "@effect-workos/workos/domain/DomainIds"
+import * as WorkOSIds from "@effect-workos/workos/domain/Ids"
 import * as WorkOSPublicApiClient from "@effect-workos/workos/PublicApiClient"
 import { Config, Layer, Logger, pipe } from "effect"
 
 const layerPublicApiClient = WorkOSPublicApiClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
-    Config.map(ClientId.make)
+    Config.map(WorkOSIds.ClientId.make)
   )
 })
 

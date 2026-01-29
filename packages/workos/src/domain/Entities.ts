@@ -1,13 +1,13 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./DomainIds.ts"
+import { OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./Ids.ts"
 import {
   EmailAddress,
   OrganizationDomainState,
   OrganizationDomainVerificationStrategy,
   OrganizationMembershipStatus,
   Role
-} from "./DomainValues.ts"
+} from "./Values.ts"
 
 export class OrganizationDomain extends S.Class<OrganizationDomain>("@effect-workos/workos/OrganizationDomain")({
   _tag: pipe(

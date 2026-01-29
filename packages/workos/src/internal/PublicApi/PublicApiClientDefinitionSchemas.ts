@@ -1,7 +1,7 @@
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { ClientId, OrganizationId } from "../../domain/DomainIds.ts"
+import { ClientId, OrganizationId } from "../../domain/Ids.ts"
 
 export class BuildAuthorizationUrlParameters
   extends S.Class<BuildAuthorizationUrlParameters>("BuildAuthorizationUrlParameters")({

@@ -4,7 +4,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import type { ClientId } from "./domain/DomainIds.ts"
+import type { ClientId } from "./domain/Ids.ts"
 import * as PublicApiClientUserManagementDefinitions from "./internal/PublicApi/PublicApiClientDefinitions.ts"
 
 export interface Service {

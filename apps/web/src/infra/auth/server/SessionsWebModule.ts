@@ -6,7 +6,7 @@ import { cookies } from "next/headers"
 import { UnexpectedError } from "@effect-workos/lib/errors/UnexpectedError"
 import { isDynamicServerError as isNextDynamicServerError } from "next/dist/client/components/hooks-server-context"
 import * as Jose from "jose"
-import { AccessToken } from "@effect-workos/workos/domain/DomainValues"
+import * as WorkOSValues from "@effect-workos/workos/domain/Values"
 import * as Clock from "effect/Clock"
 import * as S from "effect/Schema"
 
@@ -21,7 +21,7 @@ export class AccessTokenCookieNotFoundError extends S.TaggedError<AccessTokenCoo
 export class AccessTokenExpiredError extends S.TaggedError<AccessTokenExpiredError>()(
   "AccessTokenExpiredError",
   {
-    accessToken: AccessToken
+    accessToken: WorkOSValues.AccessToken
   },
   {
     description: "The access token is expired"
@@ -52,7 +52,7 @@ export class SessionsWebModule extends Effect.Service<SessionsWebModule>()(
       )
 
       const setSessionJWT = Effect.fn(
-        function*(accessToken: AccessToken) {
+        function*(accessToken: WorkOSValues.AccessToken) {
           const cookieStore = yield* cookiesStoreEffect
 
           cookieStore.set(
@@ -69,7 +69,7 @@ export class SessionsWebModule extends Effect.Service<SessionsWebModule>()(
         }
       )
 
-      const checkAccessTokenExpiration = Effect.fn(function*(accessToken: AccessToken) {
+      const checkAccessTokenExpiration = Effect.fn(function*(accessToken: WorkOSValues.AccessToken) {
         const { exp } = Jose.decodeJwt(accessToken)
         if (exp === undefined) {
           return yield* Effect.die(new UnexpectedError({ message: "JWT is missing expiration" }))
@@ -93,7 +93,7 @@ export class SessionsWebModule extends Effect.Service<SessionsWebModule>()(
           return yield* Effect.fail(new AccessTokenCookieNotFoundError())
         }
 
-        return AccessToken.make(cookie.value)
+        return WorkOSValues.AccessToken.make(cookie.value)
       })
 
       // const handleAuthenticateSession = Effect.fn(function*(inputAccessToken?: AccessToken) {

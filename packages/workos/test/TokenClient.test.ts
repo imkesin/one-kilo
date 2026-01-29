@@ -3,7 +3,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as TestClock from "effect/TestClock"
-import { generateSessionId, generateUserId } from "../src/domain/DomainIds.ts"
+import { generateSessionId, generateUserId } from "../src/domain/Ids.ts"
 import * as TokenClient from "../src/TokenClient.ts"
 import * as TokenGenerator from "../src/TokenGenerator.ts"
 

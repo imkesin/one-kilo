@@ -5,7 +5,7 @@ import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
-import type { ClientId } from "../../domain/DomainIds.ts"
+import type { ClientId } from "../../domain/Ids.ts"
 import { InvalidUrlError } from "../CommonErrors.js"
 import { BuildAuthorizationUrlParameters } from "./PublicApiClientDefinitionSchemas.ts"
 

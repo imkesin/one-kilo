@@ -7,7 +7,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Jose from "jose"
-import type { ClientId } from "./domain/DomainIds.ts"
+import type { ClientId } from "./domain/Ids.ts"
 import { KeyPairTest } from "./internal/KeyPair.ts"
 import * as TokenClientDefinitions from "./internal/TokenClientDefinitions.ts"
 

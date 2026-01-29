@@ -1,0 +1,20 @@
+{
+  "name": "@effect-workos/domain",
+  "version": "0.1.0",
+  "dependencies": {
+    "@effect-workos/workos": "workspace:*",
+    "effect": "^3.19.15"
+  },
+  "exports": {
+    "./*": "./dist/src/*.js"
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf .turbo dist",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module"
+}

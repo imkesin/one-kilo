@@ -4,8 +4,8 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import type { ClientId, OrganizationId, SessionId, UserId } from "../domain/DomainIds.ts"
-import { AccessToken, RefreshToken } from "../domain/DomainValues.ts"
+import type { ClientId, OrganizationId, SessionId, UserId } from "../domain/Ids.ts"
+import { AccessToken, RefreshToken } from "../domain/Values.ts"
 import { generateRandomString } from "../lib/RandomString.ts"
 
 class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect-workos/workos/GenerateTokenError")(

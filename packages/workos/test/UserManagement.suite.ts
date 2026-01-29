@@ -1,7 +1,7 @@
 import { describe, expect, type Vitest } from "@effect/vitest"
 import * as Effect from "effect/Effect"
 import * as ApiGateway from "../src/ApiGateway.ts"
-import { EmailAddress } from "../src/domain/DomainValues.ts"
+import { EmailAddress } from "../src/domain/Values.ts"
 
 export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway, boolean>) => {
   describe("User Management", () => {

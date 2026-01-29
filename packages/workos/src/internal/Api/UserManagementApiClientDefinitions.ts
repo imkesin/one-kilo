@@ -6,9 +6,9 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
-import { OrganizationMembership, User } from "../../domain/DomainEntities.ts"
-import { ResourceNotFoundError } from "../../domain/DomainErrors.ts"
-import type { OrganizationMembershipId, UserId } from "../../domain/DomainIds.ts"
+import { OrganizationMembership, User } from "../../domain/Entities.ts"
+import { ResourceNotFoundError } from "../../domain/Errors.ts"
+import type { OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
 import {
   AuthenticateWithCodeParameters,

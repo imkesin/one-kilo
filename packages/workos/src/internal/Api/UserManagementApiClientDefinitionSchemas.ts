@@ -2,9 +2,9 @@ import * as Data from "effect/Data"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { User } from "../../domain/DomainEntities.ts"
-import { ClientId, OrganizationId, UserId } from "../../domain/DomainIds.ts"
-import { AccessToken, AuthenticationCode, Impersonator, RefreshToken } from "../../domain/DomainValues.ts"
+import { User } from "../../domain/Entities.ts"
+import { ClientId, OrganizationId, UserId } from "../../domain/Ids.ts"
+import { AccessToken, AuthenticationCode, Impersonator, RefreshToken } from "../../domain/Values.ts"
 
 const AuthenticateRequestCommonFields = {
   clientId: pipe(
