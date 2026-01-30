@@ -1,6 +1,6 @@
 import { Effect, pipe, Schema } from "effect"
 
-export class UnexpectedError extends Schema.TaggedError<UnexpectedError>("@motte/lib/UnexpectedError")(
+export class UnexpectedError extends Schema.TaggedError<UnexpectedError>("@effect-workos/lib/UnexpectedError")(
   "UnexpectedError",
   {
     cause: Schema.optional(Schema.Defect),

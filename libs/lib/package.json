@@ -16,6 +16,8 @@
     "clean": "rm -rf .turbo dist",
     "dev": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
+    "test": "vitest",
+    "test:once": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "type": "module"
