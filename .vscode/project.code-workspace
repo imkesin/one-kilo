@@ -23,6 +23,10 @@
       "path": "../libs/lib"
     },
     {
+      "name": "@one-kilo/server-api",
+      "path": "../libs/server-api"
+    },
+    {
       "name": "@one-kilo/telemetry",
       "path": "../libs/telemetry"
     },

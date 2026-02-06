@@ -1,0 +1,21 @@
+{
+  "name": "@one-kilo/server-api",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./*": "./dist/src/*.js"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.src.json",
+    "clean": "rm -rf .turbo dist",
+    "dev": "tsc --build tsconfig.src.json --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "typecheck": "tsc --build"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.94.2",
+    "effect": "^3.19.15"
+  }
+}
+
