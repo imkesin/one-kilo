@@ -1,8 +1,7 @@
 import { HttpApi, HttpApiError } from "@effect/platform"
-import { Authentication } from "./infra/Authentication/Authentication.ts"
-import { PublicRateLimiting } from "./infra/RateLimiting/RateLimiting.ts"
-import { HealthApi } from "./modules/Health/HealthApi.ts"
-import { SessionsApi } from "./modules/Sessions/SessionsApi.ts"
+import { Authentication } from "./infra/Authentication.ts"
+import { HealthApi } from "./modules/health/HealthApi.ts"
+import { SessionsApi } from "./modules/sessions/SessionsApi.ts"
 
 const ApplicationApi = HttpApi.make("ApplicationApi")
   .middleware(Authentication)
@@ -13,10 +12,9 @@ const AuthenticationApi = HttpApi.make("AuthenticationApi")
 
 const PublicApi = HttpApi.make("PublicApi")
   .add(HealthApi)
-  .addHttpApi(AuthenticationApi)
-  .middleware(PublicRateLimiting)
 
 export const ServerApi = HttpApi.make("ServerApi")
   .addHttpApi(ApplicationApi)
+  .addHttpApi(AuthenticationApi)
   .addHttpApi(PublicApi)
   .addError(HttpApiError.InternalServerError)

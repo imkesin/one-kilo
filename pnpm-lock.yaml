@@ -150,6 +150,9 @@ importers:
       '@effect/platform':
         specifier: ^0.94.2
         version: 0.94.2(effect@3.19.15)
+      '@one-kilo/domain':
+        specifier: workspace:*
+        version: link:../domain
       effect:
         specifier: ^3.19.15
         version: 3.19.15
