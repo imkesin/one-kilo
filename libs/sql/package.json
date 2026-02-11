@@ -1,0 +1,27 @@
+{
+  "name": "@one-kilo/sql",
+  "version": "0.1.0",
+  "dependencies": {
+    "@effect/platform-node": "^0.104.1",
+    "@effect/sql": "^0.49.0",
+    "@effect/sql-pg": "0.50.1",
+    "effect": "^3.19.15",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.16.0"
+  },
+  "exports": {
+    "./*": "./dist/src/*.js",
+    "./internal/*": null
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc --build tsconfig.src.json",
+    "clean": "rm -rf .turbo dist",
+    "dev": "tsc --build tsconfig.src.json --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "typecheck": "tsc --build"
+  },
+  "type": "module"
+}

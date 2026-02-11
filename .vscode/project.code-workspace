@@ -27,6 +27,10 @@
       "path": "../libs/server-api"
     },
     {
+      "name": "@one-kilo/sql",
+      "path": "../libs/sql"
+    },
+    {
       "name": "@one-kilo/telemetry",
       "path": "../libs/telemetry"
     },
