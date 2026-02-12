@@ -1,4 +1,6 @@
+import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
 import * as UUIDv7 from "@one-kilo/lib/uuid/UUIDv7"
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as ParseResult from "effect/ParseResult"
 import * as S from "effect/Schema"
@@ -13,6 +15,8 @@ export const UserId = pipe(
   })
 )
 export type UserId = typeof UserId.Type
+
+export const generate = Effect.map(UUIDGenerator.UUIDGenerator.v7, UserId.make)
 
 export const PrefixedUserId = pipe(
   S.NonEmptyTrimmedString,
