@@ -1,6 +1,6 @@
-import { handleAuth } from "@workos-inc/authkit-nextjs"
+import { redirect } from "next/navigation"
 import { workspacesPageUrl } from "~/app/(app)/w/url"
 
-export const GET = handleAuth({
-  returnPathname: workspacesPageUrl
-})
+export const GET = async () => {
+  redirect(workspacesPageUrl)
+}
