@@ -60,6 +60,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/web:${{ github.sha }}
             ${{ env.REGISTRY }}/web:latest
+          build-args: |
+            WORKOS_CLIENT_ID=${{ vars.WORKOS_CLIENT_ID }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
