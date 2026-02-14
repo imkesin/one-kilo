@@ -1,5 +1,6 @@
 config:
   gcp:project: one-kilo-dev
   gcp:region: us-west1
+  gcp:zone: us-west1-c
   one-kilo-infra:cloudflare-tunnel-token:
     secure: AAABAHb21GnpOouTlTnZGdNgdW3cTgaC7GhXfagP0vTzax/tJs3/7uMyvLp8Vxw3Na6Z3+vFQD9JnpUY1a7tYn0k1dJ8uGgaKFlY3KnEYdblJUT+nHqKEdqL2SeVxLc9YHn0t85/WZM0oIr75SlarzBoBF6tuRT7iKwuKF0sOIQVmYqOEjpc2P9Yqfptwbj4SiF5HeP1slkHKDd2i5iRvmm+HvSAKxtFyMk3MmNrIoNmuuOkhR6XxPpqK5IyjKV+m2kheis5iuI5MqEagT/QmbTRgKMsZRAD
