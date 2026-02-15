@@ -1,8 +1,9 @@
-# One Kilo Monorepo Guide
+# One Kilo - Monorepo Guide
 
 ## Structure
 
 - `apps/` - Executable applications
+- `infra/` - Infrastructure definitions (e.g., Pulumi, k8s)
 - `libs/` - Internal shared libraries (consumed by `apps/`, not published)
 - `packages/` - Publishable standalone packages (e.g., `@effect/auth-workos`)
 

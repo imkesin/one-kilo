@@ -13,7 +13,6 @@
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
     "lint": "eslint .",
-    "pulumi:up": "pulumi up",
     "typecheck": "tsc --build"
   }
 }
