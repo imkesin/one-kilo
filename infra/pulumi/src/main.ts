@@ -3,9 +3,11 @@ import * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
 import * as YAML from "js-yaml"
 import { createGithubActionsResources } from "./github-actions.js"
+import { createAppDeployments } from "./k8s-apps.js"
 
 const config = new Pulumi.Config()
 const gcpConfig = new Pulumi.Config("gcp")
+const imageTag = config.get("imageTag") ?? "latest"
 
 const cluster = new GCP.container.Cluster(
   "one-kilo-cluster",
@@ -121,7 +123,14 @@ const artifactRegistryRepository = new GCP.artifactregistry.Repository(
 const githubActions = createGithubActionsResources({
   repository: artifactRegistryRepository,
   cluster,
-  githubRepository: "imkesin/one-kilo"
+  githubRepositoryName: "imkesin/one-kilo"
+})
+
+createAppDeployments({
+  provider: k8sProvider,
+  repository: artifactRegistryRepository,
+  projectName: gcpConfig.require("project"),
+  imageTag
 })
 
 export const workloadIdentityPoolProviderName = githubActions.workloadIdentityPoolProvider.name

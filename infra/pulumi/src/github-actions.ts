@@ -1,11 +1,13 @@
 import * as GCP from "@pulumi/gcp"
 import * as Pulumi from "@pulumi/pulumi"
 
-export function createGithubActionsResources(options: {
+type CreateGithubActionsResourcesParameters = {
   readonly repository: GCP.artifactregistry.Repository
   readonly cluster: GCP.container.Cluster
-  readonly githubRepository: string
-}) {
+  readonly githubRepositoryName: string
+}
+
+export function createGithubActionsResources(parameters: CreateGithubActionsResourcesParameters) {
   const serviceAccount = new GCP.serviceaccount.Account(
     "github-actions",
     {
@@ -17,8 +19,8 @@ export function createGithubActionsResources(options: {
   const _repositoryIamMember = new GCP.artifactregistry.RepositoryIamMember(
     "github-actions-registry-writer",
     {
-      repository: options.repository.name,
-      location: options.repository.location,
+      repository: parameters.repository.name,
+      location: parameters.repository.location,
       role: "roles/artifactregistry.writer",
       member: Pulumi.interpolate`serviceAccount:${serviceAccount.email}`
     }
@@ -27,7 +29,7 @@ export function createGithubActionsResources(options: {
   const _gkeIamMember = new GCP.projects.IAMMember(
     "github-actions-gke-developer",
     {
-      project: options.cluster.project,
+      project: parameters.cluster.project,
       role: "roles/container.developer",
       member: Pulumi.interpolate`serviceAccount:${serviceAccount.email}`
     }
@@ -51,7 +53,7 @@ export function createGithubActionsResources(options: {
         "google.subject": "assertion.sub",
         "attribute.repository": "assertion.repository"
       },
-      attributeCondition: `assertion.repository == "${options.githubRepository}"`,
+      attributeCondition: `assertion.repository == "${parameters.githubRepositoryName}"`,
       oidc: {
         issuerUri: "https://token.actions.githubusercontent.com"
       }
@@ -64,7 +66,7 @@ export function createGithubActionsResources(options: {
       serviceAccountId: serviceAccount.name,
       role: "roles/iam.workloadIdentityUser",
       member: Pulumi
-        .interpolate`principalSet://iam.googleapis.com/${workloadIdentityPool.name}/attribute.repository/${options.githubRepository}`
+        .interpolate`principalSet://iam.googleapis.com/${workloadIdentityPool.name}/attribute.repository/${parameters.githubRepositoryName}`
     }
   )
 
