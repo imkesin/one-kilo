@@ -8,6 +8,7 @@ import * as Option from "effect/Option"
 import { UsersModel } from "./UsersModel.ts"
 
 type InsertUserParameters = {
+  id: Option.Option<UserId>
   performedByUserId: Option.Option<UserId>
   workosUserId: WorkOSIds.UserId
 }
@@ -26,17 +27,23 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
         execute: (request) => sql`INSERT INTO users ${sql.insert(request).returning("*")}`
       })
       const insert = Effect.fn("UsersRepository.insert")(
-        function*({ performedByUserId, workosUserId }: InsertUserParameters) {
+        function*({ id, performedByUserId, workosUserId }: InsertUserParameters) {
           return yield* Effect.flatMap(
-            userIdGenerator.generate,
-            (generatedId) =>
+            Option.match(
+              id,
+              {
+                onNone: () => userIdGenerator.generate,
+                onSome: (id) => Effect.succeed(id)
+              }
+            ),
+            (userId) =>
               insertSchema({
-                id: generatedId,
+                id: userId,
                 workosUserId,
                 createdAt: undefined,
-                createdByUserId: Option.getOrNull(performedByUserId) ?? generatedId,
+                createdByUserId: Option.getOrNull(performedByUserId) ?? userId,
                 updatedAt: undefined,
-                updatedByUserId: Option.getOrNull(performedByUserId) ?? generatedId,
+                updatedByUserId: Option.getOrNull(performedByUserId) ?? userId,
                 archivedAt: undefined
               })
           )

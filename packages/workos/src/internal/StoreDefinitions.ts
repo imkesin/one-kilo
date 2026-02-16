@@ -29,7 +29,8 @@ import {
   CreateOrganizationMembershipParameters,
   type CreateUserParameters,
   DeleteOrganizationMembershipResponse,
-  DeleteUserResponse
+  DeleteUserResponse,
+  type UpdateUserParameters
 } from "./Api/UserManagementApiClientDefinitionSchemas.ts"
 import {
   type RetrieveTokenByClientCredentialsParameters_Redacted,
@@ -76,6 +77,10 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
 
 interface UserManagement {
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<User>
+  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
+    User,
+    ResourceNotFoundError
+  >
   readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<User, ResourceNotFoundError>
 
@@ -152,12 +157,13 @@ export const make = (options?: MakeOptions): Effect.Effect<
         usersStore.set("users", users),
         Effect.orDie
       )
-    const insertUser = (user: UsersModel) =>
+    const setUser = (userId: UserId, user: UsersModel) =>
       pipe(
         loadAllUsers,
-        Effect.flatMap((existingUsers) => setUsers(new Map(existingUsers).set(user.id, user))),
+        Effect.flatMap((existingUsers) => setUsers(new Map(existingUsers).set(userId, user))),
         Effect.orDie
       )
+    const insertUser = (user: UsersModel) => setUser(user.id, user)
     const deleteUser = (userId: UserId) =>
       pipe(
         loadAllUsers,
@@ -363,6 +369,26 @@ export const make = (options?: MakeOptions): Effect.Effect<
             yield* insertUser(user)
 
             return user.asEntity()
+          }),
+          updateUser: Effect.fn(function*(userId: UserId, parameters: typeof UpdateUserParameters.Type) {
+            const now = yield* DateTime.nowAsDate
+            const existing = yield* findUserById(userId)
+
+            const updated = UsersModel.make({
+              ...existing,
+              firstName: parameters.firstName ?? existing.firstName,
+              lastName: parameters.lastName ?? existing.lastName,
+              email: parameters.email ? EmailAddress.make(parameters.email) : existing.email,
+              emailVerified: parameters.emailVerified ?? existing.emailVerified,
+              externalId: parameters.externalId ?? existing.externalId,
+              locale: parameters.locale ?? existing.locale,
+              metadata: parameters.metadata ?? existing.metadata,
+              updatedAt: now
+            })
+
+            yield* setUser(userId, updated)
+
+            return updated.asEntity()
           }),
           deleteUser: (userId: UserId) =>
             pipe(

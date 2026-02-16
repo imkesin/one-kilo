@@ -167,6 +167,46 @@ export class CreateUserParameters extends S.Class<CreateUserParameters>("CreateU
   )
 }) {}
 
+export class UpdateUserParameters extends S.Class<UpdateUserParameters>("UpdateUserParameters")({
+  firstName: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional,
+    S.fromKey("first_name")
+  ),
+  lastName: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional,
+    S.fromKey("last_name")
+  ),
+
+  email: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional
+  ),
+  emailVerified: pipe(
+    S.Boolean,
+    S.optional,
+    S.fromKey("email_verified")
+  ),
+
+  externalId: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional,
+    S.fromKey("external_id")
+  ),
+  locale: pipe(
+    S.NonEmptyTrimmedString,
+    S.optional
+  ),
+  metadata: pipe(
+    S.Record({
+      key: S.String,
+      value: S.Unknown
+    }),
+    S.optional
+  )
+}) {}
+
 export type DeleteUserResponse = Data.TaggedEnum<{
   Success: Record<never, never>
   NotFound: Record<never, never>

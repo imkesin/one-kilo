@@ -16,7 +16,17 @@ export const WorkspaceId = pipe(
 )
 export type WorkspaceId = typeof WorkspaceId.Type
 
-export const generate = Effect.map(UUIDGenerator.UUIDGenerator.v7, WorkspaceId.make)
+export class WorkspaceIdGenerator extends Effect.Service<WorkspaceIdGenerator>()(
+  "@one-kilo/domain/WorkspaceIdGenerator",
+  {
+    dependencies: [UUIDGenerator.UUIDGenerator.Default],
+    effect: Effect.gen(function*() {
+      const uuidGenerator = yield* UUIDGenerator.UUIDGenerator
+      const generate = Effect.map(uuidGenerator.v7, WorkspaceId.make)
+      return { generate }
+    })
+  }
+) {}
 
 export const PrefixedWorkspaceId = pipe(
   S.NonEmptyTrimmedString,

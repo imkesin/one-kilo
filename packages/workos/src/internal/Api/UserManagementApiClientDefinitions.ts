@@ -19,7 +19,8 @@ import {
   CreateOrganizationMembershipParameters,
   CreateUserParameters,
   DeleteOrganizationMembershipResponse,
-  DeleteUserResponse
+  DeleteUserResponse,
+  UpdateUserParameters
 } from "./UserManagementApiClientDefinitionSchemas.ts"
 
 type AuthenticateWithCodeParameters_WithoutClientFields = Omit<
@@ -42,6 +43,10 @@ export interface Client {
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
     User,
     HttpClientError.HttpClientError | ParseError
+  >
+  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
+    User,
+    HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
   >
   readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse, HttpClientError.HttpClientError>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<
@@ -141,6 +146,24 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
+            orElse: HttpResponseExtensions.unexpectedStatus
+          })
+        )
+      ),
+    updateUser: (userId, parameters) =>
+      pipe(
+        parameters,
+        S.encode(UpdateUserParameters),
+        Effect.map((_) =>
+          pipe(
+            HttpClientRequest.put(`/users/${userId}`),
+            HttpClientRequest.bodyUnsafeJson(_)
+          )
+        ),
+        flatMapResponse(
+          HttpClientResponse.matchStatus({
+            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "404": () => Effect.fail(new ResourceNotFoundError()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
