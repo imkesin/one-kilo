@@ -50,7 +50,7 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
             })
           )
 
-        const result = yield* Effect.andThen(
+        const _result = yield* Effect.andThen(
           usersQueryRepository.findUserEntityByWorkOSUserId({ workosUserId: workosUser.id }),
           Option.match({
             onNone: () => registrationProcesses.registerHumanUser({ workosUser }),
