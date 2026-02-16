@@ -17,7 +17,7 @@ export const UUIDv7 = pipe(
     }
   ),
   S.pattern(UUIDv7Regex),
-  S.brand("@workos-effect/lib/UUIDv7"),
+  S.brand("@one-kilo/lib/UUIDv7"),
   S.annotations({
     identifier: "UUIDv7",
     title: "UUIDv7",
@@ -38,7 +38,7 @@ export const ShortenedUUIDv7 = pipe(
     }
   ),
   S.pattern(ShortenedUUIDv7Regex),
-  S.brand("@workos-effect/lib/ShortenedUUIDv7"),
+  S.brand("@one-kilo/lib/ShortenedUUIDv7"),
   S.annotations({
     identifier: "ShortenedUUIDv7",
     title: "UUIDv7 (Shortened)",

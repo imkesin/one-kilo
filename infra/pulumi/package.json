@@ -1,7 +1,5 @@
 {
   "name": "@one-kilo/pulumi",
-  "type": "module",
-  "private": true,
   "devDependencies": {
     "@pulumi/gcp": "^9.12.0",
     "@pulumi/kubernetes": "^4.25.0",
@@ -9,10 +7,12 @@
     "@types/js-yaml": "^4.0.9",
     "js-yaml": "^4.1.1"
   },
+  "private": true,
   "scripts": {
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
     "lint": "eslint .",
     "typecheck": "tsc --build"
-  }
+  },
+  "type": "module"
 }

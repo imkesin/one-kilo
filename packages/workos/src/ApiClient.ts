@@ -7,6 +7,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
+import type { ClientId } from "./domain/Ids.ts"
 import * as OrganizationsClientDefinitions from "./internal/Api/OrganizationsApiClientDefinitions.ts"
 import * as UserManagementClientDefinitions from "./internal/Api/UserManagementApiClientDefinitions.ts"
 
@@ -24,9 +25,13 @@ export class ApiClient extends Context.Tag(
 export const make = (
   options: {
     /**
+     * The WorkOS Client ID
+     */
+    readonly clientId: ClientId
+    /**
      * The WorkOS API Key
      */
-    readonly apiKey: Redacted.Redacted<string>
+    readonly clientSecret: Redacted.Redacted<string>
   }
 ): Effect.Effect<Service, never, HttpClient.HttpClient> =>
   Effect.gen(function*() {
@@ -36,7 +41,7 @@ export const make = (
       HttpClient.HttpClient,
       Effect.map(
         HttpClient.mapRequest(
-          HttpClientRequest.bearerToken(options.apiKey)
+          HttpClientRequest.bearerToken(options.clientSecret)
         )
       )
     )
@@ -51,7 +56,7 @@ export const make = (
 
     return ApiClient.of({
       client: {
-        userManagement: UserManagementClientDefinitions.make(userManagementHttpClient),
+        userManagement: UserManagementClientDefinitions.make(userManagementHttpClient, options),
         organizations: OrganizationsClientDefinitions.make(organizationsHttpClient)
       }
     })
@@ -59,13 +64,15 @@ export const make = (
 
 export const layer = (
   options: {
-    readonly apiKey: Redacted.Redacted<string>
+    readonly clientId: ClientId
+    readonly clientSecret: Redacted.Redacted<string>
   }
 ): Layer.Layer<ApiClient, never, HttpClient.HttpClient> => Layer.effect(ApiClient, make(options))
 
 export const layerConfig = (
   options: {
-    readonly apiKey: Config.Config<Redacted.Redacted<string>>
+    readonly clientId: Config.Config<ClientId>
+    readonly clientSecret: Config.Config<Redacted.Redacted<string>>
   }
 ): Layer.Layer<ApiClient, ConfigError, HttpClient.HttpClient> => {
   return pipe(

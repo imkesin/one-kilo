@@ -5,10 +5,11 @@ import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
+import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
 import { OrganizationMembership, User } from "../../domain/Entities.ts"
 import { ResourceNotFoundError } from "../../domain/Errors.ts"
-import type { OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
+import type { ClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
 import {
   AuthenticateWithCodeParameters,
@@ -21,10 +22,15 @@ import {
   DeleteUserResponse
 } from "./UserManagementApiClientDefinitionSchemas.ts"
 
+type AuthenticateWithCodeParameters_WithoutClientFields = Omit<
+  AuthenticateWithCodeParameters,
+  "clientId" | "clientSecret"
+>
+
 export interface Client {
   readonly httpClient: HttpClient.HttpClient
 
-  readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters) => Effect.Effect<
+  readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters_WithoutClientFields) => Effect.Effect<
     AuthenticateWithCodeResponse,
     HttpClientError.HttpClientError | ParseError
   >
@@ -52,7 +58,13 @@ export interface Client {
   ) => Effect.Effect<DeleteOrganizationMembershipResponse, HttpClientError.HttpClientError>
 }
 
-export const make = (httpClient: HttpClient.HttpClient): Client => {
+export const make = (
+  httpClient: HttpClient.HttpClient,
+  options: {
+    readonly clientId: ClientId
+    readonly clientSecret: Redacted.Redacted<string>
+  }
+): Client => {
   const mapResponse: <A, E>(
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
@@ -79,7 +91,11 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
 
     authenticateWithCode: (parameters) =>
       pipe(
-        parameters,
+        {
+          ...parameters,
+          clientId: options.clientId,
+          clientSecret: Redacted.value(options.clientSecret)
+        },
         S.encode(AuthenticateWithCodeParameters),
         Effect.map((_) =>
           pipe(

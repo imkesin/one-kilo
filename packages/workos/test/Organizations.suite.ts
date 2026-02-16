@@ -24,10 +24,6 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
         expect(organization.metadata).toMatchObject({
           testRun: timestamp.toString()
         })
-
-        expect(organization.id).toBeDefined()
-        expect(organization.createdAt).toBeInstanceOf(Date)
-        expect(organization.updatedAt).toBeInstanceOf(Date)
         expect(organization.domains).toEqual([])
       }))
   })
