@@ -65,19 +65,30 @@ const k8sProvider = new K8s.Provider(
   { kubeconfig }
 )
 
+const k8sNamespace = new K8s.core.v1.Namespace(
+  "one-kilo",
+  { metadata: { name: "one-kilo" } },
+  { provider: k8sProvider }
+)
+
 const tunnelTokenSecret = new K8s.core.v1.Secret(
   "cloudflare-tunnel-token",
   {
+    metadata: { namespace: k8sNamespace.metadata.name },
     stringData: {
       token: config.requireSecret("cloudflare-tunnel-token")
     }
   },
-  { provider: k8sProvider }
+  {
+    provider: k8sProvider,
+    dependsOn: [k8sNamespace]
+  }
 )
 
 const _cloudflared = new K8s.apps.v1.Deployment(
   "cloudflared",
   {
+    metadata: { namespace: k8sNamespace.metadata.name },
     spec: {
       replicas: 1,
       selector: {
@@ -115,7 +126,10 @@ const _cloudflared = new K8s.apps.v1.Deployment(
       }
     }
   },
-  { provider: k8sProvider }
+  {
+    provider: k8sProvider,
+    dependsOn: [k8sNamespace]
+  }
 )
 
 const artifactRegistryRepository = new GCP.artifactregistry.Repository(
@@ -134,7 +148,8 @@ const githubActions = createGithubActionsResources({
 })
 
 createAppDeployments({
-  provider: k8sProvider,
+  k8sProvider,
+  k8sNamespace,
   repository: artifactRegistryRepository,
   projectName: gcpConfig.require("project"),
   imageTag

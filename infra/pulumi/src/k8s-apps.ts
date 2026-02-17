@@ -3,14 +3,16 @@ import * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
 
 type CreateAppDeploymentsParameters = {
-  readonly provider: K8s.Provider
+  readonly k8sProvider: K8s.Provider
+  readonly k8sNamespace: K8s.core.v1.Namespace
   readonly repository: GCP.artifactregistry.Repository
   readonly projectName: string
   readonly imageTag: string
 }
 
 export function createAppDeployments({
-  provider,
+  k8sProvider,
+  k8sNamespace,
   repository,
   projectName,
   imageTag
@@ -22,11 +24,15 @@ export function createAppDeployments({
   const workosApiKeySecret = new K8s.core.v1.Secret(
     "workos-api-key",
     {
+      metadata: { namespace: k8sNamespace.metadata.name },
       stringData: {
         "api-key": config.requireSecret("workos-api-key")
       }
     },
-    { provider }
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
   )
 
   const WEB_PORT = 3000
@@ -35,6 +41,7 @@ export function createAppDeployments({
   const _webDeployment = new K8s.apps.v1.Deployment(
     "web",
     {
+      metadata: { namespace: k8sNamespace.metadata.name },
       spec: {
         replicas: 1,
         selector: { matchLabels: webLabels },
@@ -50,19 +57,25 @@ export function createAppDeployments({
         }
       }
     },
-    { provider }
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
   )
   const _webService = new K8s.core.v1.Service(
     "web",
     {
-      metadata: { name: "web" },
+      metadata: { name: "web", namespace: k8sNamespace.metadata.name },
       spec: {
         type: "ClusterIP",
         selector: webLabels,
         ports: [{ port: 80, targetPort: WEB_PORT }]
       }
     },
-    { provider }
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
   )
 
   const SERVER_PORT = 10_000
@@ -71,6 +84,7 @@ export function createAppDeployments({
   const _serverDeployment = new K8s.apps.v1.Deployment(
     "server",
     {
+      metadata: { namespace: k8sNamespace.metadata.name },
       spec: {
         replicas: 1,
         selector: { matchLabels: SERVER_LABELS },
@@ -103,18 +117,24 @@ export function createAppDeployments({
         }
       }
     },
-    { provider }
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
   )
   const _serverService = new K8s.core.v1.Service(
     "server",
     {
-      metadata: { name: "server" },
+      metadata: { name: "server", namespace: k8sNamespace.metadata.name },
       spec: {
         type: "ClusterIP",
         selector: SERVER_LABELS,
         ports: [{ port: 80, targetPort: SERVER_PORT }]
       }
     },
-    { provider }
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
   )
 }
