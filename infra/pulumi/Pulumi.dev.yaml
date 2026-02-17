@@ -6,3 +6,4 @@ config:
     secure: AAABAHb21GnpOouTlTnZGdNgdW3cTgaC7GhXfagP0vTzax/tJs3/7uMyvLp8Vxw3Na6Z3+vFQD9JnpUY1a7tYn0k1dJ8uGgaKFlY3KnEYdblJUT+nHqKEdqL2SeVxLc9YHn0t85/WZM0oIr75SlarzBoBF6tuRT7iKwuKF0sOIQVmYqOEjpc2P9Yqfptwbj4SiF5HeP1slkHKDd2i5iRvmm+HvSAKxtFyMk3MmNrIoNmuuOkhR6XxPpqK5IyjKV+m2kheis5iuI5MqEagT/QmbTRgKMsZRAD
   one-kilo-infra:workos-api-key:
     secure: AAABAGDI3JvPeLGFuJJB03V/R69IxmUevMGgMfSX0xOTHhWwRm3nIXLs1sosoAX6dpIOkWAy6H8xl6usGOWUxTU6k6gD+S17P3kVEHD3k4SW2XQdK7FlRn97aSx2Bzp9QpnvyXobCNq1hH/MgPN7SwJPqg==
+  one-kilo-infra:workos-client-id: client_01KBR3CAW3KWC4KDYK65M6VES6

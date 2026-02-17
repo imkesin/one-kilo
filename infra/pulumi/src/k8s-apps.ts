@@ -51,7 +51,21 @@ export function createAppDeployments({
             containers: [{
               name: "web",
               image: Pulumi.interpolate`${imageBase}/web:${imageTag}`,
-              ports: [{ containerPort: WEB_PORT }]
+              ports: [{ containerPort: WEB_PORT }],
+              env: [
+                {
+                  name: "WORKOS_CLIENT_ID",
+                  value: config.require("workos-client-id")
+                }
+              ],
+              livenessProbe: {
+                httpGet: {
+                  path: "/livez",
+                  port: WEB_PORT
+                },
+                initialDelaySeconds: 10,
+                periodSeconds: 30
+              }
             }]
           }
         }
@@ -95,22 +109,28 @@ export function createAppDeployments({
               name: "server",
               image: Pulumi.interpolate`${imageBase}/server:${imageTag}`,
               ports: [{ containerPort: SERVER_PORT }],
-              env: [{
-                name: "WORKOS_API_KEY",
-                valueFrom: {
-                  secretKeyRef: {
-                    name: workosApiKeySecret.metadata.name,
-                    key: "api-key"
+              env: [
+                {
+                  name: "WORKOS_CLIENT_ID",
+                  value: config.require("workos-client-id")
+                },
+                {
+                  name: "WORKOS_API_KEY",
+                  valueFrom: {
+                    secretKeyRef: {
+                      name: workosApiKeySecret.metadata.name,
+                      key: "api-key"
+                    }
                   }
                 }
-              }],
+              ],
               livenessProbe: {
                 httpGet: {
                   path: "/livez",
                   port: SERVER_PORT
                 },
                 initialDelaySeconds: 10,
-                periodSeconds: 15
+                periodSeconds: 30
               }
             }]
           }
