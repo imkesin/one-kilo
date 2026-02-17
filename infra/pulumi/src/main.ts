@@ -147,7 +147,23 @@ const artifactRegistryRepository = new GCP.artifactregistry.Repository(
   {
     repositoryId: "one-kilo",
     format: "DOCKER",
-    location: gcpConfig.require("region")
+    location: gcpConfig.require("region"),
+    cleanupPolicies: [
+      {
+        id: "keep-latest-30",
+        action: "KEEP",
+        mostRecentVersions: {
+          keepCount: 30
+        }
+      },
+      {
+        id: "delete-older-than-7d",
+        action: "DELETE",
+        condition: {
+          olderThan: "7d"
+        }
+      }
+    ]
   }
 )
 
