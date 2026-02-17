@@ -17,6 +17,13 @@ const cluster = new GCP.container.Cluster(
     nodeConfig: {
       machineType: "e2-standard-4",
       spot: true
+    },
+    maintenancePolicy: {
+      recurringWindow: {
+        startTime: "2026-01-01T05:00:00Z",
+        endTime: "2026-01-01T10:00:00Z",
+        recurrence: "FREQ=DAILY"
+      }
     }
   }
 )

@@ -22,8 +22,8 @@ export class RegistrationProcesses extends Effect.Service<RegistrationProcesses>
       const workspaceIdGenerator = yield* WorkspaceIdGenerator
 
       const registerHumanUser = Effect.fn("RegistrationProcesses.registerHumanUser")(
-        function*({ workosUser: _workosUser }: RegisterHumanUserParameters) {
-          const _userId = yield* userIdGenerator.generate
+        function*({ workosUser }: RegisterHumanUserParameters) {
+          const userId = yield* userIdGenerator.generate
           const workspaceId = yield* workspaceIdGenerator.generate
 
           /*
@@ -39,9 +39,18 @@ export class RegistrationProcesses extends Effect.Service<RegistrationProcesses>
 
           // Update user to force the `externalId`
 
-          const _workosOrganization = yield* workosClient.organizations.createOrganization({
-            name: "TODO",
+          yield* workosClient.userManagement.updateUser(
+            workosUser.id,
+            { externalId: userId }
+          )
+          const workosOrganization = yield* workosClient.organizations.createOrganization({
+            name: "FIX ME",
             externalId: workspaceId
+          })
+          const _workosOrganizationMembership = yield* workosClient.userManagement.createOrganizationMembership({
+            userId: workosUser.id,
+            organizationId: workosOrganization.id,
+            roles: []
           })
         }
       )
