@@ -120,7 +120,17 @@ const _cloudflared = new K8s.apps.v1.Deployment(
                   key: "token"
                 }
               }
-            }]
+            }],
+            resources: {
+              requests: {
+                cpu: "250m",
+                memory: "128Mi"
+              },
+              limits: {
+                cpu: "500m",
+                memory: "256Mi"
+              }
+            }
           }]
         }
       }

@@ -58,6 +58,10 @@ export function createAppDeployments({
                   value: config.require("workos-client-id")
                 }
               ],
+              resources: {
+                requests: { cpu: "500m", memory: "512Mi" },
+                limits: { cpu: "1000m", memory: "1Gi" }
+              },
               livenessProbe: {
                 httpGet: {
                   path: "/livez",
@@ -124,6 +128,10 @@ export function createAppDeployments({
                   }
                 }
               ],
+              resources: {
+                requests: { cpu: "500m", memory: "512Mi" },
+                limits: { cpu: "1000m", memory: "1Gi" }
+              },
               livenessProbe: {
                 httpGet: {
                   path: "/livez",
