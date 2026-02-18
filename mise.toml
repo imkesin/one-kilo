@@ -1,4 +1,4 @@
 [tools]
 node = "24"
-pnpm = "10"
+pnpm = "10.30"
 pulumi = "3"
