@@ -1,10 +1,26 @@
+import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
+import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
+import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import { UserIdGenerator } from "@one-kilo/domain/ids/UserId"
+import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { WorkspaceIdGenerator } from "@one-kilo/domain/ids/WorkspaceId"
+import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import * as Effect from "effect/Effect"
+import * as Exit from "effect/Exit"
+
+type ExecuteRegistrationParameters = {
+  readonly userId: UserId
+  readonly workspaceId: WorkspaceId
+
+  readonly workosOrganizationId: WorkOSIds.OrganizationId
+  readonly workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
+  readonly workosUser: WorkOSEntities.User
+}
 
 type RegisterHumanUserParameters = {
+  readonly workosRefreshToken: WorkOSValues.RefreshToken
   readonly workosUser: WorkOSEntities.User
 }
 
@@ -16,42 +32,94 @@ export class RegistrationProcesses extends Effect.Service<RegistrationProcesses>
       WorkspaceIdGenerator.Default
     ],
     effect: Effect.gen(function*() {
-      const { client: workosClient } = yield* WorkOSApiGateway.ApiGateway
+      const { client: workosGatewayClient } = yield* WorkOSApiGateway.ApiGateway
+      const { client: workosDirectClient } = yield* WorkOSApiClient.ApiClient
 
       const userIdGenerator = yield* UserIdGenerator
       const workspaceIdGenerator = yield* WorkspaceIdGenerator
 
-      const registerHumanUser = Effect.fn("RegistrationProcesses.registerHumanUser")(
-        function*({ workosUser }: RegisterHumanUserParameters) {
-          const userId = yield* userIdGenerator.generate
-          const workspaceId = yield* workspaceIdGenerator.generate
-
+      const persist = Effect.fn("RegistrationProcesses.persist")(
+        function*(
+          {
+            userId: _userId,
+            workspaceId: _workspaceId,
+            workosOrganizationId: _workosOrganizationId,
+            workosOrganizationMembershipId: _workosOrganizationMembershipId,
+            workosUser: _workosUser
+          }: ExecuteRegistrationParameters
+        ) {
           /*
-            1. Create WorkOS organization          ← external, first
-            2. Create WorkOS org membership        ← external, second
-            3. Refresh WorkOS access token         ← external, third
-
             4. DB transaction:                     ← all internal, atomic
                 - insert user
                 - insert workspace (using WorkOS org ID)
                 - insert workspace membership
-           */
+          */
 
-          // Update user to force the `externalId`
+          // User Module
+          // Workspace Module
+          // Workspace Membership Module
+        }
+      )
 
-          yield* workosClient.userManagement.updateUser(
-            workosUser.id,
-            { externalId: userId }
+      const registerHumanUser = Effect.fn("RegistrationProcesses.registerHumanUser")(
+        function*({
+          workosRefreshToken: inputWorkosRefreshToken,
+          workosUser
+        }: RegisterHumanUserParameters) {
+          const userId = yield* userIdGenerator.generate
+          const workspaceId = yield* workspaceIdGenerator.generate
+
+          // Special suffix is intended to support debugging through the WorkOS console.
+          const workosOrganizationName = `Personal (${workspaceId.slice(-6)})`
+
+          const [workosOrganization] = yield* Effect.all(
+            [
+              workosGatewayClient.organizations.createOrganization({
+                name: workosOrganizationName,
+                externalId: workspaceId
+              }),
+              workosGatewayClient.userManagement.updateUser(
+                workosUser.id,
+                { externalId: userId }
+              )
+            ],
+            { concurrency: "unbounded" }
           )
-          const workosOrganization = yield* workosClient.organizations.createOrganization({
-            name: "FIX ME",
-            externalId: workspaceId
+
+          // If there is any failure, attempt to clean up the dangling organization
+          yield* Effect.addFinalizer((exit) => {
+            if (Exit.isFailure(exit)) {
+              return workosGatewayClient.organizations.deleteOrganization(workosOrganization.id)
+            }
+
+            return Effect.void
           })
-          const _workosOrganizationMembership = yield* workosClient.userManagement.createOrganizationMembership({
+
+          const workosOrganizationMembership = yield* workosGatewayClient.userManagement.createOrganizationMembership({
             userId: workosUser.id,
             organizationId: workosOrganization.id,
             roles: []
           })
+
+          const refreshTokenResult = yield* workosDirectClient.userManagement.authenticateWithRefreshToken({
+            refreshToken: inputWorkosRefreshToken,
+            organizationId: workosOrganization.id
+          })
+
+          yield* persist({
+            userId,
+            workspaceId,
+            workosOrganizationId: workosOrganization.id,
+            workosOrganizationMembershipId: workosOrganizationMembership.id,
+            workosUser
+          })
+
+          return {
+            userId,
+            workspaceId,
+            workosAccessToken: refreshTokenResult.accessToken,
+            workosRefreshToken: refreshTokenResult.refreshToken
+          }
         }
       )
 

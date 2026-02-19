@@ -1,13 +1,27 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
+import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { UsersQueryRepository } from "@one-kilo/sql/modules/users/UsersQueryRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
+import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import { RegistrationProcesses } from "../../processes/registration/RegistrationProcesses.ts"
+
+type AuthenticationContext = {
+  readonly userId: UserId
+  readonly workspaceId: WorkspaceId
+  readonly workosAccessToken: WorkOSValues.AccessToken
+  readonly workosRefreshToken: WorkOSValues.RefreshToken
+}
+type CodeExchangeOutcome = Data.TaggedEnum<{
+  NewlyCreatedUser: AuthenticationContext
+  ReturningUser: AuthenticationContext
+}>
+const CodeExchangeOutcome = Data.taggedEnum<CodeExchangeOutcome>()
 
 export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()(
   "@one-kilo/server/SessionsOrchestrator",
@@ -24,17 +38,15 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
       const usersQueryRepository = yield* UsersQueryRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
 
-      const exchangeCodeForSession = Effect.fn(function*(options: {
-        readonly code: WorkOSValues.AuthenticationCode
-      }) {
+      const exchangeCodeForSession = Effect.fn(function*(options: { readonly code: WorkOSValues.AuthenticationCode }) {
         const {
           user: workosUser,
           organizationId: workosOrganizationId,
-          accessToken,
-          refreshToken
+          accessToken: workosAccessToken,
+          refreshToken: workosRefreshToken
         } = yield* workosClient.userManagement.authenticateWithCode({ code: options.code })
 
-        const handleExistingUser = (userId: UserId) =>
+        const handleReturningUser = (userId: UserId) =>
           pipe(
             Option.fromNullable(workosOrganizationId),
             Option.match({
@@ -44,24 +56,33 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
                   workspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId({ workosOrganizationId }),
                   Option.match({
                     onNone: () => dieWithUnexpectedError("Existing user's workspace not found"),
-                    onSome: ({ id }) => Effect.succeed({ userId: userId, workspaceId: id })
+                    onSome: ({ id }) =>
+                      Effect.succeed(
+                        CodeExchangeOutcome.ReturningUser({
+                          userId,
+                          workspaceId: id,
+                          workosAccessToken,
+                          workosRefreshToken
+                        })
+                      )
                   })
                 )
             })
           )
 
-        const _result = yield* Effect.andThen(
+        const outcome = yield* Effect.andThen(
           usersQueryRepository.findUserEntityByWorkOSUserId({ workosUserId: workosUser.id }),
           Option.match({
-            onNone: () => registrationProcesses.registerHumanUser({ workosUser }),
-            onSome: ({ id }) => handleExistingUser(id)
+            onNone: () =>
+              Effect.map(
+                registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
+                CodeExchangeOutcome.NewlyCreatedUser
+              ),
+            onSome: ({ id }) => handleReturningUser(id)
           })
         )
 
-        // Need to transform this into something useful on the way out
-        // Probably just the domain-specific userId and workspaceId
-
-        return { accessToken, refreshToken }
+        return outcome
       })
 
       return { exchangeCodeForSession }

@@ -18,13 +18,17 @@ import {
   AuthenticateWithRefreshTokenResponse,
   CreateOrganizationMembershipParameters,
   CreateUserParameters,
-  DeleteOrganizationMembershipResponse,
-  DeleteUserResponse,
+  DeleteOrganizationMembershipOutcome,
+  DeleteUserOutcome,
   UpdateUserParameters
 } from "./UserManagementApiClientDefinitionSchemas.ts"
 
 type AuthenticateWithCodeParameters_WithoutClientFields = Omit<
   AuthenticateWithCodeParameters,
+  "clientId" | "clientSecret"
+>
+type AuthenticateWithRefreshTokenParameters_WithoutClientFields = Omit<
+  AuthenticateWithRefreshTokenParameters,
   "clientId" | "clientSecret"
 >
 
@@ -35,7 +39,9 @@ export interface Client {
     AuthenticateWithCodeResponse,
     HttpClientError.HttpClientError | ParseError
   >
-  readonly authenticateWithRefreshToken: (parameters: AuthenticateWithRefreshTokenParameters) => Effect.Effect<
+  readonly authenticateWithRefreshToken: (
+    parameters: AuthenticateWithRefreshTokenParameters_WithoutClientFields
+  ) => Effect.Effect<
     AuthenticateWithRefreshTokenResponse,
     HttpClientError.HttpClientError | ParseError
   >
@@ -48,7 +54,7 @@ export interface Client {
     User,
     HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
   >
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse, HttpClientError.HttpClientError>
+  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserOutcome, HttpClientError.HttpClientError>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<
     User,
     HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
@@ -60,7 +66,7 @@ export interface Client {
 
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
-  ) => Effect.Effect<DeleteOrganizationMembershipResponse, HttpClientError.HttpClientError>
+  ) => Effect.Effect<DeleteOrganizationMembershipOutcome, HttpClientError.HttpClientError>
 }
 
 export const make = (
@@ -117,7 +123,11 @@ export const make = (
       ),
     authenticateWithRefreshToken: (parameters) =>
       pipe(
-        parameters,
+        {
+          ...parameters,
+          clientId: options.clientId,
+          clientSecret: Redacted.value(options.clientSecret)
+        },
         S.encode(AuthenticateWithRefreshTokenParameters),
         Effect.map((_) =>
           pipe(
@@ -173,8 +183,8 @@ export const make = (
         HttpClientRequest.del(`/users/${userId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": () => Effect.succeed(DeleteUserResponse.Success()),
-            "404": () => Effect.succeed(DeleteUserResponse.NotFound()),
+            "2xx": () => Effect.succeed(DeleteUserOutcome.Success()),
+            "404": () => Effect.succeed(DeleteUserOutcome.NotFound()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -213,8 +223,8 @@ export const make = (
         HttpClientRequest.del(`/organization_memberships/${organizationMembershipId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": () => Effect.succeed(DeleteOrganizationMembershipResponse.Success()),
-            "404": () => Effect.succeed(DeleteOrganizationMembershipResponse.NotFound()),
+            "2xx": () => Effect.succeed(DeleteOrganizationMembershipOutcome.Success()),
+            "404": () => Effect.succeed(DeleteOrganizationMembershipOutcome.NotFound()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

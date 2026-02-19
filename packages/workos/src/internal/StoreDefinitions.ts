@@ -23,13 +23,13 @@ import { EmailAddress, OrganizationMembershipStatus, Role } from "../domain/Valu
 import * as TokenGenerator from "../TokenGenerator.ts"
 import {
   type CreateOrganizationParameters,
-  DeleteOrganizationResponse
+  DeleteOrganizationOutcome
 } from "./Api/OrganizationsApiClientDefinitionSchemas.ts"
 import {
   CreateOrganizationMembershipParameters,
   type CreateUserParameters,
-  DeleteOrganizationMembershipResponse,
-  DeleteUserResponse,
+  DeleteOrganizationMembershipOutcome,
+  DeleteUserOutcome,
   type UpdateUserParameters
 } from "./Api/UserManagementApiClientDefinitionSchemas.ts"
 import {
@@ -81,7 +81,7 @@ interface UserManagement {
     User,
     ResourceNotFoundError
   >
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserResponse>
+  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserOutcome>
   readonly retrieveUser: (userId: UserId) => Effect.Effect<User, ResourceNotFoundError>
 
   readonly createOrganizationMembership: (
@@ -89,12 +89,12 @@ interface UserManagement {
   ) => Effect.Effect<OrganizationMembership>
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
-  ) => Effect.Effect<DeleteOrganizationMembershipResponse>
+  ) => Effect.Effect<DeleteOrganizationMembershipOutcome>
 }
 
 interface Organizations {
   readonly createOrganization: (parameters: typeof CreateOrganizationParameters.Type) => Effect.Effect<Organization>
-  readonly deleteOrganization: (organizationId: OrganizationId) => Effect.Effect<DeleteOrganizationResponse>
+  readonly deleteOrganization: (organizationId: OrganizationId) => Effect.Effect<DeleteOrganizationOutcome>
   readonly retrieveOrganization: (organizationId: OrganizationId) => Effect.Effect<Organization, ResourceNotFoundError>
 }
 
@@ -395,8 +395,8 @@ export const make = (options?: MakeOptions): Effect.Effect<
               deleteUser(userId),
               Effect.map(({ userExisted }) => (
                 userExisted
-                  ? DeleteUserResponse.Success()
-                  : DeleteUserResponse.NotFound()
+                  ? DeleteUserOutcome.Success()
+                  : DeleteUserOutcome.NotFound()
               ))
             ),
           retrieveUser: (userId: UserId) =>
@@ -455,8 +455,8 @@ export const make = (options?: MakeOptions): Effect.Effect<
               deleteOrganizationMembership(organizationMembershipId),
               Effect.map(({ organizationMembershipsExisted }) => (
                 organizationMembershipsExisted
-                  ? DeleteOrganizationMembershipResponse.Success()
-                  : DeleteOrganizationMembershipResponse.NotFound()
+                  ? DeleteOrganizationMembershipOutcome.Success()
+                  : DeleteOrganizationMembershipOutcome.NotFound()
               ))
             )
         },
@@ -484,8 +484,8 @@ export const make = (options?: MakeOptions): Effect.Effect<
               deleteOrganization(organizationId),
               Effect.map(({ organizationExisted }) => (
                 organizationExisted
-                  ? DeleteOrganizationResponse.Success()
-                  : DeleteOrganizationResponse.NotFound()
+                  ? DeleteOrganizationOutcome.Success()
+                  : DeleteOrganizationOutcome.NotFound()
               ))
             ),
           retrieveOrganization: (organizationId) =>

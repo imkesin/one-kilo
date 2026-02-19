@@ -124,6 +124,11 @@ export class AuthenticateWithRefreshTokenParameters
       ),
       S.fromKey("grant_type")
     ),
+    organizationId: pipe(
+      OrganizationId,
+      S.optional,
+      S.fromKey("organization_id")
+    ),
 
     ...AuthenticateRequestWithSecretCommonFields
   })
@@ -207,11 +212,11 @@ export class UpdateUserParameters extends S.Class<UpdateUserParameters>("UpdateU
   )
 }) {}
 
-export type DeleteUserResponse = Data.TaggedEnum<{
+export type DeleteUserOutcome = Data.TaggedEnum<{
   Success: Record<never, never>
   NotFound: Record<never, never>
 }>
-export const DeleteUserResponse = Data.taggedEnum<DeleteUserResponse>()
+export const DeleteUserOutcome = Data.taggedEnum<DeleteUserOutcome>()
 
 export class CreateOrganizationMembershipParameters
   extends S.Class<CreateOrganizationMembershipParameters>("CreateOrganizationMembershipParameters")({
@@ -242,8 +247,8 @@ export class UpdateOrganizationMembershipParameters
   })
 {}
 
-export type DeleteOrganizationMembershipResponse = Data.TaggedEnum<{
+export type DeleteOrganizationMembershipOutcome = Data.TaggedEnum<{
   Success: Record<never, never>
   NotFound: Record<never, never>
 }>
-export const DeleteOrganizationMembershipResponse = Data.taggedEnum<DeleteOrganizationMembershipResponse>()
+export const DeleteOrganizationMembershipOutcome = Data.taggedEnum<DeleteOrganizationMembershipOutcome>()

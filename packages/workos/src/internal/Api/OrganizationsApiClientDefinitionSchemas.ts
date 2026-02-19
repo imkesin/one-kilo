@@ -44,8 +44,8 @@ export class CreateOrganizationParameters extends S.Class<CreateOrganizationPara
   )
 }) {}
 
-export type DeleteOrganizationResponse = Data.TaggedEnum<{
+export type DeleteOrganizationOutcome = Data.TaggedEnum<{
   Success: Record<never, never>
   NotFound: Record<never, never>
 }>
-export const DeleteOrganizationResponse = Data.taggedEnum<DeleteOrganizationResponse>()
+export const DeleteOrganizationOutcome = Data.taggedEnum<DeleteOrganizationOutcome>()

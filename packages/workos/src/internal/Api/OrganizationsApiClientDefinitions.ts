@@ -10,7 +10,7 @@ import { Organization } from "../../domain/Entities.ts"
 import { ResourceNotFoundError } from "../../domain/Errors.ts"
 import type { OrganizationId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
-import { CreateOrganizationParameters, DeleteOrganizationResponse } from "./OrganizationsApiClientDefinitionSchemas.ts"
+import { CreateOrganizationParameters, DeleteOrganizationOutcome } from "./OrganizationsApiClientDefinitionSchemas.ts"
 
 export interface Client {
   readonly httpClient: HttpClient.HttpClient
@@ -21,7 +21,7 @@ export interface Client {
 
   readonly deleteOrganization: (
     organizationId: OrganizationId
-  ) => Effect.Effect<DeleteOrganizationResponse, HttpClientError.HttpClientError>
+  ) => Effect.Effect<DeleteOrganizationOutcome, HttpClientError.HttpClientError>
 
   readonly retrieveOrganization: (
     organizationId: OrganizationId
@@ -75,8 +75,8 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         HttpClientRequest.del(`/${organizationId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": () => Effect.succeed(DeleteOrganizationResponse.Success()),
-            "404": () => Effect.succeed(DeleteOrganizationResponse.NotFound()),
+            "2xx": () => Effect.succeed(DeleteOrganizationOutcome.Success()),
+            "404": () => Effect.succeed(DeleteOrganizationOutcome.NotFound()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
