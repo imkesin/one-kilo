@@ -9,7 +9,7 @@ import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
-import { RegistrationProcesses } from "../../processes/registration/RegistrationProcesses.ts"
+import { RegistrationUseCases } from "../registration/RegistrationUseCases.ts"
 
 type AuthenticationContext = {
   readonly userId: UserId
@@ -28,13 +28,13 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
   {
     dependencies: [
       UsersQueryRepository.Default,
-      RegistrationProcesses.Default,
+      RegistrationUseCases.Default,
       WorkspacesQueryRepository.Default
     ],
     effect: Effect.gen(function*() {
       const { client: workosClient } = yield* WorkOSApiClient.ApiClient
 
-      const registrationProcesses = yield* RegistrationProcesses
+      const registrationProcesses = yield* RegistrationUseCases
       const usersQueryRepository = yield* UsersQueryRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
 

@@ -9,14 +9,22 @@ import { WorkspaceIdGenerator } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
+import { UsersCreationModule } from "../../modules/users/UsersCreationModule.ts"
+import { WorkspacesCreationModule } from "../../modules/workspaces/WorkspacesCreationModule.ts"
 
-type ExecuteRegistrationParameters = {
-  readonly userId: UserId
-  readonly workspaceId: WorkspaceId
-
-  readonly workosOrganizationId: WorkOSIds.OrganizationId
-  readonly workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
-  readonly workosUser: WorkOSEntities.User
+type PersistRegistrationParameters = {
+  readonly userParameters: {
+    readonly id: UserId
+    readonly workosUser: WorkOSEntities.User
+  }
+  readonly workspaceParameters: {
+    readonly id: WorkspaceId
+    readonly name: string
+    readonly workosOrganizationId: WorkOSIds.OrganizationId
+  }
+  readonly workspaceMembershipParameters: {
+    readonly workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
+  }
 }
 
 type RegisterHumanUserParameters = {
@@ -24,44 +32,55 @@ type RegisterHumanUserParameters = {
   readonly workosUser: WorkOSEntities.User
 }
 
-export class RegistrationProcesses extends Effect.Service<RegistrationProcesses>()(
-  "@one-kilo/server/RegistrationProcesses",
+export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()(
+  "@one-kilo/server/RegistrationUseCases",
   {
     dependencies: [
       UserIdGenerator.Default,
-      WorkspaceIdGenerator.Default
+      UsersCreationModule.Default,
+      WorkspaceIdGenerator.Default,
+      WorkspacesCreationModule.Default
     ],
     effect: Effect.gen(function*() {
       const { client: workosGatewayClient } = yield* WorkOSApiGateway.ApiGateway
       const { client: workosDirectClient } = yield* WorkOSApiClient.ApiClient
 
       const userIdGenerator = yield* UserIdGenerator
+      const usersCreationModule = yield* UsersCreationModule
       const workspaceIdGenerator = yield* WorkspaceIdGenerator
+      const workspacesCreationModule = yield* WorkspacesCreationModule
 
-      const persist = Effect.fn("RegistrationProcesses.persist")(
+      const persistRegistration = Effect.fn("RegistrationUseCases.persistRegistration")(
         function*(
           {
-            userId: _userId,
-            workspaceId: _workspaceId,
-            workosOrganizationId: _workosOrganizationId,
-            workosOrganizationMembershipId: _workosOrganizationMembershipId,
-            workosUser: _workosUser
-          }: ExecuteRegistrationParameters
+            userParameters,
+            workspaceParameters,
+            workspaceMembershipParameters: _workspaceMembershipParameters
+          }: PersistRegistrationParameters
         ) {
-          /*
-            4. DB transaction:                     ← all internal, atomic
-                - insert user
-                - insert workspace (using WorkOS org ID)
-                - insert workspace membership
-          */
+          const [
+            _user,
+            _workspace
+          ] = yield* Effect.all([
+            usersCreationModule.createHumanUser({
+              id: userParameters.id,
+              workosUserId: userParameters.workosUser.id
+            }),
+            workspacesCreationModule.createWorkspace({
+              id: workspaceParameters.id,
+              name: workspaceParameters.name,
+              performedByUserId: userParameters.id,
+              workosOrganizationId: workspaceParameters.workosOrganizationId
+            })
+          ])
 
-          // User Module
-          // Workspace Module
-          // Workspace Membership Module
+          // Make membership
+
+          // Wrap everything in a transaction
         }
       )
 
-      const registerHumanUser = Effect.fn("RegistrationProcesses.registerHumanUser")(
+      const registerHumanUser = Effect.fn("RegistrationUseCases.registerHumanUser")(
         function*({
           workosRefreshToken: inputWorkosRefreshToken,
           workosUser
@@ -106,12 +125,19 @@ export class RegistrationProcesses extends Effect.Service<RegistrationProcesses>
             organizationId: workosOrganization.id
           })
 
-          yield* persist({
-            userId,
-            workspaceId,
-            workosOrganizationId: workosOrganization.id,
-            workosOrganizationMembershipId: workosOrganizationMembership.id,
-            workosUser
+          yield* persistRegistration({
+            userParameters: {
+              id: userId,
+              workosUser
+            },
+            workspaceParameters: {
+              id: workspaceId,
+              name: workosOrganizationName,
+              workosOrganizationId: workosOrganization.id
+            },
+            workspaceMembershipParameters: {
+              workosOrganizationMembershipId: workosOrganizationMembership.id
+            }
           })
 
           return {

@@ -4,13 +4,13 @@ import * as SqlSchema from "@effect/sql/SqlSchema"
 import { UserId, UserIdGenerator } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
-import * as Option from "effect/Option"
 import { UsersModel } from "./UsersModel.ts"
 
 type InsertUserParameters = {
-  id: Option.Option<UserId>
-  performedByUserId: Option.Option<UserId>
   workosUserId: WorkOSIds.UserId
+
+  id?: UserId
+  performedByUserId?: UserId
 }
 
 export class UsersRepository extends Effect.Service<UsersRepository>()(
@@ -27,23 +27,25 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
         execute: (request) => sql`INSERT INTO users ${sql.insert(request).returning("*")}`
       })
       const insert = Effect.fn("UsersRepository.insert")(
-        function*({ id, performedByUserId, workosUserId }: InsertUserParameters) {
+        function*({
+          workosUserId,
+          id,
+          performedByUserId
+        }: InsertUserParameters) {
+          const userIdEffect = id
+            ? Effect.succeed(id)
+            : userIdGenerator.generate
+
           return yield* Effect.flatMap(
-            Option.match(
-              id,
-              {
-                onNone: () => userIdGenerator.generate,
-                onSome: (id) => Effect.succeed(id)
-              }
-            ),
+            userIdEffect,
             (userId) =>
               insertSchema({
                 id: userId,
                 workosUserId,
                 createdAt: undefined,
-                createdByUserId: Option.getOrNull(performedByUserId) ?? userId,
+                createdByUserId: performedByUserId ?? userId,
                 updatedAt: undefined,
-                updatedByUserId: Option.getOrNull(performedByUserId) ?? userId,
+                updatedByUserId: performedByUserId ?? userId,
                 archivedAt: undefined
               })
           )
