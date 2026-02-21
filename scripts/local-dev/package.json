@@ -1,0 +1,14 @@
+{
+  "name": "@one-kilo/local-dev",
+  "devDependencies": {
+    "@effect/platform": "^0.94.2",
+    "@effect/platform-node": "^0.104.1",
+    "effect": "^3.19.15"
+  },
+  "private": true,
+  "scripts": {
+    "pg:setup": "node src/setup-local-postgres-container.ts",
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "type": "module"
+}

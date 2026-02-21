@@ -3,6 +3,7 @@ packages:
   - infra/*
   - libs/*
   - packages/*
+  - scripts/*
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

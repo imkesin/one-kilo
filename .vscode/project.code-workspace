@@ -43,6 +43,11 @@
     {
       "name": "@effect/auth-workos",
       "path": "../packages/workos"
+    },
+    // Scripts
+    {
+      "name": "@one-kilo/local-dev",
+      "path": "../scripts/local-dev"
     }
   ],
   "launch": {
