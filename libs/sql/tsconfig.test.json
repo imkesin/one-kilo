@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "declarationMap": false
+  },
+  "include": [
+    "test/**/*.ts",
+    "vitest.*.ts"
+  ],
+  "references": [
+    { "path": "./tsconfig.src.json" }
+  ]
+}

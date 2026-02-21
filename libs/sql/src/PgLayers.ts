@@ -13,11 +13,11 @@ const POSTGRES_OIDS = {
   TIMESTAMPTZ: 1184
 } as const
 
-type SqlLayerOptions = {
+type PgLayerOptions = {
   readonly defaultDatabase?: "local" | "test"
 }
 
-export const layer = (options?: SqlLayerOptions) =>
+export const layer = (options?: PgLayerOptions) =>
   PgClient.layerConfig({
     host: pipe(
       Config.string("POSTGRES_HOST"),
@@ -71,4 +71,4 @@ const layerMigrator = () =>
     Layer.provide(NodeContext.layer)
   )
 
-export const layerWithMigrations = (options?: SqlLayerOptions) => Layer.provideMerge(layerMigrator(), layer(options))
+export const layerWithMigrations = (options?: PgLayerOptions) => Layer.provideMerge(layerMigrator(), layer(options))

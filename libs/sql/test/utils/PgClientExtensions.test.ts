@@ -7,13 +7,13 @@ import * as Fiber from "effect/Fiber"
 import { pipe } from "effect/Function"
 import * as Ref from "effect/Ref"
 import { expect } from "vitest"
-import { SqlLiveWithoutMigrations } from "../../src/Sql.ts"
+import * as PgLayers from "../../src/PgLayers.ts"
 import { withSerializableTransaction } from "../../src/utils/PgClientExtensions.ts"
 
-// TODO - This needs to be verified next
+const layerTest = PgLayers.layer({ defaultDatabase: "test" })
 
-describe("withSerializableTransaction", () => {
-  layer(SqlLiveWithoutMigrations)("with real Postgres", (it) => {
+describe("`withSerializableTransaction`", () => {
+  layer(layerTest, { excludeTestServices: true })("using live Postgres", (it) => {
     it.effect("retries on serialization conflict between concurrent transactions", () =>
       Effect.gen(function*() {
         const sql = yield* SqlClient.SqlClient
@@ -74,6 +74,6 @@ describe("withSerializableTransaction", () => {
         // Transaction B should have retried at least once
         const attempts = yield* Ref.get(bAttempts)
         expect(attempts).toBeGreaterThan(1)
-      }), { timeout: 5_000 })
+      }))
   })
 })
