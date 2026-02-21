@@ -6,58 +6,69 @@ import * as Layer from "effect/Layer"
 import * as String from "effect/String"
 import { fileURLToPath } from "node:url"
 import TypeOverrides from "pg/lib/type-overrides"
+import { PostgresDefaults } from "./configs/Defaults.ts"
 
-const POSTGRES_OIDS = { TIMESTAMP: 1114, TIMESTAMPTZ: 1184 } as const
+const POSTGRES_OIDS = {
+  TIMESTAMP: 1114,
+  TIMESTAMPTZ: 1184
+} as const
 
-const MigratorLayer = pipe(
-  PgMigrator.layer({
-    loader: PgMigrator.fromFileSystem(
-      fileURLToPath(new URL("./migrations", import.meta.url))
-    )
-  }),
-  Layer.provide(NodeContext.layer)
-)
+type SqlLayerOptions = {
+  readonly defaultDatabase?: "local" | "test"
+}
 
-export const SqlLiveWithoutMigrations = PgClient.layerConfig({
-  host: pipe(
-    Config.string("POSTGRES_HOST"),
-    Config.withDefault("localhost")
-  ),
-  port: pipe(
-    Config.number("POSTGRES_PORT"),
-    Config.withDefault(5432)
-  ),
+export const layer = (options?: SqlLayerOptions) =>
+  PgClient.layerConfig({
+    host: pipe(
+      Config.string("POSTGRES_HOST"),
+      Config.withDefault(PostgresDefaults.host)
+    ),
+    port: pipe(
+      Config.number("POSTGRES_PORT"),
+      Config.withDefault(PostgresDefaults.port)
+    ),
 
-  username: pipe(
-    Config.string("POSTGRES_USER"),
-    Config.withDefault("postgres")
-  ),
-  password: pipe(
-    Config.string("POSTGRES_PASSWORD"),
-    Config.withDefault("postgres"),
-    (_) => Config.redacted(_)
-  ),
+    username: pipe(
+      Config.string("POSTGRES_USER"),
+      Config.withDefault(PostgresDefaults.user)
+    ),
+    password: pipe(
+      Config.string("POSTGRES_PASSWORD"),
+      Config.withDefault(PostgresDefaults.password),
+      (_) => Config.redacted(_)
+    ),
 
-  database: pipe(
-    Config.string("POSTGRES_DB"),
-    Config.withDefault("one_kilo_local")
-  ),
+    database: pipe(
+      Config.string("POSTGRES_DB"),
+      Config.withDefault(
+        options?.defaultDatabase === "test"
+          ? PostgresDefaults.testDB
+          : PostgresDefaults.localDB
+      )
+    ),
 
-  transformQueryNames: Config.succeed(String.camelToSnake),
-  transformResultNames: Config.succeed(String.snakeToCamel),
-  transformJson: Config.succeed(true),
+    transformQueryNames: Config.succeed(String.camelToSnake),
+    transformResultNames: Config.succeed(String.snakeToCamel),
+    transformJson: Config.succeed(true),
 
-  types: Config.suspend(() => {
-    const override = new TypeOverrides()
+    types: Config.suspend(() => {
+      const override = new TypeOverrides()
 
-    override.setTypeParser(POSTGRES_OIDS.TIMESTAMP, identity)
-    override.setTypeParser(POSTGRES_OIDS.TIMESTAMPTZ, identity)
+      override.setTypeParser(POSTGRES_OIDS.TIMESTAMP, identity)
+      override.setTypeParser(POSTGRES_OIDS.TIMESTAMPTZ, identity)
 
-    return Config.succeed(override)
+      return Config.succeed(override)
+    })
   })
-})
 
-export const SqlLive = pipe(
-  MigratorLayer,
-  Layer.provideMerge(SqlLiveWithoutMigrations)
-)
+const layerMigrator = () =>
+  pipe(
+    PgMigrator.layer({
+      loader: PgMigrator.fromFileSystem(
+        fileURLToPath(new URL("./migrations", import.meta.url))
+      )
+    }),
+    Layer.provide(NodeContext.layer)
+  )
+
+export const layerWithMigrations = (options?: SqlLayerOptions) => Layer.provideMerge(layerMigrator(), layer(options))

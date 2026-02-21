@@ -1,5 +1,6 @@
 import { NodeContext, NodeRuntime } from "@effect/platform-node"
 import * as Command from "@effect/platform/Command"
+import { PostgresDefaults } from "@one-kilo/sql/configs/Defaults"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -7,10 +8,6 @@ import * as Schedule from "effect/Schedule"
 
 const POSTGRES_IMAGE = "postgres:18.2"
 const CONTAINER_NAME = "local-one-kilo-postgres"
-const POSTGRES_USER = "postgres"
-const POSTGRES_PASSWORD = "postgres"
-const LOCAL_DB = "one_kilo_local"
-const TEST_DB = "one_kilo_test"
 
 const isContainerRunning = Effect.gen(function*() {
   const cmd = Command.make("docker", "inspect", "-f", "{{.State.Running}}", CONTAINER_NAME)
@@ -62,11 +59,11 @@ const createContainer = Effect.gen(function*() {
       "--name",
       CONTAINER_NAME,
       "-e",
-      `POSTGRES_USER=${POSTGRES_USER}`,
+      `POSTGRES_USER=${PostgresDefaults.user}`,
       "-e",
-      `POSTGRES_PASSWORD=${POSTGRES_PASSWORD}`,
+      `POSTGRES_PASSWORD=${PostgresDefaults.password}`,
       "-e",
-      `POSTGRES_DB=${LOCAL_DB}`,
+      `POSTGRES_DB=${PostgresDefaults.localDB}`,
       "-p",
       "5432:5432",
       "-d",
@@ -81,7 +78,7 @@ const createContainer = Effect.gen(function*() {
 })
 
 const waitForPostgres = pipe(
-  Command.make("docker", "exec", CONTAINER_NAME, "pg_isready", "-U", POSTGRES_USER),
+  Command.make("docker", "exec", CONTAINER_NAME, "pg_isready", "-U", PostgresDefaults.user),
   Command.exitCode,
   Effect.flatMap((code) =>
     code === 0
@@ -103,7 +100,7 @@ const createDatabase = (name: string) =>
       CONTAINER_NAME,
       "psql",
       "-U",
-      POSTGRES_USER,
+      PostgresDefaults.user,
       "-c",
       `CREATE DATABASE ${name};`
     ),
@@ -131,7 +128,7 @@ const main = Effect.gen(function*() {
     yield* waitForPostgres
   }
 
-  yield* createDatabase(TEST_DB)
+  yield* createDatabase(PostgresDefaults.testDB)
   yield* Effect.log("Postgres setup complete")
 })
 
