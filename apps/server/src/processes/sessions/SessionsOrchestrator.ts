@@ -52,7 +52,7 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
             Option.match({
               onNone: () => dieWithUnexpectedError("Existing user is not associated with an organization"),
               onSome: (workosOrganizationId) =>
-                Effect.flatMap(
+                Effect.andThen(
                   workspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId({ workosOrganizationId }),
                   Option.match({
                     onNone: () => dieWithUnexpectedError("Existing user's workspace not found"),

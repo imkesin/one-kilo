@@ -20,20 +20,20 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/l
 export const dieWithUnexpectedError = (message: string) =>
   pipe(
     Effect.logError(message),
-    Effect.flatMap(() => Effect.die(new UnexpectedError({ message })))
+    Effect.andThen(Effect.die(new UnexpectedError({ message })))
   )
 
 export const dieWithUnexpectedErrorCallback = <E>(message: string) => (error?: E) => {
   if (error instanceof UnexpectedError) {
     return pipe(
       Effect.logError(error.message, error.cause),
-      Effect.flatMap(() => Effect.die(error))
+      Effect.andThen(Effect.die(error))
     )
   }
 
   return pipe(
     Effect.logError(message, error),
-    Effect.flatMap(() => Effect.die(new UnexpectedError({ message, cause: error })))
+    Effect.andThen(Effect.die(new UnexpectedError({ message, cause: error })))
   )
 }
 

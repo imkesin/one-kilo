@@ -174,7 +174,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           try: () => Jose.decodeJwt(token),
           catch: (e) => new InvalidTokenError({ cause: e, token })
         }),
-        Effect.flatMap(
+        Effect.andThen(
           S.decodeUnknown(
             S.Union(
               DecodedMachineAccessToken,
@@ -190,7 +190,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           try: () => Jose.decodeJwt(token),
           catch: (e) => new InvalidTokenError({ cause: e, token })
         }),
-        Effect.flatMap(S.decodeUnknown(DecodedOAuthIdToken))
+        Effect.andThen(S.decodeUnknown(DecodedOAuthIdToken))
       ),
     verifyAccessToken: Effect.fnUntraced(function*(token: AccessToken) {
       const now = yield* DateTime.nowAsDate
@@ -210,7 +210,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           })
         ),
         Effect.map(({ payload }) => payload),
-        Effect.flatMap(
+        Effect.andThen(
           S.decodeUnknown(
             S.Union(
               DecodedMachineAccessToken,
@@ -239,7 +239,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           })
         ),
         Effect.map(({ payload }) => payload),
-        Effect.flatMap(S.decodeUnknown(DecodedOAuthIdToken))
+        Effect.andThen(S.decodeUnknown(DecodedOAuthIdToken))
       )
     })
   }

@@ -318,7 +318,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
             return exit
           }
 
-          return Effect.zipRight(
+          return Effect.andThen(
             pipe(
               organizationMemberships,
               HashMap.remove(organizationMembershipId),
@@ -421,7 +421,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
                 userId: parameters.userId
               }),
               Effect.map(Arr.head),
-              Effect.flatMap(
+              Effect.andThen(
                 Option.match({
                   onNone: () => {
                     const newMembership = OrganizationMembershipsModel.make({
@@ -434,7 +434,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
                       updatedAt: now
                     })
 
-                    return Effect.zipRight(
+                    return Effect.andThen(
                       insertOrganizationMembership(newMembership),
                       Effect.succeed(newMembership)
                     )

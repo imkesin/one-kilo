@@ -46,7 +46,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
   ) => Effect.Effect<A, HttpClientError.HttpClientError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
-      Effect.flatMap((request) => httpClient.execute(request)),
+      Effect.andThen(httpClient.execute),
       Effect.flatMap((response) => f(response))
     )
 
