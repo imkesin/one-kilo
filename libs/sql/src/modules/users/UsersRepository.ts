@@ -1,7 +1,8 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
-import { UserId, UserIdGenerator } from "@one-kilo/domain/ids/UserId"
+import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
+import { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { UsersModel } from "./UsersModel.ts"
@@ -16,10 +17,10 @@ type InsertUserParameters = {
 export class UsersRepository extends Effect.Service<UsersRepository>()(
   "@one-kilo/sql/UsersRepository",
   {
-    dependencies: [UserIdGenerator.Default],
+    dependencies: [DomainIdGenerator.Default],
     effect: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
-      const userIdGenerator = yield* UserIdGenerator
+      const idGenerator = yield* DomainIdGenerator
 
       const insertSchema = SqlSchema.single({
         Request: UsersModel.insert,
@@ -34,7 +35,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
         }: InsertUserParameters) {
           const userIdEffect = id
             ? Effect.succeed(id)
-            : userIdGenerator.generate
+            : idGenerator.userId
 
           return yield* Effect.flatMap(
             userIdEffect,

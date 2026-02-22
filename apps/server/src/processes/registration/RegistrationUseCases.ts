@@ -3,9 +3,8 @@ import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
-import { UserIdGenerator } from "@one-kilo/domain/ids/UserId"
+import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
-import { WorkspaceIdGenerator } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
@@ -36,18 +35,16 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
   "@one-kilo/server/RegistrationUseCases",
   {
     dependencies: [
-      UserIdGenerator.Default,
+      DomainIdGenerator.Default,
       UsersCreationModule.Default,
-      WorkspaceIdGenerator.Default,
       WorkspacesCreationModule.Default
     ],
     effect: Effect.gen(function*() {
       const { client: workosGatewayClient } = yield* WorkOSApiGateway.ApiGateway
       const { client: workosDirectClient } = yield* WorkOSApiClient.ApiClient
 
-      const userIdGenerator = yield* UserIdGenerator
+      const idGenerator = yield* DomainIdGenerator
       const usersCreationModule = yield* UsersCreationModule
-      const workspaceIdGenerator = yield* WorkspaceIdGenerator
       const workspacesCreationModule = yield* WorkspacesCreationModule
 
       const persistRegistration = Effect.fn("RegistrationUseCases.persistRegistration")(
@@ -85,8 +82,8 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           workosRefreshToken: inputWorkosRefreshToken,
           workosUser
         }: RegisterHumanUserParameters) {
-          const userId = yield* userIdGenerator.generate
-          const workspaceId = yield* workspaceIdGenerator.generate
+          const userId = yield* idGenerator.userId
+          const workspaceId = yield* idGenerator.workspaceId
 
           // Special suffix is intended to support debugging through the WorkOS console.
           const workosOrganizationName = `Personal (${workspaceId.slice(-6)})`

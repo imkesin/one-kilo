@@ -1,6 +1,4 @@
-import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
 import * as UUIDv7 from "@one-kilo/lib/uuid/UUIDv7"
-import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
@@ -15,18 +13,6 @@ export const WorkspaceId = pipe(
   })
 )
 export type WorkspaceId = typeof WorkspaceId.Type
-
-export class WorkspaceIdGenerator extends Effect.Service<WorkspaceIdGenerator>()(
-  "@one-kilo/domain/WorkspaceIdGenerator",
-  {
-    dependencies: [UUIDGenerator.UUIDGenerator.Default],
-    effect: Effect.gen(function*() {
-      const uuidGenerator = yield* UUIDGenerator.UUIDGenerator
-      const generate = Effect.map(uuidGenerator.v7, WorkspaceId.make)
-      return { generate }
-    })
-  }
-) {}
 
 export const PrefixedWorkspaceId = pipe(
   S.NonEmptyTrimmedString,
