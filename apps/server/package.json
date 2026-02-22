@@ -6,6 +6,8 @@
     "@effect/experimental": "^0.58.0",
     "@effect/platform": "^0.94.2",
     "@effect/platform-node": "^0.104.1",
+    "@effect/sql": "^0.49.0",
+    "@effect/sql-pg": "^0.50.1",
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/server-api": "workspace:*",

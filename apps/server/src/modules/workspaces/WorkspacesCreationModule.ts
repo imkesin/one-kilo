@@ -1,8 +1,16 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
 import * as Effect from "effect/Effect"
+
+type AddUserToPersonalWorkspaceParameters = {
+  id: WorkspaceMembershipId
+  userId: UserId
+  workspaceId: WorkspaceId
+}
 
 type CreateWorkspaceParameters = {
   id: WorkspaceId
@@ -15,12 +23,34 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
   "@one-kilo/server/WorkspacesCreationModule",
   {
     dependencies: [
+      WorkspaceMembershipsRepository.Default,
       WorkspacesRepository.Default
     ],
     effect: Effect.gen(function*() {
+      const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
       const workspacesRepository = yield* WorkspacesRepository
 
-      const createWorkspace = Effect.fn(
+      const addUserToPersonalWorkspace = Effect.fn("WorkspacesCreationModule.addUserToPersonalWorkspace")(
+        function*({
+          id,
+          userId,
+          workspaceId
+        }: AddUserToPersonalWorkspaceParameters) {
+          // TODO: This is more of an "ensure" operation - needs to be refactored so it could be called twice
+
+          const workspaceMembership = yield* workspaceMembershipsRepository.insert({
+            id,
+            userId,
+            workspaceId
+          })
+
+          // Record addition event
+
+          return workspaceMembership
+        }
+      )
+
+      const createWorkspace = Effect.fn("WorkspacesCreationModule.createWorkspace")(
         function*({
           id,
           name,
@@ -40,7 +70,10 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
         }
       )
 
-      return { createWorkspace }
+      return {
+        addUserToPersonalWorkspace,
+        createWorkspace
+      }
     })
   }
 ) {}

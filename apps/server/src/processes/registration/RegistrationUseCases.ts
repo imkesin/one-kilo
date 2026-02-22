@@ -3,9 +3,12 @@ import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
+import * as PgClient from "@effect/sql-pg/PgClient"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { UsersCreationModule } from "../../modules/users/UsersCreationModule.ts"
@@ -22,6 +25,7 @@ type PersistRegistrationParameters = {
     readonly workosOrganizationId: WorkOSIds.OrganizationId
   }
   readonly workspaceMembershipParameters: {
+    readonly id: WorkspaceMembershipId
     readonly workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
   }
 }
@@ -47,17 +51,19 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       const usersCreationModule = yield* UsersCreationModule
       const workspacesCreationModule = yield* WorkspacesCreationModule
 
+      const pg = yield* PgClient.PgClient
+
       const persistRegistration = Effect.fn("RegistrationUseCases.persistRegistration")(
         function*(
           {
             userParameters,
             workspaceParameters,
-            workspaceMembershipParameters: _workspaceMembershipParameters
+            workspaceMembershipParameters
           }: PersistRegistrationParameters
         ) {
           const [
-            _user,
-            _workspace
+            user,
+            workspace
           ] = yield* Effect.all([
             usersCreationModule.createHumanUser({
               id: userParameters.id,
@@ -69,12 +75,21 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               performedByUserId: userParameters.id,
               workosOrganizationId: workspaceParameters.workosOrganizationId
             })
-          ])
+          ], { concurrency: "unbounded" })
 
-          // Make membership
+          const workspaceMembership = yield* workspacesCreationModule.addUserToPersonalWorkspace({
+            id: workspaceMembershipParameters.id,
+            userId: userParameters.id,
+            workspaceId: workspaceParameters.id
+          })
 
-          // Wrap everything in a transaction
-        }
+          return {
+            user,
+            workspace,
+            workspaceMembership
+          }
+        },
+        PgClientExtensions.withSerializableTransaction(pg)
       )
 
       const registerHumanUser = Effect.fn("RegistrationUseCases.registerHumanUser")(
@@ -84,9 +99,12 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         }: RegisterHumanUserParameters) {
           const userId = yield* idGenerator.userId
           const workspaceId = yield* idGenerator.workspaceId
+          const workspaceMembershipId = yield* idGenerator.workspaceMembershipId
 
           // Special suffix is intended to support debugging through the WorkOS console.
           const workosOrganizationName = `Personal (${workspaceId.slice(-6)})`
+
+          // TODO: I need to give the user a name right here
 
           const [workosOrganization] = yield* Effect.all(
             [
@@ -133,6 +151,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               workosOrganizationId: workosOrganization.id
             },
             workspaceMembershipParameters: {
+              id: workspaceMembershipId,
               workosOrganizationMembershipId: workosOrganizationMembership.id
             }
           })

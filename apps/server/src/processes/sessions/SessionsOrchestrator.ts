@@ -38,52 +38,54 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
       const usersQueryRepository = yield* UsersQueryRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
 
-      const exchangeCodeForSession = Effect.fn(function*(options: { readonly code: WorkOSValues.AuthenticationCode }) {
-        const {
-          user: workosUser,
-          organizationId: workosOrganizationId,
-          accessToken: workosAccessToken,
-          refreshToken: workosRefreshToken
-        } = yield* workosClient.userManagement.authenticateWithCode({ code: options.code })
+      const exchangeCodeForSession = Effect.fn("SessionsOrchestrator.exchangeCodeForSession")(
+        function*(options: { readonly code: WorkOSValues.AuthenticationCode }) {
+          const {
+            user: workosUser,
+            organizationId: workosOrganizationId,
+            accessToken: workosAccessToken,
+            refreshToken: workosRefreshToken
+          } = yield* workosClient.userManagement.authenticateWithCode({ code: options.code })
 
-        const handleReturningUser = (userId: UserId) =>
-          pipe(
-            Option.fromNullable(workosOrganizationId),
+          const handleReturningUser = (userId: UserId) =>
+            pipe(
+              Option.fromNullable(workosOrganizationId),
+              Option.match({
+                onNone: () => dieWithUnexpectedError("Existing user is not associated with an organization"),
+                onSome: (workosOrganizationId) =>
+                  Effect.andThen(
+                    workspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId({ workosOrganizationId }),
+                    Option.match({
+                      onNone: () => dieWithUnexpectedError("Existing user's workspace not found"),
+                      onSome: ({ id }) =>
+                        Effect.succeed(
+                          CodeExchangeOutcome.ReturningUser({
+                            userId,
+                            workspaceId: id,
+                            workosAccessToken,
+                            workosRefreshToken
+                          })
+                        )
+                    })
+                  )
+              })
+            )
+
+          const outcome = yield* Effect.andThen(
+            usersQueryRepository.findUserEntityByWorkOSUserId({ workosUserId: workosUser.id }),
             Option.match({
-              onNone: () => dieWithUnexpectedError("Existing user is not associated with an organization"),
-              onSome: (workosOrganizationId) =>
-                Effect.andThen(
-                  workspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId({ workosOrganizationId }),
-                  Option.match({
-                    onNone: () => dieWithUnexpectedError("Existing user's workspace not found"),
-                    onSome: ({ id }) =>
-                      Effect.succeed(
-                        CodeExchangeOutcome.ReturningUser({
-                          userId,
-                          workspaceId: id,
-                          workosAccessToken,
-                          workosRefreshToken
-                        })
-                      )
-                  })
-                )
+              onNone: () =>
+                Effect.map(
+                  registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
+                  CodeExchangeOutcome.NewlyCreatedUser
+                ),
+              onSome: ({ id }) => handleReturningUser(id)
             })
           )
 
-        const outcome = yield* Effect.andThen(
-          usersQueryRepository.findUserEntityByWorkOSUserId({ workosUserId: workosUser.id }),
-          Option.match({
-            onNone: () =>
-              Effect.map(
-                registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
-                CodeExchangeOutcome.NewlyCreatedUser
-              ),
-            onSome: ({ id }) => handleReturningUser(id)
-          })
-        )
-
-        return outcome
-      })
+          return outcome
+        }
+      )
 
       return { exchangeCodeForSession }
     })
