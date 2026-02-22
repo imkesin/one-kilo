@@ -2,8 +2,8 @@ import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
 import * as UUIDv7 from "@one-kilo/lib/uuid/UUIDv7"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import * as ParseResult from "effect/ParseResult"
 import * as S from "effect/Schema"
+import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 
 export const UserId = pipe(
   UUIDv7.UUIDv7,
@@ -40,26 +40,12 @@ export const PrefixedUserId = pipe(
 )
 export type PrefixedUserId = typeof PrefixedUserId.Type
 
-export const UserIdFromPrefixed = S.transformOrFail(
+export const UserIdFromPrefixed = makeIdFromPrefixed(
   PrefixedUserId,
-  S.typeSchema(UserId),
+  UserId,
   {
-    decode: (fromA, _, ast) =>
-      pipe(
-        fromA.split("_")[1],
-        S.decodeUnknown(UUIDv7.UUIDv7FromShortened),
-        ParseResult.mapBoth({
-          onFailure: (error) => new ParseResult.Type(ast, fromA, error.message),
-          onSuccess: (decoded) => UserId.make(decoded)
-        })
-      ),
-    encode: (toI, _, ast) =>
-      pipe(
-        S.encode(UUIDv7.UUIDv7FromShortened)(toI),
-        ParseResult.mapBoth({
-          onFailure: (error) => new ParseResult.Type(ast, toI, error.message),
-          onSuccess: (encoded) => PrefixedUserId.make(`u_${encoded}`)
-        })
-      )
+    prefix: "u_",
+    makeId: UserId.make,
+    makePrefixed: PrefixedUserId.make
   }
 )
