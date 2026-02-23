@@ -65,7 +65,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             user,
             workspace
           ] = yield* Effect.all([
-            usersCreationModule.createHumanUser({
+            usersCreationModule.createPersonUser({
               id: userParameters.id,
               workosUserId: userParameters.workosUser.id
             }),

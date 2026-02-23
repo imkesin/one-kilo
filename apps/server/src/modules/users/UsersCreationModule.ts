@@ -15,10 +15,11 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
     effect: Effect.gen(function*() {
       const usersRepository = yield* UsersRepository
 
-      const createHumanUser = Effect.fn("UsersCreationModule.createHumanUser")(
+      const createPersonUser = Effect.fn("UsersCreationModule.createPersonUser")(
         function*({ id, workosUserId }: CreateHumanUserParameters) {
           const user = yield* usersRepository.insert({
             id,
+            type: "PERSON",
             workosUserId
           })
 
@@ -30,7 +31,7 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
         }
       )
 
-      return { createHumanUser }
+      return { createPersonUser }
     })
   }
 ) {}

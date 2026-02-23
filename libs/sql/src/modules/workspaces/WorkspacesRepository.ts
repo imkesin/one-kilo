@@ -4,12 +4,14 @@ import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { WorkspaceType } from "@one-kilo/domain/values/WorkspaceValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
 
 type InsertWorkspaceParameters = {
   name: string
+  type: WorkspaceType
   workosOrganizationId: WorkOSIds.OrganizationId
   performedByUserId: UserId
 
@@ -32,6 +34,7 @@ export class WorkspacesRepository extends Effect.Service<WorkspacesRepository>()
       const insert = Effect.fn("WorkspacesRepository.insert")(
         function*({
           name,
+          type,
           workosOrganizationId,
           id,
           performedByUserId
@@ -46,6 +49,7 @@ export class WorkspacesRepository extends Effect.Service<WorkspacesRepository>()
               insertSchema({
                 id: workspaceId,
                 name,
+                type,
                 workosOrganizationId,
                 createdAt: undefined,
                 createdByUserId: performedByUserId,

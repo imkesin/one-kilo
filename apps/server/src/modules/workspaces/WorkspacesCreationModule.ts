@@ -41,7 +41,8 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
           const workspaceMembership = yield* workspaceMembershipsRepository.insert({
             id,
             userId,
-            workspaceId
+            workspaceId,
+            role: "OWNER"
           })
 
           // Record addition event
@@ -50,6 +51,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
         }
       )
 
+      // TODO: Refactor this to create a personal workspace. This would be more cohesive business logic
       const createWorkspace = Effect.fn("WorkspacesCreationModule.createWorkspace")(
         function*({
           id,
@@ -60,6 +62,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
           const workspace = yield* workspacesRepository.insert({
             id,
             name,
+            type: "PERSONAL",
             workosOrganizationId,
             performedByUserId
           })

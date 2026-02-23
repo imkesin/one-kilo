@@ -4,6 +4,7 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import type { WorkspaceMembershipRole } from "@one-kilo/domain/values/WorkspaceMembershipValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
@@ -11,6 +12,7 @@ import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 type InsertWorkspaceMembershipParameters = {
   userId: UserId
   workspaceId: WorkspaceId
+  role: WorkspaceMembershipRole
 
   id?: WorkspaceMembershipId
   performedByUserId?: UserId
@@ -33,6 +35,7 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
         function*({
           userId,
           workspaceId,
+          role,
           id,
           performedByUserId
         }: InsertWorkspaceMembershipParameters) {
@@ -47,6 +50,7 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
                 id: membershipId,
                 userId,
                 workspaceId,
+                role,
                 createdAt: undefined,
                 createdByUserId: performedByUserId ?? userId,
                 updatedAt: undefined,

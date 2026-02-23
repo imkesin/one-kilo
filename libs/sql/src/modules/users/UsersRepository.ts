@@ -3,11 +3,13 @@ import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { UserId } from "@one-kilo/domain/ids/UserId"
+import type { UserType } from "@one-kilo/domain/values/UserValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { UsersModel } from "./UsersModel.ts"
 
 type InsertUserParameters = {
+  type: UserType
   workosUserId: WorkOSIds.UserId
 
   id?: UserId
@@ -29,6 +31,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
       })
       const insert = Effect.fn("UsersRepository.insert")(
         function*({
+          type,
           workosUserId,
           id,
           performedByUserId
@@ -42,6 +45,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
             (userId) =>
               insertSchema({
                 id: userId,
+                type,
                 workosUserId,
                 createdAt: undefined,
                 createdByUserId: performedByUserId ?? userId,
