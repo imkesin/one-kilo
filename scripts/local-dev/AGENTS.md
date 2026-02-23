@@ -1,4 +1,4 @@
-# local-dev
+# Local Dev
 
 Local development environment scripts. Uses Effect + `@effect/platform` for shell commands.
 
@@ -8,6 +8,10 @@ Local development environment scripts. Uses Effect + `@effect/platform` for shel
 pnpm pg:setup   # Create/start a local Postgres container (postgres:18.2 on port 5432)
 pnpm typecheck  # Type check
 ```
+
+## Prerequisites
+
+- `docker` must be available on the host machine.
 
 ## Notes
 
