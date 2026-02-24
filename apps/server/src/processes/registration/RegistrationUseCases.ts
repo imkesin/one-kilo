@@ -61,26 +61,20 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             workspaceMembershipParameters
           }: PersistRegistrationParameters
         ) {
-          const [
-            user,
-            workspace
-          ] = yield* Effect.all([
-            usersCreationModule.createPersonUser({
-              id: userParameters.id,
-              workosUserId: userParameters.workosUser.id
-            }),
-            workspacesCreationModule.createWorkspace({
-              id: workspaceParameters.id,
-              name: workspaceParameters.name,
-              performedByUserId: userParameters.id,
-              workosOrganizationId: workspaceParameters.workosOrganizationId
-            })
-          ], { concurrency: "unbounded" })
+          const user = yield* usersCreationModule.createPersonUser({
+            id: userParameters.id,
+            workosUserId: userParameters.workosUser.id
+          })
 
-          const workspaceMembership = yield* workspacesCreationModule.addUserToPersonalWorkspace({
-            id: workspaceMembershipParameters.id,
+          const {
+            workspace,
+            workspaceMembership
+          } = yield* workspacesCreationModule.createPersonalWorkspace({
+            id: workspaceParameters.id,
+            name: workspaceParameters.name,
+            workosOrganizationId: workspaceParameters.workosOrganizationId,
             userId: userParameters.id,
-            workspaceId: workspaceParameters.id
+            workspaceMembershipParameters
           })
 
           return {

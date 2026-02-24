@@ -3,10 +3,11 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { UserId } from "../ids/UserId.ts"
 import { UserType } from "../values/UserValues.ts"
-import { EntityAuditFields } from "./EntityFields.ts"
+import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: UserId,
+
   workosUserId: WorkOSIds.UserId,
 
   ...EntityAuditFields

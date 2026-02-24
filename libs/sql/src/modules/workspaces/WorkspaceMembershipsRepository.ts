@@ -1,3 +1,4 @@
+import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
@@ -13,6 +14,7 @@ type InsertWorkspaceMembershipParameters = {
   userId: UserId
   workspaceId: WorkspaceId
   role: WorkspaceMembershipRole
+  workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
 
   id?: WorkspaceMembershipId
   performedByUserId?: UserId
@@ -36,6 +38,7 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
           userId,
           workspaceId,
           role,
+          workosOrganizationMembershipId,
           id,
           performedByUserId
         }: InsertWorkspaceMembershipParameters) {
@@ -51,6 +54,7 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
                 userId,
                 workspaceId,
                 role,
+                workosOrganizationMembershipId,
                 createdAt: undefined,
                 createdByUserId: performedByUserId ?? userId,
                 updatedAt: undefined,

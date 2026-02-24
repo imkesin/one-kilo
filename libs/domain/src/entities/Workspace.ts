@@ -2,6 +2,7 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as S from "effect/Schema"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 import { WorkspaceType } from "../values/WorkspaceValues.ts"
+import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: WorkspaceId,
@@ -9,7 +10,9 @@ const EntityBaseFields = {
   name: S.NonEmptyTrimmedString,
   type: WorkspaceType,
 
-  workosOrganizationId: WorkOSIds.OrganizationId
+  workosOrganizationId: WorkOSIds.OrganizationId,
+
+  ...EntityAuditFields
 } as const
 
 export class WorkspaceEntity extends S.TaggedClass<WorkspaceEntity>("@one-kilo/domain/WorkspaceEntity")(

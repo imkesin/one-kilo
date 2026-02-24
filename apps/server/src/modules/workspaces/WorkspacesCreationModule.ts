@@ -6,17 +6,16 @@ import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
 import * as Effect from "effect/Effect"
 
-type AddUserToPersonalWorkspaceParameters = {
-  id: WorkspaceMembershipId
-  userId: UserId
-  workspaceId: WorkspaceId
-}
-
-type CreateWorkspaceParameters = {
+type CreatePersonalWorkspaceParameters = {
   id: WorkspaceId
   name: string
-  performedByUserId: UserId
   workosOrganizationId: WorkOSIds.OrganizationId
+
+  userId: UserId
+  workspaceMembershipParameters: {
+    id: WorkspaceMembershipId
+    workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
+  }
 }
 
 export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationModule>()(
@@ -30,53 +29,37 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
       const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
       const workspacesRepository = yield* WorkspacesRepository
 
-      const addUserToPersonalWorkspace = Effect.fn("WorkspacesCreationModule.addUserToPersonalWorkspace")(
-        function*({
-          id,
-          userId,
-          workspaceId
-        }: AddUserToPersonalWorkspaceParameters) {
-          // TODO: This is more of an "ensure" operation - needs to be refactored so it could be called twice
-
-          const workspaceMembership = yield* workspaceMembershipsRepository.insert({
-            id,
-            userId,
-            workspaceId,
-            role: "OWNER"
-          })
-
-          // Record addition event
-
-          return workspaceMembership
-        }
-      )
-
-      // TODO: Refactor this to create a personal workspace. This would be more cohesive business logic
-      const createWorkspace = Effect.fn("WorkspacesCreationModule.createWorkspace")(
+      const createPersonalWorkspace = Effect.fn("WorkspacesCreationModule.createPersonalWorkspace")(
         function*({
           id,
           name,
-          performedByUserId,
-          workosOrganizationId
-        }: CreateWorkspaceParameters) {
+          workosOrganizationId,
+          userId,
+          workspaceMembershipParameters
+        }: CreatePersonalWorkspaceParameters) {
+          // TODO: Enforce invariants before creation
+
           const workspace = yield* workspacesRepository.insert({
             id,
             name,
             type: "PERSONAL",
             workosOrganizationId,
-            performedByUserId
+            performedByUserId: userId
           })
 
-          // Record creation event
+          const workspaceMembership = yield* workspaceMembershipsRepository.insert({
+            id: workspaceMembershipParameters.id,
+            userId,
+            workspaceId: workspace.id,
+            role: "OWNER",
+            workosOrganizationMembershipId: workspaceMembershipParameters.workosOrganizationMembershipId
+          })
 
-          return workspace
+          return { workspace, workspaceMembership }
         }
       )
 
-      return {
-        addUserToPersonalWorkspace,
-        createWorkspace
-      }
+      return { createPersonalWorkspace }
     })
   }
 ) {}
