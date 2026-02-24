@@ -14,6 +14,11 @@ const cluster = new GCP.container.Cluster(
   {
     location: gcpConfig.require("zone"),
     initialNodeCount: 1,
+    addonsConfig: {
+      gkeBackupAgentConfig: {
+        enabled: true
+      }
+    },
     nodeConfig: {
       machineType: "e2-standard-4",
       spot: true
@@ -24,6 +29,25 @@ const cluster = new GCP.container.Cluster(
         endTime: "2026-01-01T10:00:00Z",
         recurrence: "FREQ=DAILY"
       }
+    }
+  }
+)
+
+const _backupPlan = new GCP.gkebackup.BackupPlan(
+  "one-kilo-cluster-backup-plan",
+  {
+    location: gcpConfig.require("region"),
+    cluster: cluster.id,
+    backupConfig: {
+      allNamespaces: true,
+      includeVolumeData: false,
+      includeSecrets: true
+    },
+    backupSchedule: {
+      cronSchedule: "0 3 * * *"
+    },
+    retentionPolicy: {
+      backupRetainDays: 7
     }
   }
 )
