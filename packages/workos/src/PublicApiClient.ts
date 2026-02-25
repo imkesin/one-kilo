@@ -4,7 +4,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import type { ClientId } from "./domain/Ids.ts"
+import type { EnvironmentClientId } from "./domain/Ids.ts"
 import * as PublicApiClientUserManagementDefinitions from "./internal/PublicApi/PublicApiClientDefinitions.ts"
 
 export interface Service {
@@ -20,9 +20,9 @@ export class PublicApiClient extends Context.Tag(
 export const make = (
   options: {
     /**
-     * The WorkOS Client ID
+     * The WorkOS Environment-Specific Client ID
      */
-    readonly clientId: ClientId
+    readonly clientId: EnvironmentClientId
   }
 ): Effect.Effect<Service> =>
   Effect.succeed(
@@ -38,13 +38,13 @@ export const make = (
 
 export const layer = (
   options: {
-    readonly clientId: ClientId
+    readonly clientId: EnvironmentClientId
   }
 ): Layer.Layer<PublicApiClient> => Layer.effect(PublicApiClient, make(options))
 
 export const layerConfig = (
   options: {
-    readonly clientId: Config.Config<ClientId>
+    readonly clientId: Config.Config<EnvironmentClientId>
   }
 ): Layer.Layer<PublicApiClient, ConfigError> => {
   return pipe(

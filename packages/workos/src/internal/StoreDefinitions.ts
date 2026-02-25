@@ -11,7 +11,7 @@ import * as S from "effect/Schema"
 import { Organization, OrganizationMembership, User } from "../domain/Entities.ts"
 import { ResourceNotFoundError, UnauthorizedError } from "../domain/Errors.ts"
 import {
-  ClientId,
+  ApplicationClientId,
   generateOrganizationId,
   generateOrganizationMembershipId,
   generateUserId,
@@ -38,7 +38,7 @@ import {
 } from "./OAuth2/OAuth2ClientDefinitionSchemas.js"
 
 class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
-  id: ClientId,
+  id: ApplicationClientId,
   orgId: OrganizationId,
   secret: S.NonEmptyTrimmedString
 }) {}
@@ -111,7 +111,7 @@ export interface OAuth2Client {
 
 export type MakeOptions = {
   initialMachineClients?: ReadonlyArray<{
-    clientId: ClientId
+    clientId: ApplicationClientId
     orgId: OrganizationId
     secret: Redacted.Redacted<string>
   }>
@@ -181,19 +181,19 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
     const clientsStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
-      (store) => store.forSchema(S.ReadonlyMap({ key: ClientId, value: ClientsModel }))
+      (store) => store.forSchema(S.ReadonlyMap({ key: ApplicationClientId, value: ClientsModel }))
     )
-    const setClients = (clients: ReadonlyMap<ClientId, ClientsModel>) =>
+    const setClients = (clients: ReadonlyMap<ApplicationClientId, ClientsModel>) =>
       pipe(
         clientsStore.set("clients", clients),
         Effect.orDie
       )
     const findClients = pipe(
       clientsStore.get("clients"),
-      Effect.map(Option.getOrElse<ReadonlyMap<ClientId, ClientsModel>>(() => new Map())),
+      Effect.map(Option.getOrElse<ReadonlyMap<ApplicationClientId, ClientsModel>>(() => new Map())),
       Effect.orDie
     )
-    const findClientById = (clientId: ClientId) =>
+    const findClientById = (clientId: ApplicationClientId) =>
       pipe(
         findClients,
         Effect.map((clients) =>

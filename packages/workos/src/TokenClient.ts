@@ -7,7 +7,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Jose from "jose"
-import type { ClientId } from "./domain/Ids.ts"
+import type { ApplicationClientId } from "./domain/Ids.ts"
 import { KeyPairTest } from "./internal/KeyPair.ts"
 import * as TokenClientDefinitions from "./internal/TokenClientDefinitions.ts"
 
@@ -56,9 +56,9 @@ export const layerKeyPairTest = () =>
 export const make = (
   options: {
     /**
-     * The WorkOS Client ID
+     * The WorkOS OAuth Application Client ID
      */
-    readonly clientId: ClientId
+    readonly clientId: ApplicationClientId
   }
 ): Effect.Effect<Service, never, HttpClient.HttpClient> =>
   Effect.gen(function*() {
@@ -79,13 +79,13 @@ export const make = (
 
 export const layer = (
   options: {
-    readonly clientId: ClientId
+    readonly clientId: ApplicationClientId
   }
 ): Layer.Layer<TokenClient, never, HttpClient.HttpClient> => Layer.effect(TokenClient, make(options))
 
 export const layerConfig = (
   options: {
-    readonly clientId: Config.Config<ClientId>
+    readonly clientId: Config.Config<ApplicationClientId>
   }
 ): Layer.Layer<TokenClient, ConfigError, HttpClient.HttpClient> => {
   return pipe(

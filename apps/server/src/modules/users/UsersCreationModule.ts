@@ -17,13 +17,13 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
 
       const createPersonUser = Effect.fn("UsersCreationModule.createPersonUser")(
         function*({ id, workosUserId }: CreateHumanUserParameters) {
+          // TODO: This user needs to have a name, email address
+
           const user = yield* usersRepository.insert({
             id,
             type: "PERSON",
             workosUserId
           })
-
-          // This user needs to have a name, email address
 
           // Record creation event
 

@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import type { ClientId, OrganizationId, SessionId, UserId } from "../domain/Ids.ts"
+import type { ApplicationClientId, OrganizationId, SessionId, UserId } from "../domain/Ids.ts"
 import { AccessToken, RefreshToken } from "../domain/Values.ts"
 import { generateRandomString } from "../lib/RandomString.ts"
 
@@ -22,7 +22,7 @@ export interface Generator {
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
   readonly generateMachineAccessToken: (parameters: {
-    clientId: ClientId
+    clientId: ApplicationClientId
     orgId: OrganizationId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 

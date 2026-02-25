@@ -8,7 +8,7 @@ import * as Logger from "effect/Logger"
 const layerPublicApiClient = WorkOSPublicApiClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
-    Config.map(WorkOSIds.ClientId.make)
+    Config.map(WorkOSIds.EnvironmentClientId.make)
   )
 })
 

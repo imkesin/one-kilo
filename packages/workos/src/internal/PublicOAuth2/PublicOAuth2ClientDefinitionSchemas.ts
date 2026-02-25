@@ -1,11 +1,11 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { ClientId } from "../../domain/Ids.ts"
+import { ApplicationClientId } from "../../domain/Ids.ts"
 import { AuthorizeScopeFromSet } from "../OAuth2/OAuth2ClientDefinitionSchemas.ts"
 
 export class BuildAuthorizeUrlParameters extends S.Class<BuildAuthorizeUrlParameters>("BuildAuthorizeUrlParameters")({
   clientId: pipe(
-    ClientId,
+    ApplicationClientId,
     S.propertySignature,
     S.fromKey("client_id")
   ),

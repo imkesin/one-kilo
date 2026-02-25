@@ -3,18 +3,25 @@ import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { UserId } from "@one-kilo/domain/ids/UserId"
-import type { UserType } from "@one-kilo/domain/values/UserValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { UsersModel } from "./UsersModel.ts"
 
-type InsertUserParameters = {
-  type: UserType
-  workosUserId: WorkOSIds.UserId
-
+type BaseInsertUserParameters = {
   id?: UserId
   performedByUserId?: UserId
 }
+type InsertUserParameters =
+  & BaseInsertUserParameters
+  & ({
+    type: "PERSON"
+    workosUserId: WorkOSIds.UserId
+    workosClientId?: never
+  } | {
+    type: "MACHINE"
+    workosClientId: WorkOSIds.ApplicationClientId
+    workosUserId?: never
+  })
 
 export class UsersRepository extends Effect.Service<UsersRepository>()(
   "@one-kilo/sql/UsersRepository",
@@ -33,6 +40,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
         function*({
           type,
           workosUserId,
+          workosClientId,
           id,
           performedByUserId
         }: InsertUserParameters) {
@@ -46,7 +54,8 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
               insertSchema({
                 id: userId,
                 type,
-                workosUserId,
+                workosUserId: workosUserId ?? null,
+                workosClientId: workosClientId ?? null,
                 createdAt: undefined,
                 createdByUserId: performedByUserId ?? userId,
                 updatedAt: undefined,

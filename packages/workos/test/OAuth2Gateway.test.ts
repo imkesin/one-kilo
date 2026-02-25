@@ -4,14 +4,14 @@ import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
-import { ClientId, OrganizationId } from "../src/domain/Ids.ts"
+import { ApplicationClientId, OrganizationId } from "../src/domain/Ids.ts"
 import * as OAuth2Gateway from "../src/OAuth2Gateway.ts"
 import * as Store from "../src/Store.ts"
 import * as TokenClient from "../src/TokenClient.ts"
 import * as TokenGenerator from "../src/TokenGenerator.ts"
 import * as OAuth2TestSuite from "./OAuth2.suite.ts"
 
-const machineClientId = ClientId.make("client_TEST")
+const machineClientId = ApplicationClientId.make("client_TEST")
 const machineClientOrgId = OrganizationId.make("org_TEST")
 const machineClientSecret = Redacted.make("secret_TEST")
 

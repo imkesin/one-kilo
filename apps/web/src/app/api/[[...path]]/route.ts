@@ -33,9 +33,8 @@ export const PATCH: Handler = handler
 export const DELETE: Handler = handler
 export const OPTIONS: Handler = handler
 
-process.on("SIGTERM", () => {
+const shutdown = () => {
   dispose()
-})
-process.on("SIGINT", () => {
-  dispose()
-})
+}
+process.on("SIGTERM", shutdown)
+process.on("SIGINT", shutdown)

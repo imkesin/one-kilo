@@ -5,7 +5,7 @@ import { pipe } from "effect/Function"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import { ClientId, OrganizationId, UserId } from "../domain/Ids.ts"
+import { ApplicationClientId, OrganizationId, UserId } from "../domain/Ids.ts"
 import { AccessToken, EmailAddress, type IdToken } from "../domain/Values.ts"
 import { OAuthUserInfoFields } from "./CommonDefinitions.ts"
 
@@ -37,7 +37,7 @@ class DecodedMachineAccessToken extends S.Class<DecodedMachineAccessToken>("Deco
 
   ...DecodedAccessTokenCommonFields,
 
-  sub: ClientId,
+  sub: ApplicationClientId,
   orgId: pipe(
     OrganizationId,
     S.optional,

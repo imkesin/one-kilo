@@ -5,13 +5,21 @@ import { makePrefixedIdGenerator } from "../lib/PrefixedId.ts"
 /**
  * The WorkOS Connect Application’s client ID.
  */
-export const ClientId = pipe(
+export const ApplicationClientId = pipe(
   S.NonEmptyTrimmedString,
   S.startsWith("client_"),
-  S.brand("@effect/auth-workos/ClientId")
+  S.brand("@effect/auth-workos/ApplicationClientId")
 )
-export type ClientId = typeof ClientId.Type
-export const generateClientId = makePrefixedIdGenerator(ClientId, "client")
+export type ApplicationClientId = typeof ApplicationClientId.Type
+export const generateClientId = makePrefixedIdGenerator(ApplicationClientId, "client")
+
+export const EnvironmentClientId = pipe(
+  S.NonEmptyTrimmedString,
+  S.startsWith("client_"),
+  S.brand("@effect/auth-workos/EnvironmentClientId")
+)
+export type EnvironmentClientId = typeof EnvironmentClientId.Type
+export const generateEnvironmentClientId = makePrefixedIdGenerator(EnvironmentClientId, "client")
 
 export const OrganizationDomainId = pipe(
   S.NonEmptyTrimmedString,

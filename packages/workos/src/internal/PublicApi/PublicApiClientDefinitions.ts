@@ -5,7 +5,7 @@ import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
-import type { ClientId } from "../../domain/Ids.ts"
+import type { EnvironmentClientId } from "../../domain/Ids.ts"
 import { InvalidUrlError } from "../CommonErrors.js"
 import { BuildAuthorizationUrlParameters } from "./PublicApiClientDefinitionSchemas.ts"
 
@@ -21,7 +21,7 @@ export interface Client {
   >
 }
 
-export const make = (options: { apiPath: string; clientId: ClientId }): Client => {
+export const make = (options: { apiPath: string; clientId: EnvironmentClientId }): Client => {
   return {
     buildAuthorizationUrl: (parameters) =>
       pipe(

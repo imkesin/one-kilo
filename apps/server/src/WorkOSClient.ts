@@ -9,7 +9,7 @@ import * as Layer from "effect/Layer"
 const apiClientLayer = ApiClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
-    Config.map(WorkOSIds.ClientId.make)
+    Config.map(WorkOSIds.EnvironmentClientId.make)
   ),
   clientSecret: pipe(
     Config.string("WORKOS_API_KEY"),

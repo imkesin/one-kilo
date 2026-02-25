@@ -7,7 +7,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
-import type { ClientId } from "./domain/Ids.ts"
+import type { EnvironmentClientId } from "./domain/Ids.ts"
 import * as OrganizationsClientDefinitions from "./internal/Api/OrganizationsApiClientDefinitions.ts"
 import * as UserManagementClientDefinitions from "./internal/Api/UserManagementApiClientDefinitions.ts"
 
@@ -25,9 +25,9 @@ export class ApiClient extends Context.Tag(
 export const make = (
   options: {
     /**
-     * The WorkOS Client ID
+     * The WorkOS Environment-Specific Client ID
      */
-    readonly clientId: ClientId
+    readonly clientId: EnvironmentClientId
     /**
      * The WorkOS API Key
      */
@@ -64,14 +64,14 @@ export const make = (
 
 export const layer = (
   options: {
-    readonly clientId: ClientId
+    readonly clientId: EnvironmentClientId
     readonly clientSecret: Redacted.Redacted<string>
   }
 ): Layer.Layer<ApiClient, never, HttpClient.HttpClient> => Layer.effect(ApiClient, make(options))
 
 export const layerConfig = (
   options: {
-    readonly clientId: Config.Config<ClientId>
+    readonly clientId: Config.Config<EnvironmentClientId>
     readonly clientSecret: Config.Config<Redacted.Redacted<string>>
   }
 ): Layer.Layer<ApiClient, ConfigError, HttpClient.HttpClient> => {

@@ -4,7 +4,7 @@ import * as Option from "effect/Option"
 import * as ParseResult from "effect/ParseResult"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
-import { ClientId } from "../../domain/Ids.ts"
+import { ApplicationClientId } from "../../domain/Ids.ts"
 import { AccessToken, IdToken, RefreshToken } from "../../domain/Values.ts"
 import { OAuthUserInfoFields } from "../CommonDefinitions.ts"
 
@@ -55,7 +55,7 @@ const DurationFromSeconds = S.transform(
 
 const RetrieveTokenParameters_CommonFields = {
   clientId: pipe(
-    ClientId,
+    ApplicationClientId,
     S.propertySignature,
     S.fromKey("client_id")
   ),
@@ -215,7 +215,7 @@ export class RetrieveTokenByClientCredentialsResponse
 
 export class AuthorizeDeviceParameters extends S.Class<AuthorizeDeviceParameters>("AuthorizeDeviceParameters")({
   clientId: pipe(
-    ClientId,
+    ApplicationClientId,
     S.propertySignature,
     S.fromKey("client_id")
   ),

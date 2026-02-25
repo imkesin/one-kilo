@@ -9,7 +9,7 @@ import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
 import { OrganizationMembership, User } from "../../domain/Entities.ts"
 import { ResourceNotFoundError } from "../../domain/Errors.ts"
-import type { ClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
+import type { EnvironmentClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
 import {
   AuthenticateWithCodeParameters,
@@ -72,7 +72,7 @@ export interface Client {
 export const make = (
   httpClient: HttpClient.HttpClient,
   options: {
-    readonly clientId: ClientId
+    readonly clientId: EnvironmentClientId
     readonly clientSecret: Redacted.Redacted<string>
   }
 ): Client => {
