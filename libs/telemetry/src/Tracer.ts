@@ -1,5 +1,5 @@
+import * as OtlpSerialization from "@effect/opentelemetry/OtlpSerialization"
 import * as OtlpTracer from "@effect/opentelemetry/OtlpTracer"
-import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -20,21 +20,22 @@ const HoneycombConfig = Config.nested(
   "HONEYCOMB"
 )
 
-export const TracerLive = Layer.unwrapEffect(
-  Effect.gen(function*() {
-    const honeycombConfig = yield* HoneycombConfig
+export const TracerLive = pipe(
+  Layer.unwrapEffect(
+    Effect.gen(function*() {
+      const honeycombConfig = yield* HoneycombConfig
 
-    return OtlpTracer.layer({
-      url: "https://api.honeycomb.io/v1/traces",
-      resource: {
-        serviceName: honeycombConfig.dataset
-      },
-      headers: {
-        "x-honeycomb-team": Redacted.value(honeycombConfig.apiKey),
-        "x-honeycomb-dataset": honeycombConfig.dataset
-      }
+      return OtlpTracer.layer({
+        url: "https://api.honeycomb.io/v1/traces",
+        resource: {
+          serviceName: honeycombConfig.dataset
+        },
+        headers: {
+          "x-honeycomb-team": Redacted.value(honeycombConfig.apiKey),
+          "x-honeycomb-dataset": honeycombConfig.dataset
+        }
+      })
     })
-  })
-).pipe(
-  Layer.provide(NodeHttpClient.layerUndici)
+  ),
+  Layer.provide(OtlpSerialization.layerJson)
 )
