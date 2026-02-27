@@ -1,5 +1,6 @@
 import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
+import { UserId } from "../ids/UserId.ts"
 import { FullName, PreferredName } from "../values/PersonValues.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
@@ -14,7 +15,10 @@ const EntityBaseFields = {
 
 export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/PersonEntity")(
   "PersonEntity",
-  { ...EntityBaseFields },
+  {
+    ...EntityBaseFields,
+    userId: UserId
+  },
   {
     identifier: "PersonEntity",
     title: "Person Entity",
@@ -22,14 +26,14 @@ export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/
   }
 ) {}
 
-export class Person extends S.TaggedClass<Person>("@one-kilo/domain/Person")(
-  "Person",
+export class PersonOnUser extends S.TaggedClass<PersonOnUser>("@one-kilo/domain/PersonOnUser")(
+  "PersonOnUser",
   {
     ...EntityBaseFields
   },
   {
-    identifier: "Person",
-    title: "Person",
-    description: "A person within the system."
+    identifier: "PersonOnUser",
+    title: "Person (on User)",
+    description: "A person linked to a user"
   }
 ) {}

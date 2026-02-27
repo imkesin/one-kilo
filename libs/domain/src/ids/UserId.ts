@@ -14,9 +14,11 @@ export const UserId = pipe(
 )
 export type UserId = typeof UserId.Type
 
+const USER_PREFIX = "usr_"
+
 export const PrefixedUserId = pipe(
   S.NonEmptyTrimmedString,
-  S.startsWith("u_"),
+  S.startsWith(USER_PREFIX),
   S.brand("@one-kilo/domain/PrefixedUserId"),
   S.annotations({
     description: "The unique identifier for a user.",
@@ -30,7 +32,7 @@ export const UserIdFromPrefixed = makeIdFromPrefixed(
   PrefixedUserId,
   UserId,
   {
-    prefix: "u_",
+    prefix: USER_PREFIX,
     makeId: UserId.make,
     makePrefixed: PrefixedUserId.make
   }

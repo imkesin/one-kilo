@@ -7,19 +7,21 @@ export const WorkspaceMembershipId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/WorkspaceMembershipId"),
   S.annotations({
-    description: "The unique identifier for a workspace membership.",
+    description: "The unique identifier for a workspace membership",
     identifier: "WorkspaceMembershipId",
     title: "Workspace Membership ID"
   })
 )
 export type WorkspaceMembershipId = typeof WorkspaceMembershipId.Type
 
+const WORKSPACE_MEMBERSHIP_PREFIX = "wkm_"
+
 export const PrefixedWorkspaceMembershipId = pipe(
   S.NonEmptyTrimmedString,
-  S.startsWith("wm_"),
+  S.startsWith(WORKSPACE_MEMBERSHIP_PREFIX),
   S.brand("@one-kilo/domain/PrefixedWorkspaceMembershipId"),
   S.annotations({
-    description: "The unique identifier for a workspace membership.",
+    description: "The unique identifier for a workspace membership",
     identifier: "PrefixedWorkspaceMembershipId",
     title: "Workspace Membership ID (Prefixed)"
   })
@@ -30,7 +32,7 @@ export const WorkspaceMembershipIdFromPrefixed = makeIdFromPrefixed(
   PrefixedWorkspaceMembershipId,
   WorkspaceMembershipId,
   {
-    prefix: "wm_",
+    prefix: WORKSPACE_MEMBERSHIP_PREFIX,
     makeId: WorkspaceMembershipId.make,
     makePrefixed: PrefixedWorkspaceMembershipId.make
   }

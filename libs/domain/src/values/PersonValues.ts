@@ -7,7 +7,7 @@ export const FullName = pipe(
   S.maxLength(128),
   S.brand("@one-kilo/domain/FullName"),
   S.annotations({
-    description: "The full name of a person.",
+    description: "The full name of a person",
     identifier: "FullName",
     title: "Full Name"
   })
@@ -19,7 +19,7 @@ export const PreferredName = pipe(
   S.maxLength(64),
   S.brand("@one-kilo/domain/PreferredName"),
   S.annotations({
-    description: "The preferred name of a person.",
+    description: "The preferred name of a person",
     identifier: "PreferredName",
     title: "Preferred Name"
   })

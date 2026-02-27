@@ -10,10 +10,10 @@ import * as Effect from "effect/Effect"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
 
 type InsertWorkspaceParameters = {
+  performedByUserId: UserId
   name: WorkspaceName
   type: WorkspaceType
   workosOrganizationId: WorkOSIds.OrganizationId
-  performedByUserId: UserId
 
   id?: WorkspaceId
 }

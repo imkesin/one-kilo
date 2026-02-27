@@ -14,9 +14,11 @@ export const PersonId = pipe(
 )
 export type PersonId = typeof PersonId.Type
 
+const PERSON_PREFIX = "per_"
+
 export const PrefixedPersonId = pipe(
   S.NonEmptyTrimmedString,
-  S.startsWith("p_"),
+  S.startsWith(PERSON_PREFIX),
   S.brand("@one-kilo/domain/PrefixedPersonId"),
   S.annotations({
     description: "The unique identifier for a person.",
@@ -30,7 +32,7 @@ export const PersonIdFromPrefixed = makeIdFromPrefixed(
   PrefixedPersonId,
   PersonId,
   {
-    prefix: "p_",
+    prefix: PERSON_PREFIX,
     makeId: PersonId.make,
     makePrefixed: PrefixedPersonId.make
   }

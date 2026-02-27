@@ -33,6 +33,6 @@ export class Workspace extends S.TaggedClass<Workspace>("@one-kilo/domain/Worksp
   {
     identifier: "Workspace",
     title: "Workspace",
-    description: "A container for shared work — the root of all access and visibility."
+    description: "A container for shared work — the root of all access and visibility"
   }
 ) {}

@@ -27,6 +27,6 @@ export class WorkspaceMembership extends S.TaggedClass<WorkspaceMembership>("@on
   {
     identifier: "WorkspaceMembership",
     title: "Workspace Membership",
-    description: "An association between a user and a workspace."
+    description: "An association between a user and a workspace"
   }
 ) {}

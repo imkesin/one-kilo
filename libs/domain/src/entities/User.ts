@@ -4,6 +4,8 @@ import * as S from "effect/Schema"
 import { UserId } from "../ids/UserId.ts"
 import { UserType } from "../values/UserValues.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
+import { MachineOnUser } from "./Machine.ts"
+import { PersonOnUser } from "./Person.ts"
 
 const EntityBaseFields = {
   id: UserId,
@@ -32,7 +34,8 @@ export class MachineUserEntity extends S.TaggedClass<MachineUserEntity>("@one-ki
 export class MachineUser extends S.TaggedClass<MachineUser>("@one-kilo/domain/User:Machine")(
   "MachineUser",
   {
-    ...MachineUserEntityFields
+    ...MachineUserEntityFields,
+    machine: MachineOnUser
   },
   {
     identifier: "User:Machine",
@@ -63,7 +66,8 @@ export class PersonUserEntity extends S.TaggedClass<PersonUserEntity>("@one-kilo
 export class PersonUser extends S.TaggedClass<PersonUser>("@one-kilo/domain/User:Person")(
   "PersonUser",
   {
-    ...PersonUserEntityFields
+    ...PersonUserEntityFields,
+    person: PersonOnUser
   },
   {
     identifier: "User:Person",
