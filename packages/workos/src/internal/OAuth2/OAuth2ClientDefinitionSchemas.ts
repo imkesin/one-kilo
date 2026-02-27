@@ -195,11 +195,6 @@ export class RetrieveTokenByClientCredentialsParameters
         }
       ),
       S.fromKey("grant_type")
-    ),
-
-    scope: pipe(
-      ScopeFromSet,
-      S.optional
     )
   })
 {}
