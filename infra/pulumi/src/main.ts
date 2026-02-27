@@ -52,6 +52,30 @@ const _backupPlan = new GCP.gkebackup.BackupPlan(
   }
 )
 
+const _defaultLogBucket = new GCP.logging.ProjectBucketConfig(
+  "default-log-bucket",
+  {
+    project: gcpConfig.require("project"),
+    location: "global",
+    bucketId: "_Default",
+    retentionDays: 14
+  }
+)
+
+const _gkeHeartbeatLogExclusion = new GCP.logging.ProjectExclusion(
+  "gke-heartbeat-log-exclusion",
+  {
+    filter: [
+      "resource.type=\"k8s_cluster\"",
+      "(",
+      "protoPayload.methodName=\"io.k8s.coordination.v1.leases.update\"",
+      "OR protoPayload.methodName=\"io.k8s.coordination.v1.leases.create\"",
+      "OR protoPayload.methodName=\"io.k8s.core.v1.configmaps.update\"",
+      ")"
+    ].join("\n")
+  }
+)
+
 const kubeconfig = Pulumi
   .all([cluster.endpoint, cluster.masterAuth])
   .apply(([endpoint, auth]) =>
