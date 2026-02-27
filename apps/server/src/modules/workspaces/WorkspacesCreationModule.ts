@@ -2,13 +2,13 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
 import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
 import * as Effect from "effect/Effect"
 
 type CreatePersonalWorkspaceParameters = {
   id: WorkspaceId
-  name: string
   workosOrganizationId: WorkOSIds.OrganizationId
 
   userId: UserId
@@ -32,7 +32,6 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
       const createPersonalWorkspace = Effect.fn("WorkspacesCreationModule.createPersonalWorkspace")(
         function*({
           id,
-          name,
           workosOrganizationId,
           userId,
           workspaceMembershipParameters
@@ -41,7 +40,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
 
           const workspace = yield* workspacesRepository.insert({
             id,
-            name,
+            name: WorkspaceName.make("Personal"),
             type: "PERSONAL",
             workosOrganizationId,
             performedByUserId: userId

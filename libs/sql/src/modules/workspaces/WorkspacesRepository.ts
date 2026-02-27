@@ -4,13 +4,13 @@ import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
-import type { WorkspaceType } from "@one-kilo/domain/values/WorkspaceValues"
+import type { WorkspaceName, WorkspaceType } from "@one-kilo/domain/values/WorkspaceValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
 
 type InsertWorkspaceParameters = {
-  name: string
+  name: WorkspaceName
   type: WorkspaceType
   workosOrganizationId: WorkOSIds.OrganizationId
   performedByUserId: UserId

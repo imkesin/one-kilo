@@ -1,13 +1,13 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as S from "effect/Schema"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
-import { WorkspaceType } from "../values/WorkspaceValues.ts"
+import { WorkspaceName, WorkspaceType } from "../values/WorkspaceValues.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: WorkspaceId,
 
-  name: S.NonEmptyTrimmedString,
+  name: WorkspaceName,
   type: WorkspaceType,
 
   workosOrganizationId: WorkOSIds.OrganizationId,

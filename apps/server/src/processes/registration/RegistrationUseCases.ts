@@ -21,7 +21,6 @@ type PersistRegistrationParameters = {
   }
   readonly workspaceParameters: {
     readonly id: WorkspaceId
-    readonly name: string
     readonly workosOrganizationId: WorkOSIds.OrganizationId
   }
   readonly workspaceMembershipParameters: {
@@ -71,7 +70,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             workspaceMembership
           } = yield* workspacesCreationModule.createPersonalWorkspace({
             id: workspaceParameters.id,
-            name: workspaceParameters.name,
             workosOrganizationId: workspaceParameters.workosOrganizationId,
             userId: userParameters.id,
             workspaceMembershipParameters
@@ -96,7 +94,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           const workspaceMembershipId = yield* idGenerator.workspaceMembershipId
 
           // Special suffix is intended to support debugging through the WorkOS console.
-          const workosOrganizationName = `Personal (${workspaceId.slice(-6)})`
+          const workosOrganizationName = `Personal ${workspaceId.slice(-6).toUpperCase()}`
 
           // TODO: I need to give the user a name right here
 
@@ -141,7 +139,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             },
             workspaceParameters: {
               id: workspaceId,
-              name: workosOrganizationName,
               workosOrganizationId: workosOrganization.id
             },
             workspaceMembershipParameters: {
