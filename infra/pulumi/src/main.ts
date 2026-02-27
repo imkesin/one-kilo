@@ -81,7 +81,7 @@ const _defaultLogSink = new GCP.logging.ProjectSink(
       },
       {
         name: "fluentbit-logs",
-        filter: "logName=\"projects/*/logs/fluentbit\""
+        filter: `logName="projects/${gcpConfig.require("project")}/logs/fluentbit"`
       }
     ],
     uniqueWriterIdentity: true
