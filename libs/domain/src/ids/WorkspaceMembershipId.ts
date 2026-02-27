@@ -14,7 +14,7 @@ export const WorkspaceMembershipId = pipe(
 )
 export type WorkspaceMembershipId = typeof WorkspaceMembershipId.Type
 
-const WORKSPACE_MEMBERSHIP_PREFIX = "wkm_"
+const WORKSPACE_MEMBERSHIP_PREFIX = "wsm_"
 
 export const PrefixedWorkspaceMembershipId = pipe(
   S.NonEmptyTrimmedString,

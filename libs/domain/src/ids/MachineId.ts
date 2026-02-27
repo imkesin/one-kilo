@@ -14,7 +14,7 @@ export const MachineId = pipe(
 )
 export type MachineId = typeof MachineId.Type
 
-const MACHINE_PREFIX = "mch_"
+const MACHINE_PREFIX = "mchn_"
 
 export const PrefixedMachineId = pipe(
   S.NonEmptyTrimmedString,

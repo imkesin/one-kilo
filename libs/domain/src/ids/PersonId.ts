@@ -14,7 +14,7 @@ export const PersonId = pipe(
 )
 export type PersonId = typeof PersonId.Type
 
-const PERSON_PREFIX = "per_"
+const PERSON_PREFIX = "prsn_"
 
 export const PrefixedPersonId = pipe(
   S.NonEmptyTrimmedString,
