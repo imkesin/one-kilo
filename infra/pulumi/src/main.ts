@@ -62,17 +62,29 @@ const _defaultLogBucket = new GCP.logging.ProjectBucketConfig(
   }
 )
 
-const _gkeHeartbeatLogExclusion = new GCP.logging.ProjectExclusion(
-  "gke-heartbeat-log-exclusion",
+const _defaultLogSink = new GCP.logging.ProjectSink(
+  "default-log-sink",
   {
-    filter: [
-      "resource.type=\"k8s_cluster\"",
-      "(",
-      "protoPayload.methodName=\"io.k8s.coordination.v1.leases.update\"",
-      "OR protoPayload.methodName=\"io.k8s.coordination.v1.leases.create\"",
-      "OR protoPayload.methodName=\"io.k8s.core.v1.configmaps.update\"",
-      ")"
-    ].join("\n")
+    name: "_Default",
+    destination: `logging.googleapis.com/projects/${gcpConfig.require("project")}/locations/global/buckets/_Default`,
+    exclusions: [
+      {
+        name: "gke-heartbeat-logs",
+        filter: [
+          "resource.type=\"k8s_cluster\"",
+          "(",
+          "protoPayload.methodName=\"io.k8s.coordination.v1.leases.update\"",
+          "OR protoPayload.methodName=\"io.k8s.coordination.v1.leases.create\"",
+          "OR protoPayload.methodName=\"io.k8s.core.v1.configmaps.update\"",
+          ")"
+        ].join("\n")
+      },
+      {
+        name: "fluentbit-logs",
+        filter: "logName=\"projects/*/logs/fluentbit\""
+      }
+    ],
+    uniqueWriterIdentity: true
   }
 )
 
