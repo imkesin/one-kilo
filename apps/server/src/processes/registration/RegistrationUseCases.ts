@@ -17,7 +17,7 @@ import { WorkspacesCreationModule } from "../../modules/workspaces/WorkspacesCre
 type PersistRegistrationParameters = {
   readonly userParameters: {
     readonly id: UserId
-    readonly workosUser: WorkOSEntities.User
+    readonly workosUserId: WorkOSIds.UserId
   }
   readonly workspaceParameters: {
     readonly id: WorkspaceId
@@ -62,7 +62,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         ) {
           const user = yield* usersCreationModule.createPersonUser({
             id: userParameters.id,
-            workosUserId: userParameters.workosUser.id
+            workosUserId: userParameters.workosUserId
           })
 
           const {
@@ -135,7 +135,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           yield* persistRegistration({
             userParameters: {
               id: userId,
-              workosUser
+              workosUserId: workosUser.id
             },
             workspaceParameters: {
               id: workspaceId,

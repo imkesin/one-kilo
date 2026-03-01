@@ -1,6 +1,8 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import { MachineId } from "../ids/MachineId.ts"
+import { PersonId } from "../ids/PersonId.ts"
 import { UserId } from "../ids/UserId.ts"
 import { UserType } from "../values/UserValues.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
@@ -22,7 +24,8 @@ const MachineUserEntityFields = {
 export class MachineUserEntity extends S.TaggedClass<MachineUserEntity>("@one-kilo/domain/UserEntity:Machine")(
   "UserEntity:Machine",
   {
-    ...MachineUserEntityFields
+    ...MachineUserEntityFields,
+    machineId: MachineId
   },
   {
     identifier: "UserEntity:Machine",
@@ -54,7 +57,8 @@ const PersonUserEntityFields = {
 export class PersonUserEntity extends S.TaggedClass<PersonUserEntity>("@one-kilo/domain/UserEntity:Person")(
   "UserEntity:Person",
   {
-    ...PersonUserEntityFields
+    ...PersonUserEntityFields,
+    personId: PersonId
   },
   {
     identifier: "UserEntity:Person",
