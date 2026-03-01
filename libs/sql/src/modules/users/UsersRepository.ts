@@ -2,7 +2,7 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { MachineId } from "@one-kilo/domain/ids/MachineId"
+import type { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -21,11 +21,11 @@ type InsertUserParameters =
     type: "PERSON"
     personId: PersonId
     workosUserId: WorkOSIds.UserId
-    machineId?: never
+    machineClientId?: never
     workosClientId?: never
   } | {
-    type: "MACHINE"
-    machineId: MachineId
+    type: "MACHINE_CLIENT"
+    machineClientId: MachineClientId
     workosClientId: WorkOSIds.ApplicationClientId
     personId?: never
     workosUserId?: never
@@ -49,7 +49,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
           type,
           personId,
           workosUserId,
-          machineId,
+          machineClientId,
           workosClientId,
           id,
           performedByUserId
@@ -66,7 +66,7 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
                 type,
                 personId: personId ?? null,
                 workosUserId: workosUserId ?? null,
-                machineId: machineId ?? null,
+                machineClientId: machineClientId ?? null,
                 workosClientId: workosClientId ?? null,
                 createdAt: undefined,
                 createdByUserId: performedByUserId ?? userId,

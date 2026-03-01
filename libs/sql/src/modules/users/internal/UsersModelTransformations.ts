@@ -1,4 +1,4 @@
-import { MachineUserEntity, PersonUserEntity, type UserEntity } from "@one-kilo/domain/entities/User"
+import { MachineClientUserEntity, PersonUserEntity, type UserEntity } from "@one-kilo/domain/entities/User"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import type { UsersModel } from "../UsersModel.ts"
@@ -23,15 +23,15 @@ export const toUserEntity = (model: typeof UsersModel.select.Type): Effect.Effec
   }
 
   if (
-    model.type === "MACHINE"
-    && model.machineId
+    model.type === "MACHINE_CLIENT"
+    && model.machineClientId
     && model.workosClientId
   ) {
     return Effect.succeed(
-      MachineUserEntity.make({
+      MachineClientUserEntity.make({
         id: model.id,
-        type: "MACHINE",
-        machineId: model.machineId,
+        type: "MACHINE_CLIENT",
+        machineClientId: model.machineClientId,
         workosClientId: model.workosClientId,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,

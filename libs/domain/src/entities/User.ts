@@ -1,12 +1,12 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { MachineId } from "../ids/MachineId.ts"
+import { MachineClientId } from "../ids/MachineClientId.ts"
 import { PersonId } from "../ids/PersonId.ts"
 import { UserId } from "../ids/UserId.ts"
 import { UserType } from "../values/UserValues.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
-import { MachineOnUser } from "./Machine.ts"
+import { MachineClientOnUser } from "./MachineClient.ts"
 import { PersonOnUser } from "./Person.ts"
 
 const EntityBaseFields = {
@@ -14,36 +14,38 @@ const EntityBaseFields = {
   ...EntityAuditFields
 } as const
 
-const MachineUserEntityFields = {
+const MachineClientUserEntityFields = {
   ...EntityBaseFields,
 
-  type: pipe(UserType, S.pickLiteral("MACHINE")),
+  type: pipe(UserType, S.pickLiteral("MACHINE_CLIENT")),
   workosClientId: WorkOSIds.ApplicationClientId
 } as const
 
-export class MachineUserEntity extends S.TaggedClass<MachineUserEntity>("@one-kilo/domain/UserEntity:Machine")(
-  "UserEntity:Machine",
-  {
-    ...MachineUserEntityFields,
-    machineId: MachineId
-  },
-  {
-    identifier: "UserEntity:Machine",
-    title: "User Entity (Machine)",
-    description: "A minimal user representing a machine"
-  }
-) {}
+export class MachineClientUserEntity
+  extends S.TaggedClass<MachineClientUserEntity>("@one-kilo/domain/UserEntity:MachineClient")(
+    "UserEntity:MachineClient",
+    {
+      ...MachineClientUserEntityFields,
+      machineClientId: MachineClientId
+    },
+    {
+      identifier: "UserEntity:MachineClient",
+      title: "User Entity (Machine Client)",
+      description: "A minimal user representing a machine client"
+    }
+  )
+{}
 
-export class MachineUser extends S.TaggedClass<MachineUser>("@one-kilo/domain/User:Machine")(
-  "MachineUser",
+export class MachineClientUser extends S.TaggedClass<MachineClientUser>("@one-kilo/domain/User:MachineClient")(
+  "MachineClientUser",
   {
-    ...MachineUserEntityFields,
-    machine: MachineOnUser
+    ...MachineClientUserEntityFields,
+    machineClient: MachineClientOnUser
   },
   {
-    identifier: "User:Machine",
-    title: "User (Machine)",
-    description: "A minimal user representing a machine"
+    identifier: "User:MachineClient",
+    title: "User (Machine Client)",
+    description: "A minimal user representing a machine client"
   }
 ) {}
 
@@ -80,5 +82,5 @@ export class PersonUser extends S.TaggedClass<PersonUser>("@one-kilo/domain/User
   }
 ) {}
 
-export type UserEntity = MachineUserEntity | PersonUserEntity
-export type User = MachineUser | PersonUser
+export type UserEntity = MachineClientUserEntity | PersonUserEntity
+export type User = MachineClientUser | PersonUser

@@ -1,6 +1,6 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as Model from "@effect/sql/Model"
-import { MachineId } from "@one-kilo/domain/ids/MachineId"
+import { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { UserType } from "@one-kilo/domain/values/UserValues"
@@ -15,7 +15,7 @@ export class UsersModel extends Model.Class<UsersModel>("UsersModel")({
   personId: S.NullOr(PersonId),
   workosUserId: S.NullOr(WorkOSIds.UserId),
 
-  machineId: S.NullOr(MachineId),
+  machineClientId: S.NullOr(MachineClientId),
   workosClientId: S.NullOr(WorkOSIds.ApplicationClientId),
 
   ...ModelAuditFields

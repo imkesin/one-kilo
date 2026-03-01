@@ -8,6 +8,10 @@
 - `packages/` - Publishable standalone packages (e.g., `@effect/auth-workos`)
 - `scripts/` - Developer tooling and local environment scripts (e.g., `local-dev`)
 
+## Tooling
+
+- `pnpm` - Package manager
+
 ## Top-Level Commands
 
 ```bash
