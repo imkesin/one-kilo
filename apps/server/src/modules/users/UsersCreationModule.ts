@@ -7,6 +7,8 @@ import * as Effect from "effect/Effect"
 
 type CreateHumanUserParameters = {
   id: UserId
+  preferredName: PreferredName
+  fullName: FullName
   workosUserId: WorkOSIds.UserId
 }
 
@@ -22,10 +24,7 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
       const usersRepository = yield* UsersRepository
 
       const createPersonUser = Effect.fn("UsersCreationModule.createPersonUser")(
-        function*({ id, workosUserId }: CreateHumanUserParameters) {
-          const preferredName = PreferredName.make("Anonymous")
-          const fullName = FullName.make("Anonymous Shy Unicorn")
-
+        function*({ id, preferredName, fullName, workosUserId }: CreateHumanUserParameters) {
           const person = yield* personsRepository.insert({
             preferredName,
             fullName,

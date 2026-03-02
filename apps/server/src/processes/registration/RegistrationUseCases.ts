@@ -8,15 +8,22 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import { PersonFallbackNameGenerator } from "@one-kilo/domain/values/PersonFallbackNameGenerator"
+import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
+import { pipe } from "effect/Function"
+import * as Option from "effect/Option"
+import * as S from "effect/Schema"
 import { UsersCreationModule } from "../../modules/users/UsersCreationModule.ts"
 import { WorkspacesCreationModule } from "../../modules/workspaces/WorkspacesCreationModule.ts"
 
 type PersistRegistrationParameters = {
   readonly userParameters: {
     readonly id: UserId
+    readonly preferredName: PreferredName
+    readonly fullName: FullName
     readonly workosUserId: WorkOSIds.UserId
   }
   readonly workspaceParameters: {
@@ -39,6 +46,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
   {
     dependencies: [
       DomainIdGenerator.Default,
+      PersonFallbackNameGenerator.Default,
       UsersCreationModule.Default,
       WorkspacesCreationModule.Default
     ],
@@ -47,6 +55,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       const { client: workosDirectClient } = yield* WorkOSApiClient.ApiClient
 
       const idGenerator = yield* DomainIdGenerator
+      const fallbackNameGenerator = yield* PersonFallbackNameGenerator
       const usersCreationModule = yield* UsersCreationModule
       const workspacesCreationModule = yield* WorkspacesCreationModule
 
@@ -62,6 +71,8 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         ) {
           const user = yield* usersCreationModule.createPersonUser({
             id: userParameters.id,
+            preferredName: userParameters.preferredName,
+            fullName: userParameters.fullName,
             workosUserId: userParameters.workosUserId
           })
 
@@ -84,6 +95,51 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         PgClientExtensions.withSerializableTransaction(pg)
       )
 
+      const derivePersonNamesFromWorkosUser = Effect.fnUntraced(
+        function*({ id, firstName, lastName }: Pick<WorkOSEntities.User, "id" | "firstName" | "lastName">) {
+          if (firstName !== null && lastName !== null) {
+            const decoded = yield* pipe(
+              Effect.all({
+                preferredName: S.decode(PreferredName)(firstName),
+                fullName: S.decode(FullName)(`${firstName} ${lastName}`)
+              }),
+              Effect.tapError((cause) =>
+                pipe(
+                  Effect.logWarning(
+                    "Failed to decode person names from a WorkOS user",
+                    cause
+                  ),
+                  Effect.annotateLogs({
+                    workosUserId: id,
+                    workosFirstName: firstName,
+                    workosLastName: lastName
+                  })
+                )
+              ),
+              Effect.option
+            )
+
+            if (Option.isSome(decoded)) {
+              return {
+                ...decoded.value,
+                workosName: { firstName, lastName }
+              }
+            }
+
+            yield* Effect.logWarning("Failed to derive person names from WorkOS user, using fallback names")
+          }
+
+          return yield* Effect.map(
+            fallbackNameGenerator.generate,
+            (fallback) => ({
+              preferredName: fallback.fallbackPreferredName,
+              fullName: fallback.fallbackFullName,
+              workosName: fallback.fallbackWorkosName
+            })
+          )
+        }
+      )
+
       const registerHumanUser = Effect.fn("RegistrationUseCases.registerHumanUser")(
         function*({
           workosRefreshToken: inputWorkosRefreshToken,
@@ -96,7 +152,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           // Special suffix is intended to support debugging through the WorkOS console.
           const workosOrganizationName = `Personal ${workspaceId.slice(-6).toUpperCase()}`
 
-          // TODO: I need to give the user a name right here
+          const { preferredName, fullName, workosName } = yield* derivePersonNamesFromWorkosUser(workosUser)
 
           const [workosOrganization] = yield* Effect.all(
             [
@@ -106,7 +162,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               }),
               workosGatewayClient.userManagement.updateUser(
                 workosUser.id,
-                { externalId: userId }
+                {
+                  externalId: userId,
+                  firstName: workosName.firstName,
+                  lastName: workosName.lastName
+                }
               )
             ],
             { concurrency: "unbounded" }
@@ -135,7 +195,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           yield* persistRegistration({
             userParameters: {
               id: userId,
-              workosUserId: workosUser.id
+              workosUserId: workosUser.id,
+              preferredName,
+              fullName
             },
             workspaceParameters: {
               id: workspaceId,
