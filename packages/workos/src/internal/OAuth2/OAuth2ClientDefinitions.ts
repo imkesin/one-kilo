@@ -10,7 +10,7 @@ import * as Redacted from "effect/Redacted"
 import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
 import { AccessToken } from "../../domain/Values.ts"
-import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
+import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
 import {
   AuthorizeDeviceParameters,
   AuthorizeDeviceResponse,

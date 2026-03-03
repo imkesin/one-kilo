@@ -10,7 +10,7 @@ import * as S from "effect/Schema"
 import { OrganizationMembership, User } from "../../domain/Entities.ts"
 import { ResourceNotFoundError } from "../../domain/Errors.ts"
 import type { EnvironmentClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
-import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
+import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
 import {
   AuthenticateWithCodeParameters,
   AuthenticateWithCodeResponse,

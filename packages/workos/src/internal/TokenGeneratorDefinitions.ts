@@ -6,7 +6,7 @@ import * as S from "effect/Schema"
 import * as Jose from "jose"
 import type { ApplicationClientId, OrganizationId, SessionId, UserId } from "../domain/Ids.ts"
 import { AccessToken, RefreshToken } from "../domain/Values.ts"
-import { generateRandomString } from "../lib/RandomString.ts"
+import { generateRandomString } from "./lib/RandomString.ts"
 
 class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect/auth-workos/GenerateTokenError")(
   "GenerateTokenError",

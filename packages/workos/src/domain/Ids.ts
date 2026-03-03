@@ -1,6 +1,6 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { makePrefixedIdGenerator } from "../lib/PrefixedId.ts"
+import { makePrefixedIdGenerator } from "../internal/lib/PrefixedId.ts"
 
 /**
  * The WorkOS Connect Application’s client ID.

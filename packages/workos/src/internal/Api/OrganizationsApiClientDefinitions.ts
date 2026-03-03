@@ -9,7 +9,7 @@ import * as S from "effect/Schema"
 import { Organization } from "../../domain/Entities.ts"
 import { ResourceNotFoundError } from "../../domain/Errors.ts"
 import type { OrganizationId } from "../../domain/Ids.ts"
-import * as HttpResponseExtensions from "../../lib/HttpResponseExtensions.ts"
+import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
 import { CreateOrganizationParameters, DeleteOrganizationOutcome } from "./OrganizationsApiClientDefinitionSchemas.ts"
 
 export interface Client {
