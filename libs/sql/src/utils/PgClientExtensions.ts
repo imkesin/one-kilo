@@ -1,4 +1,5 @@
 import * as PgClient from "@effect/sql-pg/PgClient"
+import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -21,15 +22,21 @@ export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(
     pg.withTransaction
   )
 
-  return Effect.retry(
-    transactionEffect,
-    {
-      while: S.is(SqlErrorWithRetryableCause),
-      times: 3,
-      schedule: pipe(
-        Schedule.exponential(Duration.millis(10)),
-        Schedule.jittered
-      )
-    }
+  return pipe(
+    Effect.retry(
+      transactionEffect,
+      {
+        while: S.is(SqlErrorWithRetryableCause),
+        times: 3,
+        schedule: pipe(
+          Schedule.exponential(Duration.millis(10)),
+          Schedule.jittered
+        )
+      }
+    ),
+    Effect.catchTag(
+      "SqlError",
+      dieWithUnexpectedErrorCallback("Failed to execute a serializable transaction")
+    )
   )
 }

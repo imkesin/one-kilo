@@ -10,6 +10,7 @@ import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { PersonFallbackNameGenerator } from "@one-kilo/domain/values/PersonFallbackNameGenerator"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
@@ -160,13 +161,16 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 name: workosOrganizationName,
                 externalId: workspaceId
               }),
-              workosGatewayClient.userManagement.updateUser(
-                workosUser.id,
-                {
-                  externalId: userId,
-                  firstName: workosName.firstName,
-                  lastName: workosName.lastName
-                }
+              pipe(
+                workosGatewayClient.userManagement.updateUser(
+                  workosUser.id,
+                  {
+                    externalId: userId,
+                    firstName: workosName.firstName,
+                    lastName: workosName.lastName
+                  }
+                ),
+                orDieWithUnexpectedError("Failed to update WorkOS user during registration.")
               )
             ],
             { concurrency: "unbounded" }
