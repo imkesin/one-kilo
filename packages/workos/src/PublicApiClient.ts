@@ -5,7 +5,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import type { EnvironmentClientId } from "./domain/Ids.ts"
-import * as PublicApiClientUserManagementDefinitions from "./internal/PublicApi/PublicApiClientDefinitions.ts"
+import * as PublicApiClientUserManagementDefinitions from "./internal/public-api/PublicApiClientDefinitions.ts"
 
 export interface Service {
   readonly client: {

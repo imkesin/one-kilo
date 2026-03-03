@@ -24,18 +24,18 @@ import * as TokenGenerator from "../TokenGenerator.ts"
 import {
   type CreateOrganizationParameters,
   DeleteOrganizationOutcome
-} from "./Api/OrganizationsApiClientDefinitionSchemas.ts"
+} from "./api/OrganizationsApiClientDefinitionSchemas.ts"
 import {
   CreateOrganizationMembershipParameters,
   type CreateUserParameters,
   DeleteOrganizationMembershipOutcome,
   DeleteUserOutcome,
   type UpdateUserParameters
-} from "./Api/UserManagementApiClientDefinitionSchemas.ts"
+} from "./api/UserManagementApiClientDefinitionSchemas.ts"
 import {
   type RetrieveTokenByClientCredentialsParameters_Redacted,
   RetrieveTokenByClientCredentialsResponse
-} from "./OAuth2/OAuth2ClientDefinitionSchemas.js"
+} from "./oauth2/OAuth2ClientDefinitionSchemas.js"
 
 class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
   id: ApplicationClientId,

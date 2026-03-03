@@ -4,7 +4,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import * as PublicOAuth2ClientDefinitions from "./internal/PublicOAuth2/PublicOAuth2ClientDefinitions.ts"
+import * as PublicOAuth2ClientDefinitions from "./internal/public-oauth2/PublicOAuth2ClientDefinitions.ts"
 
 export interface Service {
   readonly client: PublicOAuth2ClientDefinitions.Client

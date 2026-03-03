@@ -6,7 +6,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import * as OAuth2ClientDefinitions from "./internal/OAuth2/OAuth2ClientDefinitions.ts"
+import * as OAuth2ClientDefinitions from "./internal/oauth2/OAuth2ClientDefinitions.ts"
 
 export interface Service {
   readonly client: OAuth2ClientDefinitions.Client

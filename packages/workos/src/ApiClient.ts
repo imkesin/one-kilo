@@ -8,8 +8,8 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
 import type { EnvironmentClientId } from "./domain/Ids.ts"
-import * as OrganizationsClientDefinitions from "./internal/Api/OrganizationsApiClientDefinitions.ts"
-import * as UserManagementClientDefinitions from "./internal/Api/UserManagementApiClientDefinitions.ts"
+import * as OrganizationsClientDefinitions from "./internal/api/OrganizationsApiClientDefinitions.ts"
+import * as UserManagementClientDefinitions from "./internal/api/UserManagementApiClientDefinitions.ts"
 
 export interface Service {
   readonly client: {
