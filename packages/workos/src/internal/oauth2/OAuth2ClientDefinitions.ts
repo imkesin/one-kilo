@@ -221,17 +221,17 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         Effect.retry({
           schedule: Schedule.spaced("5 seconds"),
           while: (response) => response._tag === "RetrieveTokenByDeviceCodeResponse.AuthorizationPending"
-        })
+        }),
+        Effect.catchTag(
+          "RetrieveTokenByDeviceCodeResponse.AuthorizationPending",
+          () => Effect.die("An impossible state was reached. Authorization is still pending, but we stopped polling")
+        )
       )
 
       return pipe(
         pollingRequest,
         Effect.catchTags({
           "RetrieveTokenByDeviceCodeResponse.AuthorizationDeclined": () =>
-            new DeviceCodeAuthorizationTerminated({
-              deviceCode: parameters.deviceCode
-            }),
-          "RetrieveTokenByDeviceCodeResponse.AuthorizationPending": () =>
             new DeviceCodeAuthorizationTerminated({
               deviceCode: parameters.deviceCode
             })
