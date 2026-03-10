@@ -3,10 +3,9 @@ import * as Effect from "effect/Effect"
 import * as Either from "effect/Either"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
-import type { ParseError } from "effect/ParseResult"
-import * as S from "effect/Schema"
 import type { EnvironmentClientId } from "../../domain/Ids.ts"
-import { InvalidUrlError } from "../CommonErrors.js"
+import * as WorkOSError from "../../errors/Errors.ts"
+import { encodeCatching } from "../errors/encodeCatching.ts"
 import { BuildAuthorizationUrlParameters } from "./PublicApiClientDefinitionSchemas.ts"
 
 type BuildAuthorizationUrlParameters_WithoutClientId = Omit<
@@ -17,7 +16,7 @@ type BuildAuthorizationUrlParameters_WithoutClientId = Omit<
 export interface Client {
   readonly buildAuthorizationUrl: (parameters: BuildAuthorizationUrlParameters_WithoutClientId) => Effect.Effect<
     string,
-    InvalidUrlError | ParseError
+    WorkOSError.WorkOSError
   >
 }
 
@@ -26,7 +25,7 @@ export const make = (options: { apiPath: string; clientId: EnvironmentClientId }
     buildAuthorizationUrl: (parameters) =>
       pipe(
         { ...parameters, clientId: options.clientId },
-        S.encode(BuildAuthorizationUrlParameters),
+        encodeCatching(BuildAuthorizationUrlParameters),
         Effect.flatMap((_) =>
           pipe(
             UrlParams.makeUrl(
@@ -35,7 +34,12 @@ export const make = (options: { apiPath: string; clientId: EnvironmentClientId }
               Option.none()
             ),
             Either.match({
-              onLeft: (error) => Effect.fail(new InvalidUrlError({ cause: error })),
+              onLeft: (error) =>
+                Effect.fail(
+                  new WorkOSError.WorkOSError({
+                    reason: new WorkOSError.InvalidUrlError({ cause: error })
+                  })
+                ),
               onRight: (url) => Effect.succeed(url.toString())
             })
           )

@@ -10,6 +10,8 @@ import * as Redacted from "effect/Redacted"
 import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
 import { AccessToken } from "../../domain/Values.ts"
+import * as WorkOSError from "../../errors/Errors.ts"
+import { encodeCatching } from "../errors/encodeCatching.ts"
 import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
 import {
   AuthorizeDeviceParameters,
@@ -39,7 +41,7 @@ export interface Client {
     parameters: typeof AuthorizeDeviceParameters.Type
   ) => Effect.Effect<
     typeof AuthorizeDeviceResponse.Type,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError | HttpClientError.HttpClientError | ParseError
   >
 
   readonly retrieveTokenByAuthorizationCode: (
@@ -108,7 +110,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     authorizeDevice: (parameters) =>
       pipe(
         parameters,
-        S.encode(AuthorizeDeviceParameters),
+        encodeCatching(AuthorizeDeviceParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/device_authorization"),
