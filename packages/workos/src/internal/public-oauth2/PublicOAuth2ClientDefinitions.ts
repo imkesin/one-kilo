@@ -3,8 +3,8 @@ import * as Effect from "effect/Effect"
 import * as Either from "effect/Either"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
-import * as WorkOSError from "../../errors/Errors.ts"
-import { encodeCatching } from "../errors/encodeCatching.ts"
+import * as WorkOSError from "../../domain/Errors.ts"
+import { encodeCatching } from "../schema/SchemaExtensions.ts"
 import { BuildAuthorizeUrlParameters } from "./PublicOAuth2ClientDefinitionSchemas.ts"
 
 export interface Client {
@@ -31,7 +31,10 @@ export const make = (options: { readonly authkitBaseURL: string }): Client => {
               onLeft: (error) =>
                 Effect.fail(
                   new WorkOSError.WorkOSError({
-                    reason: new WorkOSError.InvalidUrlError({ cause: error })
+                    reason: new WorkOSError.UnexpectedError({
+                      cause: error,
+                      message: "Failed to build authorization URL"
+                    })
                   })
                 ),
               onRight: (url) => Effect.succeed(url.toString())

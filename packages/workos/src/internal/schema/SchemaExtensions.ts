@@ -1,7 +1,7 @@
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import * as WorkOSError from "../../errors/Errors.ts"
+import * as WorkOSError from "../../domain/Errors.ts"
 
 export const encodeCatching = <
   A,
@@ -14,7 +14,10 @@ export const encodeCatching = <
     Effect.catchTag("ParseError", (error) =>
       Effect.fail(
         new WorkOSError.WorkOSError({
-          reason: new WorkOSError.EncodingError({ cause: error })
+          reason: new WorkOSError.UnexpectedError({
+            cause: error,
+            message: "Failed to encode input"
+          })
         })
       ))
   )

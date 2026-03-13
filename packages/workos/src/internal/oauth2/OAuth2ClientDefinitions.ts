@@ -1,18 +1,16 @@
 import type * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientError from "@effect/platform/HttpClientError"
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as UrlParams from "@effect/platform/UrlParams"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import type { ParseError } from "effect/ParseResult"
 import * as Redacted from "effect/Redacted"
 import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
 import { AccessToken } from "../../domain/Values.ts"
-import * as WorkOSError from "../../errors/Errors.ts"
-import { encodeCatching } from "../errors/encodeCatching.ts"
-import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
+import * as WorkOSError from "../../domain/Errors.ts"
+import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
+import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
   AuthorizeDeviceParameters,
   AuthorizeDeviceResponse,
@@ -41,28 +39,28 @@ export interface Client {
     parameters: typeof AuthorizeDeviceParameters.Type
   ) => Effect.Effect<
     typeof AuthorizeDeviceResponse.Type,
-    WorkOSError.WorkOSError | HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 
   readonly retrieveTokenByAuthorizationCode: (
     parameters: RetrieveTokenByAuthorizationCodeParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByAuthorizationCodeResponse.Type,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 
   readonly retrieveTokenByRefreshToken: (
     parameters: RetrieveTokenByRefreshTokenParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByRefreshTokenResponse.Type,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 
   readonly retrieveTokenByClientCredentials: (
     parameters: RetrieveTokenByClientCredentialsParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByClientCredentialsResponse.Type,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 
   /**
@@ -72,14 +70,14 @@ export interface Client {
     parameters: RetrieveTokenByDeviceCodeParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByDeviceCodeResponseSuccess.Type,
-    DeviceCodeAuthorizationTerminated | HttpClientError.HttpClientError | ParseError
+    DeviceCodeAuthorizationTerminated | WorkOSError.WorkOSError
   >
 
   readonly retrieveUserInfo: (
     accessToken: AccessToken
   ) => Effect.Effect<
     typeof RetrieveUserInfoResponse.Type,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 }
 
@@ -88,9 +86,10 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -98,10 +97,11 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
       Effect.flatMap((request) => httpClient.execute(request)),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -110,7 +110,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     authorizeDevice: (parameters) =>
       pipe(
         parameters,
-        encodeCatching(AuthorizeDeviceParameters),
+        SchemaExtensions.encodeCatching(AuthorizeDeviceParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/device_authorization"),
@@ -130,7 +130,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
           ...parameters,
           clientSecret: Redacted.value(parameters.clientSecret)
         },
-        S.encode(RetrieveTokenByAuthorizationCodeParameters),
+        SchemaExtensions.encodeCatching(RetrieveTokenByAuthorizationCodeParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/token"),
@@ -150,7 +150,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
           ...parameters,
           clientSecret: Redacted.value(parameters.clientSecret)
         },
-        S.encode(RetrieveTokenByRefreshTokenParameters),
+        SchemaExtensions.encodeCatching(RetrieveTokenByRefreshTokenParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/token"),
@@ -170,7 +170,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
           ...parameters,
           clientSecret: Redacted.value(parameters.clientSecret)
         },
-        S.encode(RetrieveTokenByClientCredentialsParameters),
+        SchemaExtensions.encodeCatching(RetrieveTokenByClientCredentialsParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/token"),
@@ -190,7 +190,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
           ...parameters,
           clientSecret: Redacted.value(parameters.clientSecret)
         },
-        S.encode(RetrieveTokenByDeviceCodeParameters),
+        SchemaExtensions.encodeCatching(RetrieveTokenByDeviceCodeParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/oauth2/token"),

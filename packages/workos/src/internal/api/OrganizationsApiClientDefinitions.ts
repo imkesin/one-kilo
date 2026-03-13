@@ -1,15 +1,13 @@
 import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientError from "@effect/platform/HttpClientError"
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import type { ParseError } from "effect/ParseResult"
-import * as S from "effect/Schema"
 import { Organization } from "../../domain/Entities.ts"
-import { ResourceNotFoundError } from "../../domain/Errors.ts"
+import * as WorkOSError from "../../domain/Errors.ts"
 import type { OrganizationId } from "../../domain/Ids.ts"
-import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
+import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
+import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import { CreateOrganizationParameters, DeleteOrganizationOutcome } from "./OrganizationsApiClientDefinitionSchemas.ts"
 
 export interface Client {
@@ -17,15 +15,15 @@ export interface Client {
 
   readonly createOrganization: (
     parameters: typeof CreateOrganizationParameters.Type
-  ) => Effect.Effect<Organization, HttpClientError.HttpClientError | ParseError>
+  ) => Effect.Effect<Organization, WorkOSError.WorkOSError>
 
   readonly deleteOrganization: (
     organizationId: OrganizationId
-  ) => Effect.Effect<DeleteOrganizationOutcome, HttpClientError.HttpClientError>
+  ) => Effect.Effect<DeleteOrganizationOutcome, WorkOSError.WorkOSError>
 
   readonly retrieveOrganization: (
     organizationId: OrganizationId
-  ) => Effect.Effect<Organization, HttpClientError.HttpClientError | ResourceNotFoundError | ParseError>
+  ) => Effect.Effect<Organization, WorkOSError.WorkOSError>
 }
 
 export const make = (httpClient: HttpClient.HttpClient): Client => {
@@ -33,9 +31,10 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -43,10 +42,11 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
       Effect.andThen(httpClient.execute),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -56,7 +56,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     createOrganization: (parameters) =>
       pipe(
         parameters,
-        S.encode(CreateOrganizationParameters),
+        SchemaExtensions.encodeCatching(CreateOrganizationParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/"),
@@ -87,7 +87,12 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(Organization),
-            "404": () => Effect.fail(new ResourceNotFoundError()),
+            "404": () =>
+              Effect.fail(
+                new WorkOSError.WorkOSError({
+                  reason: new WorkOSError.ResourceNotFoundError()
+                })
+              ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

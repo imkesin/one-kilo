@@ -1,16 +1,14 @@
 import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientError from "@effect/platform/HttpClientError"
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import type { ParseError } from "effect/ParseResult"
 import * as Redacted from "effect/Redacted"
-import * as S from "effect/Schema"
 import { OrganizationMembership, User } from "../../domain/Entities.ts"
-import { ResourceNotFoundError } from "../../domain/Errors.ts"
+import * as WorkOSError from "../../domain/Errors.ts"
 import type { EnvironmentClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
-import * as HttpResponseExtensions from "../lib/HttpResponseExtensions.ts"
+import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
+import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
   AuthenticateWithCodeParameters,
   AuthenticateWithCodeResponse,
@@ -37,36 +35,43 @@ export interface Client {
 
   readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters_WithoutClientFields) => Effect.Effect<
     AuthenticateWithCodeResponse,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
+
   readonly authenticateWithRefreshToken: (
     parameters: AuthenticateWithRefreshTokenParameters_WithoutClientFields
   ) => Effect.Effect<
     AuthenticateWithRefreshTokenResponse,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
 
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
     User,
-    HttpClientError.HttpClientError | ParseError
+    WorkOSError.WorkOSError
   >
-  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
-    User,
-    HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
-  >
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserOutcome, HttpClientError.HttpClientError>
+
   readonly retrieveUser: (userId: UserId) => Effect.Effect<
     User,
-    HttpClientError.HttpClientError | ResourceNotFoundError | ParseError
+    WorkOSError.WorkOSError
+  >
+
+  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
+    User,
+    WorkOSError.WorkOSError
+  >
+
+  readonly deleteUser: (userId: UserId) => Effect.Effect<
+    DeleteUserOutcome,
+    WorkOSError.WorkOSError
   >
 
   readonly createOrganizationMembership: (
     parameters: typeof CreateOrganizationMembershipParameters.Type
-  ) => Effect.Effect<OrganizationMembership, HttpClientError.HttpClientError | ParseError>
+  ) => Effect.Effect<OrganizationMembership, WorkOSError.WorkOSError>
 
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
-  ) => Effect.Effect<DeleteOrganizationMembershipOutcome, HttpClientError.HttpClientError>
+  ) => Effect.Effect<DeleteOrganizationMembershipOutcome, WorkOSError.WorkOSError>
 }
 
 export const make = (
@@ -80,9 +85,10 @@ export const make = (
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -90,10 +96,11 @@ export const make = (
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, HttpClientError.HttpClientError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
-      Effect.flatMap((request) => httpClient.execute(request)),
+      Effect.andThen(httpClient.execute),
+      HttpResponseExtensions.catchNetworkErrors,
       Effect.flatMap((response) => f(response))
     )
 
@@ -107,7 +114,7 @@ export const make = (
           clientId: options.clientId,
           clientSecret: Redacted.value(options.clientSecret)
         },
-        S.encode(AuthenticateWithCodeParameters),
+        SchemaExtensions.encodeCatching(AuthenticateWithCodeParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/authenticate"),
@@ -128,7 +135,7 @@ export const make = (
           clientId: options.clientId,
           clientSecret: Redacted.value(options.clientSecret)
         },
-        S.encode(AuthenticateWithRefreshTokenParameters),
+        SchemaExtensions.encodeCatching(AuthenticateWithRefreshTokenParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/authenticate"),
@@ -146,7 +153,7 @@ export const make = (
     createUser: (parameters) =>
       pipe(
         parameters,
-        S.encode(CreateUserParameters),
+        SchemaExtensions.encodeCatching(CreateUserParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/users"),
@@ -160,10 +167,26 @@ export const make = (
           })
         )
       ),
+    retrieveUser: (userId) =>
+      pipe(
+        HttpClientRequest.get(`/users/${userId}`),
+        mapResponse(
+          HttpClientResponse.matchStatus({
+            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "404": () =>
+              Effect.fail(
+                new WorkOSError.WorkOSError({
+                  reason: new WorkOSError.ResourceNotFoundError()
+                })
+              ),
+            orElse: HttpResponseExtensions.unexpectedStatus
+          })
+        )
+      ),
     updateUser: (userId, parameters) =>
       pipe(
         parameters,
-        S.encode(UpdateUserParameters),
+        SchemaExtensions.encodeCatching(UpdateUserParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.put(`/users/${userId}`),
@@ -173,7 +196,12 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () => Effect.fail(new ResourceNotFoundError()),
+            "404": () =>
+              Effect.fail(
+                new WorkOSError.WorkOSError({
+                  reason: new WorkOSError.ResourceNotFoundError()
+                })
+              ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -189,22 +217,11 @@ export const make = (
           })
         )
       ),
-    retrieveUser: (userId) =>
-      pipe(
-        HttpClientRequest.get(`/users/${userId}`),
-        mapResponse(
-          HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () => Effect.fail(new ResourceNotFoundError()),
-            orElse: HttpResponseExtensions.unexpectedStatus
-          })
-        )
-      ),
 
     createOrganizationMembership: (parameters) =>
       pipe(
         parameters,
-        S.encode(CreateOrganizationMembershipParameters),
+        SchemaExtensions.encodeCatching(CreateOrganizationMembershipParameters),
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/organization_memberships"),

@@ -1,5 +1,6 @@
 import { describe, expect, type Vitest } from "@effect/vitest"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
 import * as ApiGateway from "../src/ApiGateway.ts"
 import { EmailAddress } from "../src/domain/Values.ts"
 
@@ -21,7 +22,13 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
           }
         })
 
-        yield* Effect.addFinalizer(() => client.userManagement.deleteUser(user.id))
+        yield* Effect.addFinalizer(() => {
+          return pipe(
+            client.userManagement.deleteUser(user.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.ignore
+          )
+        })
 
         expect(user.email).toEqual(testEmail)
         expect(user.firstName).toEqual("Test")
@@ -44,7 +51,13 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
           firstName: "Test",
           lastName: "User"
         })
-        yield* Effect.addFinalizer(() => client.userManagement.deleteUser(user.id))
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            client.userManagement.deleteUser(user.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.ignore
+          )
+        )
 
         const updated = yield* client.userManagement.updateUser(user.id, {
           firstName: "Updated",
@@ -69,7 +82,13 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         const organization = yield* client.organizations.createOrganization({
           name: `test-org-${timestamp}`
         })
-        yield* Effect.addFinalizer(() => client.organizations.deleteOrganization(organization.id))
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            client.organizations.deleteOrganization(organization.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization", e)),
+            Effect.ignore
+          )
+        )
 
         const testEmail = EmailAddress.make(`test-user-${timestamp}@example.com`)
         const user = yield* client.userManagement.createUser({
@@ -77,14 +96,26 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
           firstName: "Test",
           lastName: "User"
         })
-        yield* Effect.addFinalizer(() => client.userManagement.deleteUser(user.id))
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            client.userManagement.deleteUser(user.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.ignore
+          )
+        )
 
         const membership = yield* client.userManagement.createOrganizationMembership({
           userId: user.id,
           organizationId: organization.id,
           roles: ["member"]
         })
-        yield* Effect.addFinalizer(() => client.userManagement.deleteOrganizationMembership(membership.id))
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            client.userManagement.deleteOrganizationMembership(membership.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization membership", e)),
+            Effect.ignore
+          )
+        )
 
         expect(membership.userId).toEqual(user.id)
         expect(membership.organizationId).toEqual(organization.id)

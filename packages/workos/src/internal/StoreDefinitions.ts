@@ -9,7 +9,7 @@ import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
 import { Organization, OrganizationMembership, User } from "../domain/Entities.ts"
-import { ResourceNotFoundError, UnauthorizedError } from "../domain/Errors.ts"
+import * as WorkOSError from "../domain/Errors.ts"
 import {
   ApplicationClientId,
   generateOrganizationId,
@@ -76,26 +76,51 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
 }
 
 interface UserManagement {
-  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<User>
+  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
+    User,
+    WorkOSError.WorkOSError
+  >
+  readonly retrieveUser: (userId: UserId) => Effect.Effect<
+    User,
+    WorkOSError.WorkOSError
+  >
   readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
     User,
-    ResourceNotFoundError
+    WorkOSError.WorkOSError
   >
-  readonly deleteUser: (userId: UserId) => Effect.Effect<DeleteUserOutcome>
-  readonly retrieveUser: (userId: UserId) => Effect.Effect<User, ResourceNotFoundError>
+  readonly deleteUser: (userId: UserId) => Effect.Effect<
+    DeleteUserOutcome,
+    WorkOSError.WorkOSError
+  >
 
   readonly createOrganizationMembership: (
     parameters: typeof CreateOrganizationMembershipParameters.Type
-  ) => Effect.Effect<OrganizationMembership>
+  ) => Effect.Effect<
+    OrganizationMembership,
+    WorkOSError.WorkOSError
+  >
+
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
-  ) => Effect.Effect<DeleteOrganizationMembershipOutcome>
+  ) => Effect.Effect<
+    DeleteOrganizationMembershipOutcome,
+    WorkOSError.WorkOSError
+  >
 }
 
 interface Organizations {
-  readonly createOrganization: (parameters: typeof CreateOrganizationParameters.Type) => Effect.Effect<Organization>
-  readonly deleteOrganization: (organizationId: OrganizationId) => Effect.Effect<DeleteOrganizationOutcome>
-  readonly retrieveOrganization: (organizationId: OrganizationId) => Effect.Effect<Organization, ResourceNotFoundError>
+  readonly createOrganization: (parameters: typeof CreateOrganizationParameters.Type) => Effect.Effect<
+    Organization,
+    WorkOSError.WorkOSError
+  >
+  readonly retrieveOrganization: (organizationId: OrganizationId) => Effect.Effect<
+    Organization,
+    WorkOSError.WorkOSError
+  >
+  readonly deleteOrganization: (organizationId: OrganizationId) => Effect.Effect<
+    DeleteOrganizationOutcome,
+    WorkOSError.WorkOSError
+  >
 }
 
 export interface ApiClient {
@@ -106,7 +131,10 @@ export interface ApiClient {
 export interface OAuth2Client {
   readonly retrieveTokenByClientCredentials: (
     parameters: RetrieveTokenByClientCredentialsParameters_Redacted
-  ) => Effect.Effect<typeof RetrieveTokenByClientCredentialsResponse.Type, UnauthorizedError>
+  ) => Effect.Effect<
+    RetrieveTokenByClientCredentialsResponse,
+    WorkOSError.WorkOSError
+  >
 }
 
 export type MakeOptions = {
@@ -148,7 +176,10 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () => new ResourceNotFoundError()
+          () =>
+            new WorkOSError.WorkOSError({
+              reason: new WorkOSError.ResourceNotFoundError()
+            })
         ),
         Effect.map(({ value }) => value)
       )
@@ -207,7 +238,10 @@ export const make = (options?: MakeOptions): Effect.Effect<
           /*
            * The absence of a client ID is a special case
            */
-          () => new UnauthorizedError()
+          () =>
+            new WorkOSError.WorkOSError({
+              reason: new WorkOSError.UnauthorizedError()
+            })
         ),
         Effect.map(({ value }) => value)
       )
@@ -232,7 +266,10 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () => new ResourceNotFoundError()
+          () =>
+            new WorkOSError.WorkOSError({
+              reason: new WorkOSError.ResourceNotFoundError()
+            })
         ),
         Effect.map(({ value }) => value)
       )
@@ -500,7 +537,11 @@ export const make = (options?: MakeOptions): Effect.Effect<
           const client = yield* findClientById(parameters.clientId)
 
           if (client.secret !== Redacted.value(parameters.clientSecret)) {
-            return yield* Effect.fail(new UnauthorizedError())
+            return yield* Effect.fail(
+              new WorkOSError.WorkOSError({
+                reason: new WorkOSError.UnauthorizedError()
+              })
+            )
           }
 
           const accessToken = yield* pipe(

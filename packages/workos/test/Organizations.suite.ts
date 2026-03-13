@@ -1,5 +1,6 @@
 import { describe, expect, type Vitest } from "@effect/vitest"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
 import * as ApiGateway from "../src/ApiGateway.ts"
 
 export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway, boolean>) => {
@@ -18,7 +19,13 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
           }
         })
 
-        yield* Effect.addFinalizer(() => client.organizations.deleteOrganization(organization.id))
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            client.organizations.deleteOrganization(organization.id),
+            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization", e)),
+            Effect.ignore
+          )
+        )
 
         expect(organization.name).toEqual(organizationName)
         expect(organization.metadata).toMatchObject({

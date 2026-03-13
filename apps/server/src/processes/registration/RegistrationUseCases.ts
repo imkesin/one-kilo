@@ -104,12 +104,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 preferredName: S.decode(PreferredName)(firstName),
                 fullName: S.decode(FullName)(`${firstName} ${lastName}`)
               }),
-              Effect.tapError((cause) =>
+              Effect.tapError((e) =>
                 pipe(
-                  Effect.logWarning(
-                    "Failed to decode person names from a WorkOS user",
-                    cause
-                  ),
+                  Effect.logWarning("Failed to decode person names from a WorkOS user", e),
                   Effect.annotateLogs({
                     workosUserId: id,
                     workosFirstName: firstName,
@@ -151,14 +148,14 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           const workspaceMembershipId = yield* idGenerator.workspaceMembershipId
 
           // Special suffix is intended to support debugging through the WorkOS console.
-          const workosOrganizationName = `Personal ${workspaceId.slice(-6).toUpperCase()}`
+          const workosPersonalOrganizationName = `Personal ${workspaceId.slice(-6).toUpperCase()}`
 
           const { preferredName, fullName, workosName } = yield* derivePersonNamesFromWorkosUser(workosUser)
 
           const [workosOrganization] = yield* Effect.all(
             [
               workosGatewayClient.organizations.createOrganization({
-                name: workosOrganizationName,
+                name: workosPersonalOrganizationName,
                 externalId: workspaceId
               }),
               pipe(
@@ -179,7 +176,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           // If there is any failure, attempt to clean up the dangling organization
           yield* Effect.addFinalizer((exit) => {
             if (Exit.isFailure(exit)) {
-              return workosGatewayClient.organizations.deleteOrganization(workosOrganization.id)
+              return pipe(
+                workosGatewayClient.organizations.deleteOrganization(workosOrganization.id),
+                Effect.tapError((e) => Effect.logWarning("Failed to clean up a WorkOS organization", e)),
+                Effect.ignore
+              )
             }
 
             return Effect.void
