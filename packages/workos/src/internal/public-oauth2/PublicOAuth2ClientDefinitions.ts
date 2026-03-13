@@ -10,7 +10,7 @@ import { BuildAuthorizeUrlParameters } from "./PublicOAuth2ClientDefinitionSchem
 export interface Client {
   readonly buildAuthorizeUrl: (parameters: typeof BuildAuthorizeUrlParameters.Type) => Effect.Effect<
     string,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 }
 
@@ -30,7 +30,7 @@ export const make = (options: { readonly authkitBaseURL: string }): Client => {
             Either.match({
               onLeft: (error) =>
                 Effect.fail(
-                  new WorkOSError.WorkOSError({
+                  new WorkOSError.WorkOSCommonError({
                     reason: new WorkOSError.UnexpectedError({
                       cause: error,
                       message: "Failed to build authorization URL"

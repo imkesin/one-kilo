@@ -15,15 +15,15 @@ export interface Client {
 
   readonly createOrganization: (
     parameters: typeof CreateOrganizationParameters.Type
-  ) => Effect.Effect<Organization, WorkOSError.WorkOSError>
-
-  readonly deleteOrganization: (
-    organizationId: OrganizationId
-  ) => Effect.Effect<DeleteOrganizationOutcome, WorkOSError.WorkOSError>
+  ) => Effect.Effect<Organization, WorkOSError.WorkOSCommonError>
 
   readonly retrieveOrganization: (
     organizationId: OrganizationId
-  ) => Effect.Effect<Organization, WorkOSError.WorkOSError>
+  ) => Effect.Effect<Organization, WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError>
+
+  readonly deleteOrganization: (
+    organizationId: OrganizationId
+  ) => Effect.Effect<DeleteOrganizationOutcome, WorkOSError.WorkOSCommonError>
 }
 
 export const make = (httpClient: HttpClient.HttpClient): Client => {
@@ -31,7 +31,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
       HttpResponseExtensions.catchNetworkErrors,
@@ -42,7 +42,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
       Effect.andThen(httpClient.execute),
@@ -87,12 +87,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(Organization),
-            "404": () =>
-              Effect.fail(
-                new WorkOSError.WorkOSError({
-                  reason: new WorkOSError.ResourceNotFoundError()
-                })
-              ),
+            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

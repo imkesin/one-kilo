@@ -1,6 +1,9 @@
 import * as S from "effect/Schema"
+import { AuthenticationCode } from "./Values.ts"
 
 const TypeId = "~effect/auth-workos/WorkOSError" as const
+
+// === Common Errors ===
 
 export class HttpRequestError extends S.TaggedError<HttpRequestError>(
   "@effect/auth-workos/HttpRequestError"
@@ -20,18 +23,6 @@ export class HttpResponseError extends S.TaggedError<HttpResponseError>(
   }
 ) {}
 
-export class ResourceNotFoundError
-  extends S.TaggedError<ResourceNotFoundError>("@effect/auth-workos/ResourceNotFoundError")(
-    "ResourceNotFoundError",
-    {}
-  )
-{}
-
-export class UnauthorizedError extends S.TaggedError<UnauthorizedError>("@effect/auth-workos/UnauthorizedError")(
-  "UnauthorizedError",
-  {}
-) {}
-
 export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/auth-workos/UnexpectedError")(
   "UnexpectedError",
   {
@@ -40,19 +31,46 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/aut
   }
 ) {}
 
-const WorkOSErrorReason = S.Union(
+const WorkOSCommonErrorReason = S.Union(
   HttpRequestError,
   HttpResponseError,
-  ResourceNotFoundError,
-  UnauthorizedError,
   UnexpectedError
 )
 
-export class WorkOSError extends S.TaggedError<WorkOSError>("@effect/auth-workos/WorkOSError")(
-  "WorkOSError",
+export class WorkOSCommonError extends S.TaggedError<WorkOSCommonError>("@effect/auth-workos/WorkOSCommonError")(
+  "WorkOSCommonError",
   {
-    reason: WorkOSErrorReason
+    reason: WorkOSCommonErrorReason
   }
+) {
+  readonly [TypeId] = TypeId
+}
+
+// === Specific Errors ===
+
+export class InvalidAuthenticationCodeError
+  extends S.TaggedError<InvalidAuthenticationCodeError>("@effect/auth-workos/InvalidAuthenticationCodeError")(
+    "InvalidAuthenticationCodeError",
+    {
+      code: AuthenticationCode
+    }
+  )
+{
+  readonly [TypeId] = TypeId
+}
+
+export class ResourceNotFoundError
+  extends S.TaggedError<ResourceNotFoundError>("@effect/auth-workos/ResourceNotFoundError")(
+    "ResourceNotFoundError",
+    {}
+  )
+{
+  readonly [TypeId] = TypeId
+}
+
+export class UnauthorizedError extends S.TaggedError<UnauthorizedError>("@effect/auth-workos/UnauthorizedError")(
+  "UnauthorizedError",
+  {}
 ) {
   readonly [TypeId] = TypeId
 }

@@ -10,6 +10,7 @@ import type { EnvironmentClientId, OrganizationMembershipId, UserId } from "../.
 import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
 import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
+  AuthenticateWithCodeError,
   AuthenticateWithCodeParameters,
   AuthenticateWithCodeResponse,
   AuthenticateWithRefreshTokenParameters,
@@ -35,43 +36,43 @@ export interface Client {
 
   readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters_WithoutClientFields) => Effect.Effect<
     AuthenticateWithCodeResponse,
-    WorkOSError.WorkOSError
+    WorkOSError.InvalidAuthenticationCodeError | WorkOSError.WorkOSCommonError
   >
 
   readonly authenticateWithRefreshToken: (
     parameters: AuthenticateWithRefreshTokenParameters_WithoutClientFields
   ) => Effect.Effect<
     AuthenticateWithRefreshTokenResponse,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveUser: (userId: UserId) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
 
   readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
 
   readonly deleteUser: (userId: UserId) => Effect.Effect<
     DeleteUserOutcome,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly createOrganizationMembership: (
     parameters: typeof CreateOrganizationMembershipParameters.Type
-  ) => Effect.Effect<OrganizationMembership, WorkOSError.WorkOSError>
+  ) => Effect.Effect<OrganizationMembership, WorkOSError.WorkOSCommonError>
 
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
-  ) => Effect.Effect<DeleteOrganizationMembershipOutcome, WorkOSError.WorkOSError>
+  ) => Effect.Effect<DeleteOrganizationMembershipOutcome, WorkOSError.WorkOSCommonError>
 }
 
 export const make = (
@@ -85,7 +86,7 @@ export const make = (
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
       HttpResponseExtensions.catchNetworkErrors,
@@ -96,7 +97,7 @@ export const make = (
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
       Effect.andThen(httpClient.execute),
@@ -124,6 +125,16 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithCodeResponse),
+            "400": (response) =>
+              pipe(
+                response,
+                HttpClientResponse.schemaBodyJson(AuthenticateWithCodeError.InvalidGrant),
+                Effect.flatMap(() => new WorkOSError.InvalidAuthenticationCodeError({ code: parameters.code })),
+                Effect.catchTags({
+                  "ParseError": () => HttpResponseExtensions.unexpectedStatus(response),
+                  "ResponseError": () => HttpResponseExtensions.unexpectedStatus(response)
+                })
+              ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -173,12 +184,7 @@ export const make = (
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () =>
-              Effect.fail(
-                new WorkOSError.WorkOSError({
-                  reason: new WorkOSError.ResourceNotFoundError()
-                })
-              ),
+            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -196,12 +202,7 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () =>
-              Effect.fail(
-                new WorkOSError.WorkOSError({
-                  reason: new WorkOSError.ResourceNotFoundError()
-                })
-              ),
+            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

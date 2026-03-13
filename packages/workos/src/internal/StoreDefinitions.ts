@@ -78,48 +78,48 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
 interface UserManagement {
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
   readonly retrieveUser: (userId: UserId) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
   readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
     User,
-    WorkOSError.WorkOSError
+    WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
   readonly deleteUser: (userId: UserId) => Effect.Effect<
     DeleteUserOutcome,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly createOrganizationMembership: (
     parameters: typeof CreateOrganizationMembershipParameters.Type
   ) => Effect.Effect<
     OrganizationMembership,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly deleteOrganizationMembership: (
     organizationMembershipId: OrganizationMembershipId
   ) => Effect.Effect<
     DeleteOrganizationMembershipOutcome,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 }
 
 interface Organizations {
   readonly createOrganization: (parameters: typeof CreateOrganizationParameters.Type) => Effect.Effect<
     Organization,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
   readonly retrieveOrganization: (organizationId: OrganizationId) => Effect.Effect<
     Organization,
-    WorkOSError.WorkOSError
+    WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
   readonly deleteOrganization: (organizationId: OrganizationId) => Effect.Effect<
     DeleteOrganizationOutcome,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 }
 
@@ -133,7 +133,7 @@ export interface OAuth2Client {
     parameters: RetrieveTokenByClientCredentialsParameters_Redacted
   ) => Effect.Effect<
     RetrieveTokenByClientCredentialsResponse,
-    WorkOSError.WorkOSError
+    WorkOSError.UnauthorizedError | WorkOSError.WorkOSCommonError
   >
 }
 
@@ -176,10 +176,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () =>
-            new WorkOSError.WorkOSError({
-              reason: new WorkOSError.ResourceNotFoundError()
-            })
+          () => new WorkOSError.ResourceNotFoundError()
         ),
         Effect.map(({ value }) => value)
       )
@@ -238,10 +235,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           /*
            * The absence of a client ID is a special case
            */
-          () =>
-            new WorkOSError.WorkOSError({
-              reason: new WorkOSError.UnauthorizedError()
-            })
+          () => new WorkOSError.UnauthorizedError()
         ),
         Effect.map(({ value }) => value)
       )
@@ -266,10 +260,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () =>
-            new WorkOSError.WorkOSError({
-              reason: new WorkOSError.ResourceNotFoundError()
-            })
+          () => new WorkOSError.ResourceNotFoundError()
         ),
         Effect.map(({ value }) => value)
       )
@@ -537,11 +528,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           const client = yield* findClientById(parameters.clientId)
 
           if (client.secret !== Redacted.value(parameters.clientSecret)) {
-            return yield* Effect.fail(
-              new WorkOSError.WorkOSError({
-                reason: new WorkOSError.UnauthorizedError()
-              })
-            )
+            return yield* Effect.fail(new WorkOSError.UnauthorizedError())
           }
 
           const accessToken = yield* pipe(

@@ -16,7 +16,7 @@ type BuildAuthorizationUrlParameters_WithoutClientId = Omit<
 export interface Client {
   readonly buildAuthorizationUrl: (parameters: BuildAuthorizationUrlParameters_WithoutClientId) => Effect.Effect<
     string,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 }
 
@@ -36,7 +36,7 @@ export const make = (options: { apiPath: string; clientId: EnvironmentClientId }
             Either.match({
               onLeft: (error) =>
                 Effect.fail(
-                  new WorkOSError.WorkOSError({
+                  new WorkOSError.WorkOSCommonError({
                     reason: new WorkOSError.UnexpectedError({
                       cause: error,
                       message: "Failed to build authorization URL"

@@ -82,6 +82,11 @@ export class AuthenticateWithCodeResponse
     )
   })
 {}
+export const AuthenticateWithCodeError = {
+  InvalidGrant: S.Struct({
+    error: S.Literal("invalid_grant")
+  })
+} as const
 
 export class AuthenticateWithPKCEParameters
   extends S.Class<AuthenticateWithPKCEParameters>("AuthenticateWithPKCEParameters")({

@@ -13,7 +13,7 @@ export const encodeCatching = <
     S.encode(schema),
     Effect.catchTag("ParseError", (error) =>
       Effect.fail(
-        new WorkOSError.WorkOSError({
+        new WorkOSError.WorkOSCommonError({
           reason: new WorkOSError.UnexpectedError({
             cause: error,
             message: "Failed to encode input"

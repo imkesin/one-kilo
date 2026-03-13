@@ -39,28 +39,28 @@ export interface Client {
     parameters: typeof AuthorizeDeviceParameters.Type
   ) => Effect.Effect<
     typeof AuthorizeDeviceResponse.Type,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByAuthorizationCode: (
     parameters: RetrieveTokenByAuthorizationCodeParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByAuthorizationCodeResponse.Type,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByRefreshToken: (
     parameters: RetrieveTokenByRefreshTokenParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByRefreshTokenResponse.Type,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByClientCredentials: (
     parameters: RetrieveTokenByClientCredentialsParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByClientCredentialsResponse.Type,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 
   /**
@@ -70,14 +70,14 @@ export interface Client {
     parameters: RetrieveTokenByDeviceCodeParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByDeviceCodeResponseSuccess.Type,
-    DeviceCodeAuthorizationTerminated | WorkOSError.WorkOSError
+    DeviceCodeAuthorizationTerminated | WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveUserInfo: (
     accessToken: AccessToken
   ) => Effect.Effect<
     typeof RetrieveUserInfoResponse.Type,
-    WorkOSError.WorkOSError
+    WorkOSError.WorkOSCommonError
   >
 }
 
@@ -86,7 +86,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E>
   ) => (
     request: HttpClientRequest.HttpClientRequest
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E> = (f) => (request) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E> = (f) => (request) =>
     pipe(
       httpClient.execute(request),
       HttpResponseExtensions.catchNetworkErrors,
@@ -97,7 +97,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     f: (response: HttpClientResponse.HttpClientResponse) => Effect.Effect<A, E2>
   ) => (
     requestEffect: Effect.Effect<HttpClientRequest.HttpClientRequest, E1>
-  ) => Effect.Effect<A, WorkOSError.WorkOSError | E1 | E2> = (f) => (requestEffect) =>
+  ) => Effect.Effect<A, WorkOSError.WorkOSCommonError | E1 | E2> = (f) => (requestEffect) =>
     pipe(
       requestEffect,
       Effect.flatMap((request) => httpClient.execute(request)),
