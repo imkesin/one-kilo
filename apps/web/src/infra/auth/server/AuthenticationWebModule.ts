@@ -30,8 +30,8 @@ export class AccessTokenExpiredError extends S.TaggedError<AccessTokenExpiredErr
 
 const HTTP_ONLY_COOKIE_NAME = "effect-workos/web/jwt-session-cookie"
 
-export class SessionsWebModule extends Effect.Service<SessionsWebModule>()(
-  "SessionsWebModule",
+export class AuthenticationWebModule extends Effect.Service<AuthenticationWebModule>()(
+  "AuthenticationWebModule",
   {
     dependencies: [ServerApiClient.Default],
     effect: Effect.gen(function*() {

@@ -23,8 +23,8 @@ type CodeExchangeOutcome = Data.TaggedEnum<{
 }>
 const CodeExchangeOutcome = Data.taggedEnum<CodeExchangeOutcome>()
 
-export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()(
-  "@one-kilo/server/SessionsOrchestrator",
+export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrchestrator>()(
+  "@one-kilo/server/AuthenticationOrchestrator",
   {
     dependencies: [
       UsersQueryRepository.Default,
@@ -38,7 +38,7 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
       const usersQueryRepository = yield* UsersQueryRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
 
-      const exchangeCodeForSession = Effect.fn("SessionsOrchestrator.exchangeCodeForSession")(
+      const exchangeCode = Effect.fn("AuthenticationOrchestrator.exchangeCode")(
         function*(options: { readonly code: WorkOSValues.AuthenticationCode }) {
           const {
             user: workosUser,
@@ -93,7 +93,7 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
         }
       )
 
-      return { exchangeCodeForSession }
+      return { exchangeCode }
     })
   }
 ) {}

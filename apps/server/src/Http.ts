@@ -10,18 +10,18 @@ import * as Layer from "effect/Layer"
 import { createServer } from "node:http"
 import { SqlLive } from "./infra/Sql.ts"
 import { ApiGatewayAndDirectClientLive } from "./infra/WorkOS.ts"
+import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
-import { SessionsHttp } from "./modules/sessions/SessionsHttp.ts"
 
 const ServerApiLive = pipe(
   HttpApiBuilder.api(ServerApi),
   Layer.provide([
-    HealthHttp,
-    SessionsHttp
+    AuthenticationHttp,
+    HealthHttp
   ]),
   Layer.provide([
-    SqlLive,
-    ApiGatewayAndDirectClientLive
+    ApiGatewayAndDirectClientLive,
+    SqlLive
   ]),
   Layer.provide(NodeHttpClient.layerUndici)
 )
