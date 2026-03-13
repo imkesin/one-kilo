@@ -5,11 +5,17 @@ import * as S from "effect/Schema"
 export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/lib/UnexpectedError")(
   "UnexpectedError",
   {
-    cause: S.optional(S.Defect),
-    context: S.optional(S.Record({
-      key: S.NonEmptyTrimmedString,
-      value: S.Unknown
-    })),
+    cause: pipe(
+      S.Defect,
+      S.optional
+    ),
+    context: pipe(
+      S.Record({
+        key: S.NonEmptyTrimmedString,
+        value: S.Unknown
+      }),
+      S.optional
+    ),
     message: S.NonEmptyTrimmedString
   },
   {
@@ -40,7 +46,7 @@ export const dieWithUnexpectedErrorCallback = <E>(message: string) => (error?: E
 export const orDieWithUnexpectedError = <A, E, R>(message: string) => (self: Effect.Effect<A, E, R>) =>
   pipe(
     self,
-    Effect.tapError((error) => Effect.logError(message, error)),
+    Effect.tapErrorCause((cause) => Effect.logError(message, cause)),
     Effect.orDieWith((error) => {
       if (error instanceof UnexpectedError) {
         return error

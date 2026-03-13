@@ -3,7 +3,7 @@ import * as S from "effect/Schema"
 const TypeId = "~effect/auth-workos/WorkOSError" as const
 
 export class HttpRequestError extends S.TaggedError<HttpRequestError>(
-  "@effect/auth-workos/Error/HttpRequestError"
+  "@effect/auth-workos/HttpRequestError"
 )(
   "HttpRequestError",
   {
@@ -12,7 +12,7 @@ export class HttpRequestError extends S.TaggedError<HttpRequestError>(
 ) {}
 
 export class HttpResponseError extends S.TaggedError<HttpResponseError>(
-  "@effect/auth-workos/Error/HttpResponseError"
+  "@effect/auth-workos/HttpResponseError"
 )(
   "HttpResponseError",
   {
@@ -21,18 +21,18 @@ export class HttpResponseError extends S.TaggedError<HttpResponseError>(
 ) {}
 
 export class ResourceNotFoundError
-  extends S.TaggedError<ResourceNotFoundError>("@effect/auth-workos/Error/ResourceNotFoundError")(
+  extends S.TaggedError<ResourceNotFoundError>("@effect/auth-workos/ResourceNotFoundError")(
     "ResourceNotFoundError",
     {}
   )
 {}
 
-export class UnauthorizedError extends S.TaggedError<UnauthorizedError>("@effect/auth-workos/Error/UnauthorizedError")(
+export class UnauthorizedError extends S.TaggedError<UnauthorizedError>("@effect/auth-workos/UnauthorizedError")(
   "UnauthorizedError",
   {}
 ) {}
 
-export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/auth-workos/Error/UnexpectedError")(
+export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/auth-workos/UnexpectedError")(
   "UnexpectedError",
   {
     cause: S.Defect,

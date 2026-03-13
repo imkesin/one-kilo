@@ -104,9 +104,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 preferredName: S.decode(PreferredName)(firstName),
                 fullName: S.decode(FullName)(`${firstName} ${lastName}`)
               }),
-              Effect.tapError((e) =>
+              Effect.tapErrorCause((cause) =>
                 pipe(
-                  Effect.logWarning("Failed to decode person names from a WorkOS user", e),
+                  Effect.logWarning("Failed to decode person names from a WorkOS user", cause),
                   Effect.annotateLogs({
                     workosUserId: id,
                     workosFirstName: firstName,
@@ -181,7 +181,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             if (Exit.isFailure(exit)) {
               return pipe(
                 workosGatewayClient.organizations.deleteOrganization(workosOrganization.id),
-                Effect.tapError((e) => Effect.logWarning("Failed to clean up a WorkOS organization", e)),
+                Effect.tapErrorCause((cause) => Effect.logWarning("Failed to clean up a WorkOS organization", cause)),
                 Effect.ignore
               )
             }

@@ -22,7 +22,7 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
         yield* Effect.addFinalizer(() =>
           pipe(
             client.organizations.deleteOrganization(organization.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )
         )

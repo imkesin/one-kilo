@@ -25,7 +25,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() => {
           return pipe(
             client.userManagement.deleteUser(user.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         })
@@ -54,7 +54,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             client.userManagement.deleteUser(user.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
@@ -85,7 +85,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             client.organizations.deleteOrganization(organization.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )
         )
@@ -99,7 +99,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             client.userManagement.deleteUser(user.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete a user", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
@@ -112,7 +112,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             client.userManagement.deleteOrganizationMembership(membership.id),
-            Effect.tapError((e) => Effect.logWarning("Failed to delete an organization membership", e)),
+            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization membership", cause)),
             Effect.ignore
           )
         )
