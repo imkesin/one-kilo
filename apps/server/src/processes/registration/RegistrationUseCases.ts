@@ -96,7 +96,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         PgClientExtensions.withSerializableTransaction(pg)
       )
 
-      const derivePersonNamesFromWorkosUser = Effect.fnUntraced(
+      const derivePersonNamesFromWorkosUser = Effect.fn("RegistrationUseCases.derivePersonNamesFromWorkosUser")(
         function*({ id, firstName, lastName }: Pick<WorkOSEntities.User, "id" | "firstName" | "lastName">) {
           if (firstName !== null && lastName !== null) {
             const decoded = yield* pipe(
@@ -123,9 +123,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 workosName: { firstName, lastName }
               }
             }
-
-            yield* Effect.logWarning("Failed to derive person names from WorkOS user, using fallback names")
           }
+
+          yield* Effect.logWarning("Failed to derive person names from WorkOS user, using fallback names")
 
           return yield* Effect.map(
             fallbackNameGenerator.generate,
@@ -154,10 +154,13 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
           const [workosOrganization] = yield* Effect.all(
             [
-              workosGatewayClient.organizations.createOrganization({
-                name: workosPersonalOrganizationName,
-                externalId: workspaceId
-              }),
+              pipe(
+                workosGatewayClient.organizations.createOrganization({
+                  name: workosPersonalOrganizationName,
+                  externalId: workspaceId
+                }),
+                orDieWithUnexpectedError("Failed to create WorkOS organization during registration.")
+              ),
               pipe(
                 workosGatewayClient.userManagement.updateUser(
                   workosUser.id,
@@ -186,16 +189,22 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             return Effect.void
           })
 
-          const workosOrganizationMembership = yield* workosGatewayClient.userManagement.createOrganizationMembership({
-            userId: workosUser.id,
-            organizationId: workosOrganization.id,
-            roles: []
-          })
+          const workosOrganizationMembership = yield* pipe(
+            workosGatewayClient.userManagement.createOrganizationMembership({
+              userId: workosUser.id,
+              organizationId: workosOrganization.id,
+              roles: []
+            }),
+            orDieWithUnexpectedError("Failed to create WorkOS organization membership during registration.")
+          )
 
-          const refreshTokenResult = yield* workosDirectClient.userManagement.authenticateWithRefreshToken({
-            refreshToken: inputWorkosRefreshToken,
-            organizationId: workosOrganization.id
-          })
+          const refreshTokenResponse = yield* pipe(
+            workosDirectClient.userManagement.authenticateWithRefreshToken({
+              refreshToken: inputWorkosRefreshToken,
+              organizationId: workosOrganization.id
+            }),
+            orDieWithUnexpectedError("Failed to refresh WorkOS token within registration.")
+          )
 
           yield* persistRegistration({
             userParameters: {
@@ -217,10 +226,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           return {
             userId,
             workspaceId,
-            workosAccessToken: refreshTokenResult.accessToken,
-            workosRefreshToken: refreshTokenResult.refreshToken
+            workosAccessToken: refreshTokenResponse.accessToken,
+            workosRefreshToken: refreshTokenResponse.refreshToken
           }
-        }
+        },
+        Effect.scoped
       )
 
       return { registerHumanUser }

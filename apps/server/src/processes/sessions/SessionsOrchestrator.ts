@@ -2,7 +2,7 @@ import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
-import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { UsersQueryRepository } from "@one-kilo/sql/modules/users/UsersQueryRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
 import * as Data from "effect/Data"
@@ -45,7 +45,10 @@ export class SessionsOrchestrator extends Effect.Service<SessionsOrchestrator>()
             organizationId: workosOrganizationId,
             accessToken: workosAccessToken,
             refreshToken: workosRefreshToken
-          } = yield* workosClient.userManagement.authenticateWithCode({ code: options.code })
+          } = yield* pipe(
+            workosClient.userManagement.authenticateWithCode({ code: options.code }),
+            orDieWithUnexpectedError("Failed to authenticate with WorkOS code.")
+          )
 
           const handleReturningUser = (userId: UserId) =>
             pipe(

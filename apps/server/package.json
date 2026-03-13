@@ -22,7 +22,6 @@
     "clean": "rm -rf .turbo dist",
     "dev": "pnpm /dev:.+/",
     "dev:node": "pnpm node:base --watch dist/src/dev.js",
-    "dev:tsc": "tsc --build tsconfig.src.json --watch --preserveWatchOutput",
     "docker:build": "docker build -f Dockerfile -t one-kilo-server ../..",
     "lint": "eslint .",
     "node:base": "node --env-file=.env.local --enable-source-maps",

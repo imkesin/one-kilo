@@ -64,7 +64,8 @@ export class AuthenticateWithCodeParameters
           decode: () => Option.some("authorization_code" as const),
           encode: () => "authorization_code" as const
         }
-      )
+      ),
+      S.fromKey("grant_type")
     ),
 
     ...AuthenticateRequestWithSecretCommonFields
