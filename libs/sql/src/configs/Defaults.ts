@@ -1,6 +1,6 @@
 export const PostgresDefaults = {
   host: "localhost",
-  port: 5432,
+  port: 20000,
   user: "postgres",
   password: "postgres",
   localDB: "one_kilo_local",

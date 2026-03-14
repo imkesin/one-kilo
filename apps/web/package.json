@@ -27,11 +27,11 @@
   "scripts": {
     "build": "next build",
     "clean": "rm -rf .next .turbo dist",
-    "dev": "next dev",
-    "docker:build": "docker build -f Dockerfile -t one-kilo-web ../..",
+    "dev": "next dev --port 11000",
+    "docker:build": "docker build --file Dockerfile --tag one-kilo-web ../..",
     "lint": "eslint .",
     "prepare": "panda codegen",
-    "start": "next start",
+    "start": "next start --port 11000",
     "typecheck": "tsc --noEmit --outDir dist"
   }
 }

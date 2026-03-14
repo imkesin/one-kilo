@@ -10,7 +10,7 @@ const POSTGRES_IMAGE = "postgres:18.2"
 const CONTAINER_NAME = "local-one-kilo-postgres"
 
 const isContainerRunning = Effect.gen(function*() {
-  const cmd = Command.make("docker", "inspect", "-f", "{{.State.Running}}", CONTAINER_NAME)
+  const cmd = Command.make("docker", "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME)
   const code = yield* pipe(cmd, Command.exitCode)
   if (code !== 0) return false
   const output = yield* pipe(cmd, Command.string())
@@ -58,15 +58,15 @@ const createContainer = Effect.gen(function*() {
       "run",
       "--name",
       CONTAINER_NAME,
-      "-e",
+      "--env",
       `POSTGRES_USER=${PostgresDefaults.user}`,
-      "-e",
+      "--env",
       `POSTGRES_PASSWORD=${PostgresDefaults.password}`,
-      "-e",
+      "--env",
       `POSTGRES_DB=${PostgresDefaults.localDB}`,
-      "-p",
-      "5432:5432",
-      "-d",
+      "--publish",
+      `${PostgresDefaults.port}:5432`,
+      "--detach",
       POSTGRES_IMAGE
     ),
     Command.exitCode
@@ -78,7 +78,7 @@ const createContainer = Effect.gen(function*() {
 })
 
 const waitForPostgres = pipe(
-  Command.make("docker", "exec", CONTAINER_NAME, "pg_isready", "-U", PostgresDefaults.user),
+  Command.make("docker", "exec", CONTAINER_NAME, "pg_isready", "--username", PostgresDefaults.user),
   Command.exitCode,
   Effect.flatMap((code) =>
     code === 0
@@ -99,9 +99,9 @@ const createDatabase = (name: string) =>
       "exec",
       CONTAINER_NAME,
       "psql",
-      "-U",
+      "--username",
       PostgresDefaults.user,
-      "-c",
+      "--command",
       `CREATE DATABASE ${name};`
     ),
     Command.exitCode,

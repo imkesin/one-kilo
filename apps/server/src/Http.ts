@@ -51,7 +51,7 @@ export const HttpLive = HttpApiBuilder
         {
           port: pipe(
             Config.number("PORT"),
-            Config.withDefault(10_000)
+            Config.withDefault(10000)
           )
         }
       )

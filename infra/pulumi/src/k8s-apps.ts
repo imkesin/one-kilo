@@ -35,68 +35,7 @@ export function createAppDeployments({
     }
   )
 
-  const WEB_PORT = 3000
-  const webLabels = { app: "web" } as const
-
-  const _webDeployment = new K8s.apps.v1.Deployment(
-    "web",
-    {
-      metadata: { namespace: k8sNamespace.metadata.name },
-      spec: {
-        replicas: 1,
-        selector: { matchLabels: webLabels },
-        template: {
-          metadata: { labels: webLabels },
-          spec: {
-            containers: [{
-              name: "web",
-              image: Pulumi.interpolate`${imageBase}/web:${imageTag}`,
-              ports: [{ containerPort: WEB_PORT }],
-              env: [
-                {
-                  name: "WORKOS_CLIENT_ID",
-                  value: config.require("workos-client-id")
-                }
-              ],
-              resources: {
-                requests: { cpu: "500m", memory: "512Mi" },
-                limits: { cpu: "1000m", memory: "1Gi" }
-              },
-              livenessProbe: {
-                httpGet: {
-                  path: "/livez",
-                  port: WEB_PORT
-                },
-                initialDelaySeconds: 10,
-                periodSeconds: 30
-              }
-            }]
-          }
-        }
-      }
-    },
-    {
-      provider: k8sProvider,
-      dependsOn: [k8sNamespace]
-    }
-  )
-  const _webService = new K8s.core.v1.Service(
-    "web",
-    {
-      metadata: { name: "web", namespace: k8sNamespace.metadata.name },
-      spec: {
-        type: "ClusterIP",
-        selector: webLabels,
-        ports: [{ port: 80, targetPort: WEB_PORT }]
-      }
-    },
-    {
-      provider: k8sProvider,
-      dependsOn: [k8sNamespace]
-    }
-  )
-
-  const SERVER_PORT = 10_000
+  const SERVER_PORT = 10000
   const SERVER_LABELS = { app: "server" } as const
 
   const _serverDeployment = new K8s.apps.v1.Deployment(
@@ -158,6 +97,67 @@ export function createAppDeployments({
         type: "ClusterIP",
         selector: SERVER_LABELS,
         ports: [{ port: 80, targetPort: SERVER_PORT }]
+      }
+    },
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
+  )
+
+  const WEB_PORT = 11000
+  const webLabels = { app: "web" } as const
+
+  const _webDeployment = new K8s.apps.v1.Deployment(
+    "web",
+    {
+      metadata: { namespace: k8sNamespace.metadata.name },
+      spec: {
+        replicas: 1,
+        selector: { matchLabels: webLabels },
+        template: {
+          metadata: { labels: webLabels },
+          spec: {
+            containers: [{
+              name: "web",
+              image: Pulumi.interpolate`${imageBase}/web:${imageTag}`,
+              ports: [{ containerPort: WEB_PORT }],
+              env: [
+                {
+                  name: "WORKOS_CLIENT_ID",
+                  value: config.require("workos-client-id")
+                }
+              ],
+              resources: {
+                requests: { cpu: "500m", memory: "512Mi" },
+                limits: { cpu: "1000m", memory: "1Gi" }
+              },
+              livenessProbe: {
+                httpGet: {
+                  path: "/livez",
+                  port: WEB_PORT
+                },
+                initialDelaySeconds: 10,
+                periodSeconds: 30
+              }
+            }]
+          }
+        }
+      }
+    },
+    {
+      provider: k8sProvider,
+      dependsOn: [k8sNamespace]
+    }
+  )
+  const _webService = new K8s.core.v1.Service(
+    "web",
+    {
+      metadata: { name: "web", namespace: k8sNamespace.metadata.name },
+      spec: {
+        type: "ClusterIP",
+        selector: webLabels,
+        ports: [{ port: 80, targetPort: WEB_PORT }]
       }
     },
     {
