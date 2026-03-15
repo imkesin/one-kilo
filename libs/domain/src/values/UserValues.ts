@@ -2,7 +2,7 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
 export const UserType = pipe(
-  S.Literal("MACHINE_CLIENT", "PERSON"),
+  S.Literal("MachineClient", "Person"),
   S.annotations({
     description: "The type of user",
     identifier: "UserType",

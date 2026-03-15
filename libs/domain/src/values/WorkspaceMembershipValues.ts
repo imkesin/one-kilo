@@ -2,7 +2,7 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
 export const WorkspaceMembershipRole = pipe(
-  S.Literal("OWNER"),
+  S.Literal("Owner"),
   S.annotations({
     description: "The role of a user as a member of a workspace",
     identifier: "WorkspaceMembershipRole",

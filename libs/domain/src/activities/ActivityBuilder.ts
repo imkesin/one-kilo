@@ -1,19 +1,25 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
-import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { UserId } from "../ids/UserId.ts"
 
 const TypeId = "~@one-kilo/domain/ActivityBuilder" as const
 type TypeId = typeof TypeId
 
+type Version = 1 | 2 | 3
+
 type ActivityMetadataFields<ActivityType extends string, Targets extends S.Schema.All = S.Schema.All> = {
+  // Inputs
   readonly actorId: typeof UserId
   readonly targets: Targets
-  readonly timestamp: typeof S.DateTimeUtc
 
-  readonly _type: S.PropertySignature<":", ActivityType, never, ":", ActivityType, true, never>
-  readonly _traceId: typeof S.NonEmptyTrimmedString
+  // Derived
+  readonly timestamp: typeof S.DateTimeUtc
+  readonly traceId: typeof S.NonEmptyTrimmedString
+
+  // Inferred
+  readonly type: S.tag<ActivityType>
+  readonly version: S.tag<Version>
 }
 
 interface ActivityBuilder<Targets extends S.Schema.All> {
@@ -29,12 +35,23 @@ interface ActivityBuilder<Targets extends S.Schema.All> {
   ) => { context: Context } & ActivityMetadataFields<ActivityType, Targets>
 }
 
-type DerivedTargetId<TargetType extends string> = S.brand<typeof UUIDv7, `@one-kilo/domain/${TargetType}Id`>
-type Target<T extends string = string> = { type: T; id: DerivedTargetId<T> }
+type Target<T extends string = "Unknown"> = {
+  id: S.brand<
+    typeof UUIDv7,
+    `@one-kilo/domain/${T}Id`
+  >
+  type: T
+}
 
 export function make<A extends string>(
   target: Target<A>
-): ActivityBuilder<S.Tuple<readonly [S.Struct<{ id: typeof target["id"]; type: S.tag<typeof target["type"]> }>]>>
+): ActivityBuilder<
+  S.Tuple<
+    readonly [
+      S.Struct<{ id: typeof target["id"]; type: S.tag<typeof target["type"]> }>
+    ]
+  >
+>
 export function make<
   A extends string,
   B extends string
@@ -103,31 +120,37 @@ export function make(
   return {
     [TypeId]: TypeId,
 
-    Activity: <ActivityType extends string>(activityType: ActivityType) => ({
-      actorId: UserId,
-      targets,
-      timestamp: S.DateTimeUtc,
-
-      _type: pipe(
-        S.tag(activityType),
-        S.withConstructorDefault(() => activityType)
-      ),
-      _traceId: S.NonEmptyTrimmedString
-    }),
-    ActivityWithContext: <ActivityType extends string, Context extends S.Schema.All>(
-      activityType: ActivityType,
-      context: Context
+    Activity: <ActivityType extends string>(
+      parameters: {
+        activityType: ActivityType
+        version?: Version
+      }
     ) => ({
       actorId: UserId,
-      context,
       targets,
-      timestamp: S.DateTimeUtc,
 
-      _type: pipe(
-        S.tag(activityType),
-        S.withConstructorDefault(() => activityType)
-      ),
-      _traceId: S.NonEmptyTrimmedString
+      timestamp: S.DateTimeUtc,
+      traceId: S.NonEmptyTrimmedString,
+
+      type: S.tag(parameters.activityType),
+      version: S.tag(parameters.version ?? 1)
+    }),
+    ActivityWithContext: <ActivityType extends string, Context extends S.Schema.All>(
+      parameters: {
+        activityType: ActivityType
+        context: Context
+        version?: Version
+      }
+    ) => ({
+      actorId: UserId,
+      context: parameters.context,
+      targets,
+
+      timestamp: S.DateTimeUtc,
+      traceId: S.NonEmptyTrimmedString,
+
+      type: S.tag(parameters.activityType),
+      version: S.tag(parameters.version ?? 1)
     })
   }
 }

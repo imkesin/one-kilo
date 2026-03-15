@@ -33,7 +33,7 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
 
           const user = yield* usersRepository.insert({
             id,
-            type: "PERSON",
+            type: "Person",
             personId: person.id,
             workosUserId
           })

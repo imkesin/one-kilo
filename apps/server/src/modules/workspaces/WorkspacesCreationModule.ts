@@ -41,7 +41,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
           const workspace = yield* workspacesRepository.insert({
             id,
             name: WorkspaceName.make("Personal"),
-            type: "PERSONAL",
+            type: "Personal",
             workosOrganizationId,
             performedByUserId: userId
           })
@@ -50,7 +50,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             id: workspaceMembershipParameters.id,
             userId,
             workspaceId: workspace.id,
-            role: "OWNER",
+            role: "Owner",
             workosOrganizationMembershipId: workspaceMembershipParameters.workosOrganizationMembershipId
           })
 

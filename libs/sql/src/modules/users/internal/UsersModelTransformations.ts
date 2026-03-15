@@ -5,14 +5,14 @@ import type { UsersModel } from "../UsersModel.ts"
 
 export const toUserEntity = (model: typeof UsersModel.select.Type): Effect.Effect<UserEntity> => {
   if (
-    model.type === "PERSON"
+    model.type === "Person"
     && model.personId
     && model.workosUserId
   ) {
     return Effect.succeed(
       PersonUserEntity.make({
         id: model.id,
-        type: "PERSON",
+        type: "Person",
         personId: model.personId,
         workosUserId: model.workosUserId,
         createdAt: model.createdAt,
@@ -23,14 +23,14 @@ export const toUserEntity = (model: typeof UsersModel.select.Type): Effect.Effec
   }
 
   if (
-    model.type === "MACHINE_CLIENT"
+    model.type === "MachineClient"
     && model.machineClientId
     && model.workosClientId
   ) {
     return Effect.succeed(
       MachineClientUserEntity.make({
         id: model.id,
-        type: "MACHINE_CLIENT",
+        type: "MachineClient",
         machineClientId: model.machineClientId,
         workosClientId: model.workosClientId,
         createdAt: model.createdAt,

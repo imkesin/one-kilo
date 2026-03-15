@@ -17,7 +17,7 @@ const EntityBaseFields = {
 const MachineClientUserEntityFields = {
   ...EntityBaseFields,
 
-  type: pipe(UserType, S.pickLiteral("MACHINE_CLIENT")),
+  type: pipe(UserType, S.pickLiteral("MachineClient")),
   workosClientId: WorkOSIds.ApplicationClientId
 } as const
 
@@ -37,7 +37,7 @@ export class MachineClientUserEntity
 {}
 
 export class MachineClientUser extends S.TaggedClass<MachineClientUser>("@one-kilo/domain/User:MachineClient")(
-  "MachineClientUser",
+  "User:MachineClient",
   {
     ...MachineClientUserEntityFields,
     machineClient: MachineClientOnUser
@@ -52,7 +52,7 @@ export class MachineClientUser extends S.TaggedClass<MachineClientUser>("@one-ki
 const PersonUserEntityFields = {
   ...EntityBaseFields,
 
-  type: pipe(UserType, S.pickLiteral("PERSON")),
+  type: pipe(UserType, S.pickLiteral("Person")),
   workosUserId: WorkOSIds.UserId
 } as const
 
@@ -70,7 +70,7 @@ export class PersonUserEntity extends S.TaggedClass<PersonUserEntity>("@one-kilo
 ) {}
 
 export class PersonUser extends S.TaggedClass<PersonUser>("@one-kilo/domain/User:Person")(
-  "PersonUser",
+  "User:Person",
   {
     ...PersonUserEntityFields,
     person: PersonOnUser

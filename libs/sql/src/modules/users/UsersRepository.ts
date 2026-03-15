@@ -18,13 +18,13 @@ type BaseInsertUserParameters = {
 type InsertUserParameters =
   & BaseInsertUserParameters
   & ({
-    type: "PERSON"
+    type: "Person"
     personId: PersonId
     workosUserId: WorkOSIds.UserId
     machineClientId?: never
     workosClientId?: never
   } | {
-    type: "MACHINE_CLIENT"
+    type: "MachineClient"
     machineClientId: MachineClientId
     workosClientId: WorkOSIds.ApplicationClientId
     personId?: never

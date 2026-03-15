@@ -15,7 +15,7 @@ export const WorkspaceName = pipe(
 export type WorkspaceName = typeof WorkspaceName.Type
 
 export const WorkspaceType = pipe(
-  S.Literal("PERSONAL"),
+  S.Literal("Personal"),
   S.annotations({
     description: "The type of a workspace",
     identifier: "WorkspaceType",
