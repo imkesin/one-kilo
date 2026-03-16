@@ -1,44 +1,63 @@
 import { MachineClientUserEntity, PersonUserEntity, type UserEntity } from "@one-kilo/domain/entities/User"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
 import type { UsersModel } from "../UsersModel.ts"
 
-export const toUserEntity = (model: typeof UsersModel.select.Type): Effect.Effect<UserEntity> => {
+export const toUserEntity = ({
+  id,
+  type,
+  personId,
+  workosUserId,
+  machineClientId,
+  workosClientId,
+  createdAt,
+  updatedAt,
+  archivedAt
+}: typeof UsersModel.select.Type): Effect.Effect<UserEntity> => {
   if (
-    model.type === "Person"
-    && model.personId
-    && model.workosUserId
+    type === "Person"
+    && personId
+    && workosUserId
   ) {
     return Effect.succeed(
       PersonUserEntity.make({
-        id: model.id,
+        id,
         type: "Person",
-        personId: model.personId,
-        workosUserId: model.workosUserId,
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
-        archivedAt: model.archivedAt
+        personId,
+        workosUserId,
+        createdAt,
+        updatedAt,
+        archivedAt
       })
     )
   }
 
   if (
-    model.type === "MachineClient"
-    && model.machineClientId
-    && model.workosClientId
+    type === "MachineClient"
+    && machineClientId
+    && workosClientId
   ) {
     return Effect.succeed(
       MachineClientUserEntity.make({
-        id: model.id,
+        id,
         type: "MachineClient",
-        machineClientId: model.machineClientId,
-        workosClientId: model.workosClientId,
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
-        archivedAt: model.archivedAt
+        machineClientId,
+        workosClientId,
+        createdAt,
+        updatedAt,
+        archivedAt
       })
     )
   }
 
-  return dieWithUnexpectedError("A user model could not be converted to a domain entity")
+  return pipe(
+    dieWithUnexpectedError("A user model could not be converted to a domain entity"),
+    Effect.annotateLogs({
+      user: {
+        id,
+        type
+      }
+    })
+  )
 }

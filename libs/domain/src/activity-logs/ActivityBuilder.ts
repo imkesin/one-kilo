@@ -1,6 +1,7 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import * as S from "effect/Schema"
+import { ActivityLogId } from "../ids/ActivityLogId.ts"
 import { UserId } from "../ids/UserId.ts"
 
 const TypeId = "~@one-kilo/domain/ActivityBuilder" as const
@@ -8,8 +9,9 @@ type TypeId = typeof TypeId
 
 type Version = 1 | 2 | 3
 
-type ActivityMetadataFields<ActivityType extends string, Targets extends S.Schema.All = S.Schema.All> = {
+type ActivityMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
   // Inputs
+  readonly id: typeof ActivityLogId
   readonly actorId: typeof UserId
   readonly targets: Targets
 
@@ -18,21 +20,21 @@ type ActivityMetadataFields<ActivityType extends string, Targets extends S.Schem
   readonly traceId: typeof S.NonEmptyTrimmedString
 
   // Inferred
-  readonly type: S.tag<ActivityType>
+  readonly type: S.tag<Type>
   readonly version: S.tag<Version>
 }
 
 interface ActivityBuilder<Targets extends S.Schema.All> {
   readonly [TypeId]: TypeId
 
-  Activity: <ActivityType extends string>(
-    activityType: ActivityType
-  ) => ActivityMetadataFields<ActivityType, Targets>
+  Activity: <Type extends string>(
+    type: Type
+  ) => ActivityMetadataFields<Type, Targets>
 
-  ActivityWithContext: <ActivityType extends string, Context extends S.Schema.All>(
-    activityType: ActivityType,
+  ActivityWithContext: <Type extends string, Context extends S.Schema.All>(
+    type: Type,
     context: Context
-  ) => { context: Context } & ActivityMetadataFields<ActivityType, Targets>
+  ) => ActivityMetadataFields<Type, Targets> & { context: Context }
 }
 
 type Target<T extends string = "Unknown"> = {
@@ -120,28 +122,30 @@ export function make(
   return {
     [TypeId]: TypeId,
 
-    Activity: <ActivityType extends string>(
+    Activity: <Type extends string>(
       parameters: {
-        activityType: ActivityType
+        type: Type
         version?: Version
       }
     ) => ({
+      id: ActivityLogId,
       actorId: UserId,
       targets,
 
       timestamp: S.DateTimeUtc,
       traceId: S.NonEmptyTrimmedString,
 
-      type: S.tag(parameters.activityType),
+      type: S.tag(parameters.type),
       version: S.tag(parameters.version ?? 1)
     }),
-    ActivityWithContext: <ActivityType extends string, Context extends S.Schema.All>(
+    ActivityWithContext: <Type extends string, Context extends S.Schema.All>(
       parameters: {
-        activityType: ActivityType
+        type: Type
         context: Context
         version?: Version
       }
     ) => ({
+      id: ActivityLogId,
       actorId: UserId,
       context: parameters.context,
       targets,
@@ -149,7 +153,7 @@ export function make(
       timestamp: S.DateTimeUtc,
       traceId: S.NonEmptyTrimmedString,
 
-      type: S.tag(parameters.activityType),
+      type: S.tag(parameters.type),
       version: S.tag(parameters.version ?? 1)
     })
   }

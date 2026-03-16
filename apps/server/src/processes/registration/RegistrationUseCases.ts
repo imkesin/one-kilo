@@ -108,9 +108,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 pipe(
                   Effect.logWarning("Failed to decode person names from a WorkOS user", cause),
                   Effect.annotateLogs({
-                    workosUserId: id,
-                    workosFirstName: firstName,
-                    workosLastName: lastName
+                    workosUser: {
+                      id,
+                      firstName,
+                      lastName
+                    }
                   })
                 )
               ),
