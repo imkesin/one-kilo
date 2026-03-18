@@ -2,11 +2,18 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { WorkspaceEntity } from "@one-kilo/domain/entities/Workspace"
+import { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import * as Option from "effect/Option"
+import * as S from "effect/Schema"
+import * as WorkspaceMembershipsTransformations from "./internal/WorkspaceMembershipsTransformations.ts"
+import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
 
+type FindPersonalWorkspaceAndMembershipEntityByUserIdParameters = {
+  userId: UserId
+}
 type FindWorkspaceEntityByWorkOSOrganizationIdParameters = {
   workosOrganizationId: WorkOSIds.OrganizationId
 }
@@ -17,6 +24,41 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
     dependencies: [],
     effect: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
+
+      const findPersonalWorkspaceAndMembershipEntitiesByUserIdSchema = SqlSchema.findOne({
+        Request: UserId,
+        Result: S.extend(
+          WorkspacesModel.select,
+          S.Struct({ workspaceMemberships: S.Tuple(WorkspaceMembershipsModel.select) })
+        ),
+        execute: (userId) =>
+          sql`
+            SELECT
+              ws.*,
+              JSON_AGG(${sql.unsafe(WorkspaceMembershipsModel.asJsonBBuildObject())}) AS workspaceMemberships
+            FROM workspaces ws
+            JOIN workspace_memberships wsm ON wsm.workspace_id = ws.id
+            WHERE
+              ws.type = 'Personal'
+              AND ws.archived_at IS NULL
+              AND wsm.user_id = ${userId}
+              AND wsm.archived_at IS NULL
+          `
+      })
+      const findPersonalWorkspaceAndMembershipEntitiesByUserId = Effect.fn(
+        "WorkspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByUserId"
+      )(
+        function*({ userId }: FindPersonalWorkspaceAndMembershipEntityByUserIdParameters) {
+          return yield* Effect.map(
+            findPersonalWorkspaceAndMembershipEntitiesByUserIdSchema(userId),
+            Option.map(({ workspaceMemberships: [workspaceMembership], ...workspace }) => ({
+              workspace: WorkspaceEntity.make(workspace),
+              workspaceMembership: WorkspaceMembershipsTransformations.toWorkspaceMembershipEntity(workspaceMembership)
+            }))
+          )
+        },
+        orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
+      )
 
       const findWorkspaceEntityByWorkOSOrganizationIdSchema = SqlSchema.findOne({
         Request: WorkOSIds.OrganizationId,
@@ -40,7 +82,10 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
       )
 
-      return { findWorkspaceEntityByWorkOSOrganizationId }
+      return {
+        findPersonalWorkspaceAndMembershipEntitiesByUserId,
+        findWorkspaceEntityByWorkOSOrganizationId
+      }
     })
   }
 ) {}

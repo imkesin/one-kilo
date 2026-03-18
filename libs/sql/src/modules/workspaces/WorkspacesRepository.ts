@@ -2,12 +2,25 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import { UserId } from "@one-kilo/domain/ids/UserId"
-import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { UserId } from "@one-kilo/domain/ids/UserId"
+import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import type { WorkspaceMembershipRole } from "@one-kilo/domain/values/WorkspaceMembershipValues"
 import type { WorkspaceName, WorkspaceType } from "@one-kilo/domain/values/WorkspaceValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
+import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
+
+type InsertWorkspaceMembershipParameters = {
+  userId: UserId
+  workspaceId: WorkspaceId
+  role: WorkspaceMembershipRole
+  workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
+
+  id?: WorkspaceMembershipId
+  performedByUserId?: UserId
+}
 
 type InsertWorkspaceParameters = {
   performedByUserId: UserId
@@ -62,7 +75,48 @@ export class WorkspacesRepository extends Effect.Service<WorkspacesRepository>()
         orDieWithUnexpectedError("Failed to insert workspace")
       )
 
-      return { insert }
+      const insertMembershipSchema = SqlSchema.single({
+        Request: WorkspaceMembershipsModel.insert,
+        Result: WorkspaceMembershipsModel.select,
+        execute: (request) => sql`INSERT INTO workspace_memberships ${sql.insert(request).returning("*")}`
+      })
+      const insertMembership = Effect.fn("WorkspaceMembershipsRepository.insertMembership")(
+        function*({
+          userId,
+          workspaceId,
+          role,
+          workosOrganizationMembershipId,
+          id,
+          performedByUserId
+        }: InsertWorkspaceMembershipParameters) {
+          const membershipIdEffect = id
+            ? Effect.succeed(id)
+            : idGenerator.workspaceMembershipId
+
+          return yield* Effect.flatMap(
+            membershipIdEffect,
+            (membershipId) =>
+              insertMembershipSchema({
+                id: membershipId,
+                userId,
+                workspaceId,
+                role,
+                workosOrganizationMembershipId,
+                createdAt: undefined,
+                createdByUserId: performedByUserId ?? userId,
+                updatedAt: undefined,
+                updatedByUserId: performedByUserId ?? userId,
+                archivedAt: undefined
+              })
+          )
+        },
+        orDieWithUnexpectedError("Failed to insert workspace membership")
+      )
+
+      return {
+        insert,
+        insertMembership
+      }
     })
   }
 ) {}

@@ -4,7 +4,7 @@ import { UserId } from "../ids/UserId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 import { WorkspaceMembershipId } from "../ids/WorkspaceMembershipId.ts"
 import { WorkspaceMembershipRole } from "../values/WorkspaceMembershipValues.ts"
-import { EntityAuditFields } from "./internal/EntityFields.ts"
+import { EntityRelationAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: WorkspaceMembershipId,
@@ -16,7 +16,7 @@ const EntityBaseFields = {
 
   workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId,
 
-  ...EntityAuditFields
+  ...EntityRelationAuditFields
 } as const
 
 export class WorkspaceMembership extends S.TaggedClass<WorkspaceMembership>("@one-kilo/domain/WorkspaceMembership")(

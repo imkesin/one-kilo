@@ -17,4 +17,19 @@ export class WorkspaceMembershipsModel extends Model.Class<WorkspaceMembershipsM
   workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId,
 
   ...ModelAuditFields
-}) {}
+}) {
+  static asJsonBBuildObject({ alias } = { alias: "wsm" }) {
+    return `
+      JSONB_BUILD_OBJECT(
+        'id', ${alias}.id,
+        'user_id', ${alias}.user_id,
+        'workspace_id', ${alias}.workspace_id,
+        'role', ${alias}.role,
+        'workos_organization_membership_id', ${alias}.workos_organization_membership_id,
+        'created_at', ${alias}.created_at,
+        'updated_at', ${alias}.updated_at,
+        'archived_at', ${alias}.archived_at
+      )
+    `
+  }
+}

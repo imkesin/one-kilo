@@ -3,9 +3,12 @@ import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
-import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
+import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Option from "effect/Option"
 
 type CreatePersonalWorkspaceParameters = {
   id: WorkspaceId
@@ -22,11 +25,11 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
   "@one-kilo/server/WorkspacesCreationModule",
   {
     dependencies: [
-      WorkspaceMembershipsRepository.Default,
+      WorkspacesQueryRepository.Default,
       WorkspacesRepository.Default
     ],
     effect: Effect.gen(function*() {
-      const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
+      const workspacesQueryRepository = yield* WorkspacesQueryRepository
       const workspacesRepository = yield* WorkspacesRepository
 
       const createPersonalWorkspace = Effect.fn("WorkspacesCreationModule.createPersonalWorkspace")(
@@ -36,7 +39,15 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
           userId,
           workspaceMembershipParameters
         }: CreatePersonalWorkspaceParameters) {
-          // TODO: Enforce invariants before creation
+          yield* pipe(
+            workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByUserId({ userId }),
+            Effect.andThen(
+              Option.match({
+                onNone: () => Effect.ignore,
+                onSome: () => dieWithUnexpectedError("A personal workspace already exists for this user")
+              })
+            )
+          )
 
           const workspace = yield* workspacesRepository.insert({
             id,
@@ -46,7 +57,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             performedByUserId: userId
           })
 
-          const workspaceMembership = yield* workspaceMembershipsRepository.insert({
+          const workspaceMembership = yield* workspacesRepository.insertMembership({
             id: workspaceMembershipParameters.id,
             userId,
             workspaceId: workspace.id,
