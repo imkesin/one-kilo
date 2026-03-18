@@ -1,5 +1,6 @@
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
-import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
+import { dieWithUnexpectedErrorCallback, UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Clock from "effect/Clock"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -10,6 +11,9 @@ import { cookies } from "next/headers"
 import { ServerApiClient } from "~/infra/api/ServerApiClient"
 import { DynamicServerError } from "~/lib/errors"
 
+const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
+
+// TODO => Rename these
 export class AccessTokenCookieNotFoundError extends S.TaggedError<AccessTokenCookieNotFoundError>()(
   "AccessTokenCookieNotFoundError",
   {},
@@ -18,6 +22,7 @@ export class AccessTokenCookieNotFoundError extends S.TaggedError<AccessTokenCoo
   }
 ) {}
 
+// TODO => Rename these
 export class AccessTokenExpiredError extends S.TaggedError<AccessTokenExpiredError>()(
   "AccessTokenExpiredError",
   {
@@ -28,14 +33,14 @@ export class AccessTokenExpiredError extends S.TaggedError<AccessTokenExpiredErr
   }
 ) {}
 
-const HTTP_ONLY_COOKIE_NAME = "effect-workos/web/jwt-session-cookie"
+const HTTP_ONLY_COOKIE_NAME = "one-kilo/web/AuthenticationContext"
 
 export class AuthenticationWebModule extends Effect.Service<AuthenticationWebModule>()(
   "AuthenticationWebModule",
   {
     dependencies: [ServerApiClient.Default],
     effect: Effect.gen(function*() {
-      const _serverApiClient = yield* ServerApiClient
+      const serverApiClient = yield* ServerApiClient
 
       const cookiesStoreEffect = pipe(
         Effect.tryPromise({
@@ -51,13 +56,21 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         Effect.catchTag("UnexpectedError", Effect.die)
       )
 
-      const setSessionJWT = Effect.fn(
-        function*(accessToken: WorkOSValues.AccessToken) {
+      const setAuthenticationContext = Effect.fn(
+        function*(authenticationContext: AuthenticationContext) {
           const cookieStore = yield* cookiesStoreEffect
+          const encodedAuthenticationContext = yield* pipe(
+            authenticationContext,
+            S.encode(AuthenticationContextFromJsonString),
+            Effect.catchTag(
+              "ParseError",
+              dieWithUnexpectedErrorCallback("Failed to set authentication context cookie")
+            )
+          )
 
           cookieStore.set(
             HTTP_ONLY_COOKIE_NAME,
-            accessToken,
+            encodedAuthenticationContext,
             {
               httpOnly: true,
               secure: true,
@@ -85,7 +98,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         return accessToken
       })
 
-      const _staleAccessToken = Effect.gen(function*() {
+      const _authenticationContextEffect = Effect.gen(function*() {
         const cookieStore = yield* cookiesStoreEffect
         const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
 
@@ -93,39 +106,28 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           return yield* Effect.fail(new AccessTokenCookieNotFoundError())
         }
 
-        return WorkOSValues.AccessToken.make(cookie.value)
+        const decodedAuthenticationContext = yield* pipe(
+          cookie.value,
+          S.decode(AuthenticationContextFromJsonString),
+          Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
+          Effect.mapError(() => new AccessTokenCookieNotFoundError())
+        )
+
+        return decodedAuthenticationContext
       })
 
-      // const handleAuthenticateSession = Effect.fn(function*(inputAccessToken?: AccessToken) {
-      //   const effectiveInputSessionJWT = inputAccessToken ?? (yield* staleAccessToken)
+      const handleExchangeCode = Effect.fn(function*(code: WorkOSValues.AuthenticationCode) {
+        const authenticationContext = yield* pipe(
+          serverApiClient.authentication.exchangeCode({ payload: { code } }),
+          Effect.map(({ authenticationContext }) => authenticationContext)
+        )
 
-      //   const authenticateResult = yield* serverApiClient.sessions.authenticateSession({
-      //     payload: { sessionJWT: effectiveInputSessionJWT }
-      //   })
+        yield* setAuthenticationContext(authenticationContext)
 
-      //   yield* setSessionJWT({ jwt: authenticateResult.sessionJWT })
+        return authenticationContext
+      })
 
-      //   return authenticateResult
-      // })
-      // const authenticateSession = Effect.suspend(() => handleAuthenticateSession())
-
-      // const validSessionJWT = pipe(
-      //   staleAccessToken,
-      //   Effect.flatMap(checkAccessTokenExpiration)
-      // )
-      // const refreshedSessionJWT = pipe(
-      //   validSessionJWT,
-      //   Effect.catchTag(
-      //     "AccessTokenExpiredError",
-      //     ({ accessToken }) =>
-      //       pipe(
-      //         handleAuthenticateSession(accessToken),
-      //         Effect.map(({ sessionJWT }) => sessionJWT)
-      //       )
-      //   )
-      // )
-
-      return { setSessionJWT }
+      return { handleExchangeCode }
     })
   }
 ) {}

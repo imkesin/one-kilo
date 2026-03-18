@@ -1,11 +1,9 @@
 import { NodeHttpClient } from "@effect/platform-node"
-import * as HttpApi from "@effect/platform/HttpApi"
 import * as HttpApiClient from "@effect/platform/HttpApiClient"
+import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-
-const ServerApi = HttpApi.make("ServerApi")
 
 export class ServerApiClient extends Effect.Service<ServerApiClient>()(
   "ServerApiClient",

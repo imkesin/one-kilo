@@ -17,3 +17,4 @@ export const AuthenticationContext = pipe(
     title: "Authentication Context"
   })
 )
+export type AuthenticationContext = typeof AuthenticationContext.Type
