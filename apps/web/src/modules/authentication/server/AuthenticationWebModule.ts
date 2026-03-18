@@ -82,23 +82,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         }
       )
 
-      const _checkAccessTokenExpiration = Effect.fn(function*(accessToken: WorkOSValues.AccessToken) {
-        const { exp } = Jose.decodeJwt(accessToken)
-        if (exp === undefined) {
-          return yield* Effect.die(new UnexpectedError({ message: "JWT is missing expiration" }))
-        }
-
-        const expirationInMillis = exp * 1000
-        const nowInMillis = yield* Clock.currentTimeMillis
-
-        if (expirationInMillis < nowInMillis) {
-          return yield* Effect.fail(new AccessTokenExpiredError({ accessToken }))
-        }
-
-        return accessToken
-      })
-
-      const _authenticationContextEffect = Effect.gen(function*() {
+      const rawAuthenticationContextEffect = Effect.gen(function*() {
         const cookieStore = yield* cookiesStoreEffect
         const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
 
@@ -116,16 +100,42 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         return decodedAuthenticationContext
       })
 
-      const handleExchangeCode = Effect.fn(function*(code: WorkOSValues.AuthenticationCode) {
-        const authenticationContext = yield* pipe(
-          serverApiClient.authentication.exchangeCode({ payload: { code } }),
-          Effect.map(({ authenticationContext }) => authenticationContext)
-        )
+      const _checkAccessTokenExpiration = Effect.fn(function*(accessToken: WorkOSValues.AccessToken) {
+        const { exp } = Jose.decodeJwt(accessToken)
+        if (exp === undefined) {
+          return yield* Effect.die(new UnexpectedError({ message: "JWT is missing expiration" }))
+        }
 
-        yield* setAuthenticationContext(authenticationContext)
+        const expirationInMillis = exp * 1000
+        const nowInMillis = yield* Clock.currentTimeMillis
 
-        return authenticationContext
+        if (expirationInMillis < nowInMillis) {
+          return yield* Effect.fail(new AccessTokenExpiredError({ accessToken }))
+        }
+
+        return accessToken
       })
+
+      const _getAuthenticationContext = Effect.fn(function*() {
+        const _rawContext = yield* rawAuthenticationContextEffect
+
+        // If invalid, then refresh
+
+        // Otherwise, fall through and give the context
+      })
+
+      const handleExchangeCode = Effect.fn("AuthenticationWebModule.handleExchangeCode")(
+        function*(code: WorkOSValues.AuthenticationCode) {
+          const authenticationContext = yield* pipe(
+            serverApiClient.authentication.exchangeCode({ payload: { code } }),
+            Effect.map(({ authenticationContext }) => authenticationContext)
+          )
+
+          yield* setAuthenticationContext(authenticationContext)
+
+          return authenticationContext
+        }
+      )
 
       return { handleExchangeCode }
     })
