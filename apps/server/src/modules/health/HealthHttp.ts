@@ -1,5 +1,5 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
-import { Health_RetrieveLiveness_ApiSchemas } from "@one-kilo/server-api/modules/health/HealthApiSchemas"
+import { HealthApi_RetrieveLivenessSchemas } from "@one-kilo/server-api/modules/health/HealthApiSchemas"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 
@@ -9,6 +9,6 @@ export const HealthHttp = HttpApiBuilder.group(
   (handlers) =>
     handlers.handle(
       "retrieveLiveness",
-      () => Effect.succeed(Health_RetrieveLiveness_ApiSchemas.Success.make())
+      () => Effect.succeed(HealthApi_RetrieveLivenessSchemas.Success.make())
     )
 )

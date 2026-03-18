@@ -1,6 +1,10 @@
 import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import * as S from "effect/Schema"
 
-const Health_RetrieveLiveness_ApiSuccess = S.Struct({}).annotations(HttpApiSchema.annotations({ status: 200 }))
+class HealthApi_RetrieveLiveness_Success extends S.TaggedClass<HealthApi_RetrieveLiveness_Success>()(
+  "RetrieveLiveness:Success",
+  {},
+  HttpApiSchema.annotations({ status: 200 })
+) {}
 
-export const Health_RetrieveLiveness_ApiSchemas = { Success: Health_RetrieveLiveness_ApiSuccess } as const
+export const HealthApi_RetrieveLivenessSchemas = { Success: HealthApi_RetrieveLiveness_Success } as const

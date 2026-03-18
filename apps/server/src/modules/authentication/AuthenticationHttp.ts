@@ -1,5 +1,5 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
-import { Authentication_ExchangeCode_ApiSchemas } from "@one-kilo/server-api/modules/authentication/AuthenticationApiSchemas"
+import { AuthenticationApi_ExchangeCodeSchemas } from "@one-kilo/server-api/modules/authentication/AuthenticationApiSchemas"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -19,11 +19,11 @@ export const AuthenticationHttp = HttpApiBuilder.group(
           authenticationOrchestrator.exchangeCode({ code: payload.code }),
           Effect.catchTag(
             "InvalidAuthenticationCodeError",
-            () => Effect.fail(Authentication_ExchangeCode_ApiSchemas.InvalidCodeError.make())
+            () => Effect.fail(AuthenticationApi_ExchangeCodeSchemas.Error.InvalidCode.make())
           )
         )
 
-        return Authentication_ExchangeCode_ApiSchemas.Success.make({ authenticationContext })
+        return AuthenticationApi_ExchangeCodeSchemas.Success.make({ authenticationContext })
       })
     )
   })
