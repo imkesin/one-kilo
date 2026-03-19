@@ -7,12 +7,12 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
   describe("Organizations", () => {
     it.scoped("can create an organization", () =>
       Effect.gen(function*() {
-        const { client } = yield* ApiGateway.ApiGateway
+        const gatewayClient = yield* ApiGateway.ApiGateway
 
         const timestamp = Date.now()
         const organizationName = `test-org-${timestamp}`
 
-        const organization = yield* client.organizations.createOrganization({
+        const organization = yield* gatewayClient.organizations.createOrganization({
           name: organizationName,
           metadata: {
             testRun: timestamp.toString()
@@ -21,7 +21,7 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
 
         yield* Effect.addFinalizer(() =>
           pipe(
-            client.organizations.deleteOrganization(organization.id),
+            gatewayClient.organizations.deleteOrganization(organization.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )

@@ -154,7 +154,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
   KeyValueStore.KeyValueStore | TokenGenerator.TokenGenerator
 > =>
   Effect.gen(function*() {
-    const { generator } = yield* TokenGenerator.TokenGenerator
+    const tokenGenerator = yield* TokenGenerator.TokenGenerator
 
     const usersStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
@@ -532,7 +532,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           }
 
           const accessToken = yield* pipe(
-            generator.generateMachineAccessToken({
+            tokenGenerator.generateMachineAccessToken({
               clientId: parameters.clientId,
               orgId: client.orgId
             }),

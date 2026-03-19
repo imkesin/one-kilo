@@ -6,11 +6,11 @@ import { runWithServerRuntime } from "~/infra/runtime/server/runWithServerRuntim
 import { serverRedirect } from "~/lib/serverRedirect"
 
 const signInRoute = Effect.gen(function*() {
-  const { client } = yield* WorkOSPublicApiClient.PublicApiClient
+  const workosPublicClient = yield* WorkOSPublicApiClient.PublicApiClient
 
   const port = yield* Config.number("PORT")
 
-  const authUrl = yield* client.userManagement.buildAuthorizationUrl({
+  const authUrl = yield* workosPublicClient.userManagement.buildAuthorizationUrl({
     screenHint: "sign-in",
     provider: "authkit",
     redirectUri: `http://localhost:${port}/sign-in/callback`

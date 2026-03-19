@@ -8,9 +8,7 @@ import type { EnvironmentClientId } from "./domain/Ids.ts"
 import * as PublicApiClientUserManagementDefinitions from "./internal/public-api/PublicApiClientDefinitions.ts"
 
 export interface Service {
-  readonly client: {
-    readonly userManagement: PublicApiClientUserManagementDefinitions.Client
-  }
+  readonly userManagement: PublicApiClientUserManagementDefinitions.Client
 }
 
 export class PublicApiClient extends Context.Tag(
@@ -27,12 +25,10 @@ export const make = (
 ): Effect.Effect<Service> =>
   Effect.succeed(
     PublicApiClient.of({
-      client: {
-        userManagement: PublicApiClientUserManagementDefinitions.make({
-          apiPath: "https://api.workos.com",
-          clientId: options.clientId
-        })
-      }
+      userManagement: PublicApiClientUserManagementDefinitions.make({
+        apiPath: "https://api.workos.com",
+        clientId: options.clientId
+      })
     })
   )
 

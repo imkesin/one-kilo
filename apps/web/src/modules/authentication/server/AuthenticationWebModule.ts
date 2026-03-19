@@ -40,7 +40,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
   {
     dependencies: [ServerApiClient.Default],
     effect: Effect.gen(function*() {
-      const serverApiClient = yield* ServerApiClient
+      const { client: serverApiClient } = yield* ServerApiClient
 
       const cookiesStoreEffect = pipe(
         Effect.tryPromise({

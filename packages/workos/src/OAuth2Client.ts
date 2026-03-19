@@ -8,9 +8,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as OAuth2ClientDefinitions from "./internal/oauth2/OAuth2ClientDefinitions.ts"
 
-export interface Service {
-  readonly client: OAuth2ClientDefinitions.Client
-}
+export type Service = OAuth2ClientDefinitions.Client
 
 export class OAuth2Client extends Context.Tag(
   "@effect/auth-workos/OAuth2Client"
@@ -36,9 +34,7 @@ export const make = (
       )
     )
 
-    return OAuth2Client.of({
-      client: OAuth2ClientDefinitions.make(httpClient)
-    })
+    return OAuth2Client.of(OAuth2ClientDefinitions.make(httpClient))
   })
 
 export const layer = (

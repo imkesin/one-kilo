@@ -12,10 +12,8 @@ import * as OrganizationsClientDefinitions from "./internal/api/OrganizationsApi
 import * as UserManagementClientDefinitions from "./internal/api/UserManagementApiClientDefinitions.ts"
 
 export interface Service {
-  readonly client: {
-    readonly userManagement: UserManagementClientDefinitions.Client
-    readonly organizations: OrganizationsClientDefinitions.Client
-  }
+  readonly userManagement: UserManagementClientDefinitions.Client
+  readonly organizations: OrganizationsClientDefinitions.Client
 }
 
 export class ApiClient extends Context.Tag(
@@ -55,10 +53,8 @@ export const make = (
     )
 
     return ApiClient.of({
-      client: {
-        userManagement: UserManagementClientDefinitions.make(userManagementHttpClient, options),
-        organizations: OrganizationsClientDefinitions.make(organizationsHttpClient)
-      }
+      userManagement: UserManagementClientDefinitions.make(userManagementHttpClient, options),
+      organizations: OrganizationsClientDefinitions.make(organizationsHttpClient)
     })
   })
 

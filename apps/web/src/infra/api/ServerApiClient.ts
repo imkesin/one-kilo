@@ -17,7 +17,7 @@ export class ServerApiClient extends Effect.Service<ServerApiClient>()(
 
       const client = yield* HttpApiClient.make(ServerApi, { baseUrl: serverBaseUrl })
 
-      return client
+      return { client }
     })
   }
 ) {}

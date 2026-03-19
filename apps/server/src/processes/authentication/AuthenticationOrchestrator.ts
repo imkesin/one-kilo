@@ -1,7 +1,7 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
-import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import type { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import { UsersQueryRepository } from "@one-kilo/sql/modules/users/UsersQueryRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
@@ -11,12 +11,6 @@ import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import { RegistrationUseCases } from "../registration/RegistrationUseCases.ts"
 
-type AuthenticationContext = {
-  readonly userId: UserId
-  readonly workspaceId: WorkspaceId
-  readonly workosAccessToken: WorkOSValues.AccessToken
-  readonly workosRefreshToken: WorkOSValues.RefreshToken
-}
 type CodeExchangeOutcome = Data.TaggedEnum<{
   NewlyCreatedUser: AuthenticationContext
   ReturningUser: AuthenticationContext
@@ -32,7 +26,7 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
       WorkspacesQueryRepository.Default
     ],
     effect: Effect.gen(function*() {
-      const { client: workosClient } = yield* WorkOSApiClient.ApiClient
+      const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
       const registrationProcesses = yield* RegistrationUseCases
       const usersQueryRepository = yield* UsersQueryRepository
@@ -46,7 +40,7 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             accessToken: workosAccessToken,
             refreshToken: workosRefreshToken
           } = yield* pipe(
-            workosClient.userManagement.authenticateWithCode({ code: options.code }),
+            workosDirectClient.userManagement.authenticateWithCode({ code: options.code }),
             Effect.catchTag(
               "WorkOSCommonError",
               dieWithUnexpectedErrorCallback("Failed to authenticate with WorkOS code.")

@@ -7,9 +7,7 @@ import * as Jose from "jose"
 import { KeyPairTest } from "./internal/KeyPair.ts"
 import * as TokenGeneratorDefinitions from "./internal/TokenGeneratorDefinitions.ts"
 
-export interface Service {
-  readonly generator: TokenGeneratorDefinitions.Generator
-}
+export type Service = TokenGeneratorDefinitions.Generator
 
 export class TokenGenerator extends Context.Tag(
   "@effect/auth-workos/TokenGenerator"
@@ -20,10 +18,7 @@ export const makeTest = (
     readonly authKitDomain: string
     readonly privateKey: Jose.CryptoKey
   }
-): Effect.Effect<Service> =>
-  Effect.succeed({
-    generator: TokenGeneratorDefinitions.makeTest(options)
-  })
+): Effect.Effect<Service> => Effect.succeed(TokenGeneratorDefinitions.makeTest(options))
 
 export const layerTest = (
   options: {

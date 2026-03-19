@@ -24,12 +24,12 @@ export const makeOAuth2Tests = () =>
 ) => {
   it.effect("a live token can be decoded and verified", () =>
     Effect.gen(function*() {
-      const { client: oauth2Client } = yield* OAuth2Gateway.OAuth2Gateway
-      const { client: tokenClient } = yield* TokenClient.TokenClient
+      const oauth2GatewayClient = yield* OAuth2Gateway.OAuth2Gateway
+      const tokenClient = yield* TokenClient.TokenClient
 
       const { machineClientId, machineClientSecret } = yield* OAuth2TestSuiteContext
 
-      const { accessToken } = yield* oauth2Client.retrieveTokenByClientCredentials({
+      const { accessToken } = yield* oauth2GatewayClient.retrieveTokenByClientCredentials({
         clientId: machineClientId,
         clientSecret: machineClientSecret
       })

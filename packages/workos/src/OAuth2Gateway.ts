@@ -6,9 +6,7 @@ import * as StoreDefinitions from "./internal/StoreDefinitions.ts"
 import * as OAuth2Client from "./OAuth2Client.ts"
 import * as Store from "./Store.ts"
 
-export interface Service {
-  readonly client: StoreDefinitions.OAuth2Client
-}
+export type Service = StoreDefinitions.OAuth2Client
 
 export class OAuth2Gateway extends Context.Tag(
   "@effect/auth-workos/OAuth2Gateway"
@@ -18,23 +16,21 @@ export const makeTest = (): Effect.Effect<Service, never, Store.Store> =>
   Effect.gen(function*() {
     const { oauth2Client } = yield* Store.Store
 
-    return OAuth2Gateway.of({ client: oauth2Client })
+    return OAuth2Gateway.of(oauth2Client)
   })
 
 export const layerTest = () => Layer.effect(OAuth2Gateway, makeTest())
 
 export const make = (): Effect.Effect<Service, never, OAuth2Client.OAuth2Client> =>
   Effect.gen(function*() {
-    const { client } = yield* OAuth2Client.OAuth2Client
+    const client = yield* OAuth2Client.OAuth2Client
 
     return OAuth2Gateway.of({
-      client: {
-        retrieveTokenByClientCredentials: (parameters) =>
-          pipe(
-            client.retrieveTokenByClientCredentials(parameters),
-            Effect.orDie
-          )
-      }
+      retrieveTokenByClientCredentials: (parameters) =>
+        pipe(
+          client.retrieveTokenByClientCredentials(parameters),
+          Effect.orDie
+        )
     })
   })
 

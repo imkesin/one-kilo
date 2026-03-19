@@ -52,8 +52,8 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       WorkspacesCreationModule.Default
     ],
     effect: Effect.gen(function*() {
-      const { client: workosGatewayClient } = yield* WorkOSApiGateway.ApiGateway
-      const { client: workosDirectClient } = yield* WorkOSApiClient.ApiClient
+      const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
+      const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
       const idGenerator = yield* DomainIdGenerator
       const fallbackNameGenerator = yield* PersonFallbackNameGenerator

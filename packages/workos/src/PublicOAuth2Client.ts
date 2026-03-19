@@ -6,9 +6,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as PublicOAuth2ClientDefinitions from "./internal/public-oauth2/PublicOAuth2ClientDefinitions.ts"
 
-export interface Service {
-  readonly client: PublicOAuth2ClientDefinitions.Client
-}
+export type Service = PublicOAuth2ClientDefinitions.Client
 
 export class PublicOAuth2Client extends Context.Tag(
   "@effect/auth-workos/PublicOAuth2Client"
@@ -23,11 +21,11 @@ export const make = (
   }
 ): Effect.Effect<Service> =>
   Effect.succeed(
-    PublicOAuth2Client.of({
-      client: PublicOAuth2ClientDefinitions.make({
+    PublicOAuth2Client.of(
+      PublicOAuth2ClientDefinitions.make({
         authkitBaseURL: `https://${options.authKitDomain}`
       })
-    })
+    )
   )
 
 export const layer = (

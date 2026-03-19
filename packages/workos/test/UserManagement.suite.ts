@@ -8,12 +8,12 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
   describe("User Management", () => {
     it.scoped("can create a user", () =>
       Effect.gen(function*() {
-        const { client } = yield* ApiGateway.ApiGateway
+        const gatewayClient = yield* ApiGateway.ApiGateway
 
         const timestamp = Date.now()
         const testEmail = EmailAddress.make(`test-user-${timestamp}@example.com`)
 
-        const user = yield* client.userManagement.createUser({
+        const user = yield* gatewayClient.userManagement.createUser({
           email: testEmail,
           firstName: "Test",
           lastName: "User",
@@ -24,7 +24,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
 
         yield* Effect.addFinalizer(() => {
           return pipe(
-            client.userManagement.deleteUser(user.id),
+            gatewayClient.userManagement.deleteUser(user.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
@@ -41,25 +41,25 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
 
     it.scoped("can update a user", () =>
       Effect.gen(function*() {
-        const { client } = yield* ApiGateway.ApiGateway
+        const gatewayClient = yield* ApiGateway.ApiGateway
 
         const timestamp = Date.now()
         const testEmail = EmailAddress.make(`test-user-${timestamp}@example.com`)
 
-        const user = yield* client.userManagement.createUser({
+        const user = yield* gatewayClient.userManagement.createUser({
           email: testEmail,
           firstName: "Test",
           lastName: "User"
         })
         yield* Effect.addFinalizer(() =>
           pipe(
-            client.userManagement.deleteUser(user.id),
+            gatewayClient.userManagement.deleteUser(user.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
 
-        const updated = yield* client.userManagement.updateUser(user.id, {
+        const updated = yield* gatewayClient.userManagement.updateUser(user.id, {
           firstName: "Updated",
           externalId: "ext-123"
         })
@@ -75,43 +75,43 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
 
     it.scoped("can create an organization membership", () =>
       Effect.gen(function*() {
-        const { client } = yield* ApiGateway.ApiGateway
+        const gatewayClient = yield* ApiGateway.ApiGateway
 
         const timestamp = Date.now()
 
-        const organization = yield* client.organizations.createOrganization({
+        const organization = yield* gatewayClient.organizations.createOrganization({
           name: `test-org-${timestamp}`
         })
         yield* Effect.addFinalizer(() =>
           pipe(
-            client.organizations.deleteOrganization(organization.id),
+            gatewayClient.organizations.deleteOrganization(organization.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )
         )
 
         const testEmail = EmailAddress.make(`test-user-${timestamp}@example.com`)
-        const user = yield* client.userManagement.createUser({
+        const user = yield* gatewayClient.userManagement.createUser({
           email: testEmail,
           firstName: "Test",
           lastName: "User"
         })
         yield* Effect.addFinalizer(() =>
           pipe(
-            client.userManagement.deleteUser(user.id),
+            gatewayClient.userManagement.deleteUser(user.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
 
-        const membership = yield* client.userManagement.createOrganizationMembership({
+        const membership = yield* gatewayClient.userManagement.createOrganizationMembership({
           userId: user.id,
           organizationId: organization.id,
           roles: ["member"]
         })
         yield* Effect.addFinalizer(() =>
           pipe(
-            client.userManagement.deleteOrganizationMembership(membership.id),
+            gatewayClient.userManagement.deleteOrganizationMembership(membership.id),
             Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization membership", cause)),
             Effect.ignore
           )

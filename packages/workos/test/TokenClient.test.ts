@@ -18,15 +18,15 @@ describe("TokenClient - Unit", () => {
   layer(unitTestLayer)((it) => {
     it.effect("a minimal token that can be decoded and verified", () =>
       Effect.gen(function*() {
-        const { generator } = yield* TokenGenerator.TokenGenerator
-        const { client } = yield* TokenClient.TokenClient
+        const tokenGenerator = yield* TokenGenerator.TokenGenerator
+        const tokenClient = yield* TokenClient.TokenClient
 
         const sessionId = generateSessionId()
         const userId = generateUserId()
 
-        const accessToken = yield* generator.generateAccessToken({ sessionId, userId })
+        const accessToken = yield* tokenGenerator.generateAccessToken({ sessionId, userId })
 
-        const decoded = yield* client.decodeAccessToken(accessToken)
+        const decoded = yield* tokenClient.decodeAccessToken(accessToken)
 
         if (decoded._tag !== "DecodedSessionAccessToken") {
           expect.fail("Expected a session token, but received another variant")
@@ -35,7 +35,7 @@ describe("TokenClient - Unit", () => {
         expect(decoded.sub).toEqual(userId)
         expect(decoded.sid).toEqual(sessionId)
 
-        const verified = yield* client.verifyAccessToken(accessToken)
+        const verified = yield* tokenClient.verifyAccessToken(accessToken)
 
         if (verified._tag !== "DecodedSessionAccessToken") {
           expect.fail("Expected a session token, but received another variant")
@@ -47,15 +47,15 @@ describe("TokenClient - Unit", () => {
 
     it.effect("an expired token can be decoded but not verified", () =>
       Effect.gen(function*() {
-        const { generator } = yield* TokenGenerator.TokenGenerator
-        const { client } = yield* TokenClient.TokenClient
+        const tokenGenerator = yield* TokenGenerator.TokenGenerator
+        const tokenClient = yield* TokenClient.TokenClient
 
         const sessionId = generateSessionId()
         const userId = generateUserId()
 
-        const token = yield* generator.generateAccessToken({ sessionId, userId })
+        const token = yield* tokenGenerator.generateAccessToken({ sessionId, userId })
 
-        const decoded = yield* client.decodeAccessToken(token)
+        const decoded = yield* tokenClient.decodeAccessToken(token)
 
         if (decoded._tag !== "DecodedSessionAccessToken") {
           expect.fail("Expected a session token, but received another variant")
@@ -67,7 +67,7 @@ describe("TokenClient - Unit", () => {
         yield* TestClock.adjust("5 minutes")
 
         const verificationError = yield* pipe(
-          client.verifyAccessToken(token),
+          tokenClient.verifyAccessToken(token),
           Effect.flip
         )
 

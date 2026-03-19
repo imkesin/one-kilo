@@ -11,9 +11,7 @@ import type { ApplicationClientId } from "./domain/Ids.ts"
 import { KeyPairTest } from "./internal/KeyPair.ts"
 import * as TokenClientDefinitions from "./internal/TokenClientDefinitions.ts"
 
-export interface Service {
-  readonly client: TokenClientDefinitions.Client
-}
+export type Service = TokenClientDefinitions.Client
 
 export class TokenClient extends Context.Tag(
   "@effect/auth-workos/TokenClient"
@@ -31,9 +29,7 @@ export const makeTest = (
       Effect.cached
     )
 
-    return TokenClient.of({
-      client: TokenClientDefinitions.make(jwks)
-    })
+    return TokenClient.of(TokenClientDefinitions.make(jwks))
   })
 
 export const layerTest = (
@@ -72,9 +68,7 @@ export const make = (
       Effect.cachedWithTTL("5 minutes")
     )
 
-    return TokenClient.of({
-      client: TokenClientDefinitions.make(jwks)
-    })
+    return TokenClient.of(TokenClientDefinitions.make(jwks))
   })
 
 export const layer = (

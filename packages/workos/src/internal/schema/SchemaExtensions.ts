@@ -11,13 +11,16 @@ export const encodeCatching = <
   pipe(
     input,
     S.encode(schema),
-    Effect.catchTag("ParseError", (error) =>
-      Effect.fail(
-        new WorkOSError.WorkOSCommonError({
-          reason: new WorkOSError.UnexpectedError({
-            cause: error,
-            message: "Failed to encode input"
+    Effect.catchTag(
+      "ParseError",
+      (error) =>
+        Effect.fail(
+          new WorkOSError.WorkOSCommonError({
+            reason: new WorkOSError.UnexpectedError({
+              cause: error,
+              message: "Failed to encode input"
+            })
           })
-        })
-      ))
+        )
+    )
   )
