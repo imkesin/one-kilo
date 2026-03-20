@@ -1,4 +1,5 @@
-import { NodeHttpClient, NodeHttpServer } from "@effect/platform-node"
+import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
+import * as NodeHttpServer from "@effect/platform-node/NodeHttpServer"
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import type * as HttpApp from "@effect/platform/HttpApp"
 import * as HttpMiddleware from "@effect/platform/HttpMiddleware"

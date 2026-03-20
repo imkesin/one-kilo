@@ -10,39 +10,43 @@ import * as Layer from "effect/Layer"
 import { AuthenticationOrchestrator } from "../../processes/authentication/AuthenticationOrchestrator.ts"
 import { AuthenticationUseCases } from "../../processes/authentication/AuthenticationUseCases.ts"
 
-export const AuthenticationHttp = HttpApiBuilder.group(
-  ServerApi,
-  "authentication",
-  Effect.fn(function*(handlers) {
-    const authenticationOrchestrator = yield* AuthenticationOrchestrator
-    const authenticationUseCases = yield* AuthenticationUseCases
+export const AuthenticationHttp = pipe(
+  HttpApiBuilder.group(
+    ServerApi,
+    "authentication",
+    Effect.fn(function*(handlers) {
+      const authenticationOrchestrator = yield* AuthenticationOrchestrator
+      const authenticationUseCases = yield* AuthenticationUseCases
 
-    return handlers
-      .handle(
-        "exchangeCode",
-        Effect.fn(function*({ payload }) {
-          const authenticationContext = yield* pipe(
-            authenticationOrchestrator.exchangeCode({ code: payload.code }),
-            Effect.catchTag(
-              "InvalidAuthenticationCodeError",
-              () => Effect.fail(AuthenticationApi_ExchangeCodeSchemas.Error.InvalidCode.make())
+      return handlers
+        .handle(
+          "exchangeCode",
+          Effect.fn(function*({ payload }) {
+            const authenticationContext = yield* pipe(
+              authenticationOrchestrator.exchangeCode({ code: payload.code }),
+              Effect.catchTag(
+                "InvalidAuthenticationCodeError",
+                () => Effect.fail(AuthenticationApi_ExchangeCodeSchemas.Error.InvalidCode.make())
+              )
             )
-          )
 
-          return AuthenticationApi_ExchangeCodeSchemas.Success.make({ authenticationContext })
-        })
-      )
-      .handle(
-        "refreshContext",
-        Effect.fn(function*({ payload }) {
-          const authenticationContext = yield* authenticationUseCases.refreshContext({
-            refreshToken: payload.refreshToken
+            return AuthenticationApi_ExchangeCodeSchemas.Success.make({ authenticationContext })
           })
+        )
+        .handle(
+          "refreshContext",
+          Effect.fn(function*({ payload }) {
+            const authenticationContext = yield* authenticationUseCases.refreshContext({
+              refreshToken: payload.refreshToken
+            })
 
-          return AuthenticationApi_RefreshContextSchemas.Success.make({ authenticationContext })
-        })
-      )
-  })
-).pipe(
-  Layer.provide([AuthenticationOrchestrator.Default, AuthenticationUseCases.Default])
+            return AuthenticationApi_RefreshContextSchemas.Success.make({ authenticationContext })
+          })
+        )
+    })
+  ),
+  Layer.provide([
+    AuthenticationOrchestrator.Default,
+    AuthenticationUseCases.Default
+  ])
 )

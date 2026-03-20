@@ -1,4 +1,4 @@
-import { NodeHttpClient } from "@effect/platform-node"
+import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import { describe, layer } from "@effect/vitest"
 import * as Config from "effect/Config"
 import { pipe } from "effect/Function"

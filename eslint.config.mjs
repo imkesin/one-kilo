@@ -40,7 +40,12 @@ export default defineConfig(
       "@effect/no-import-from-barrel-package": [
         "error",
         {
-          packageNames: ["effect", "@effect/platform", "@effect/sql"]
+          packageNames: [
+            "effect",
+            "@effect/platform",
+            "@effect/platform-node",
+            "@effect/sql"
+          ]
         }
       ]
     }

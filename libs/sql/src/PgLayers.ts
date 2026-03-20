@@ -1,4 +1,4 @@
-import { NodeContext } from "@effect/platform-node"
+import * as NodeContext from "@effect/platform-node/NodeContext"
 import { PgClient, PgMigrator } from "@effect/sql-pg"
 import * as Config from "effect/Config"
 import { identity, pipe } from "effect/Function"

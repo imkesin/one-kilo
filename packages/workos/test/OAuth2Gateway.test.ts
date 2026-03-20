@@ -1,4 +1,4 @@
-import { NodeKeyValueStore } from "@effect/platform-node"
+import * as NodeKeyValueStore from "@effect/platform-node/NodeKeyValueStore"
 import { describe, layer } from "@effect/vitest"
 import * as Config from "effect/Config"
 import { pipe } from "effect/Function"

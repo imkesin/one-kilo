@@ -1,14 +1,13 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
-import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
-import { UsersQueryRepository } from "@one-kilo/sql/modules/users/UsersQueryRepository"
-import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
+import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
+import * as Predicate from "effect/Predicate"
+import { AuthenticationQueryModule } from "../../modules/authentication/AuthenticationQueryModule.ts"
 import { RegistrationUseCases } from "../registration/RegistrationUseCases.ts"
 
 type CodeExchangeOutcome = Data.TaggedEnum<{
@@ -21,16 +20,14 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
   "@one-kilo/server/AuthenticationOrchestrator",
   {
     dependencies: [
-      UsersQueryRepository.Default,
-      RegistrationUseCases.Default,
-      WorkspacesQueryRepository.Default
+      AuthenticationQueryModule.Default,
+      RegistrationUseCases.Default
     ],
     effect: Effect.gen(function*() {
       const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
+      const authenticationQueryModule = yield* AuthenticationQueryModule
       const registrationProcesses = yield* RegistrationUseCases
-      const usersQueryRepository = yield* UsersQueryRepository
-      const workspacesQueryRepository = yield* WorkspacesQueryRepository
 
       const exchangeCode = Effect.fn("AuthenticationOrchestrator.exchangeCode")(
         function*(options: { readonly code: WorkOSValues.AuthenticationCode }) {
@@ -47,43 +44,33 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             )
           )
 
-          const handleReturningUser = (userId: UserId) =>
-            pipe(
-              Option.fromNullable(workosOrganizationId),
-              Option.match({
-                onNone: () => dieWithUnexpectedError("Existing user is not associated with an organization"),
-                onSome: (workosOrganizationId) =>
-                  Effect.andThen(
-                    workspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId({ workosOrganizationId }),
-                    Option.match({
-                      onNone: () => dieWithUnexpectedError("Existing user's workspace not found"),
-                      onSome: ({ id }) =>
-                        Effect.succeed(
-                          CodeExchangeOutcome.ReturningUser({
-                            userId,
-                            workspaceId: id,
-                            workosAccessToken,
-                            workosRefreshToken
-                          })
-                        )
-                    })
-                  )
-              })
-            )
-
-          const outcome = yield* Effect.andThen(
-            usersQueryRepository.findUserEntityByWorkOSUserId({ workosUserId: workosUser.id }),
-            Option.match({
-              onNone: () =>
-                Effect.map(
-                  registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
-                  CodeExchangeOutcome.NewlyCreatedUser
-                ),
-              onSome: ({ id }) => handleReturningUser(id)
-            })
+          const registerHumanUserEffect = Effect.map(
+            registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
+            CodeExchangeOutcome.NewlyCreatedUser
           )
 
-          return outcome
+          if (Predicate.isNullable(workosOrganizationId)) {
+            return yield* registerHumanUserEffect
+          }
+
+          return yield* Effect.andThen(
+            authenticationQueryModule.retrieveAuthenticationIdentity({
+              workosUserId: workosUser.id,
+              workosOrganizationId
+            }),
+            Option.match({
+              onNone: () => registerHumanUserEffect,
+              onSome: ({ userId, workspaceId }) =>
+                Effect.succeed(
+                  CodeExchangeOutcome.ReturningUser({
+                    userId,
+                    workspaceId,
+                    workosAccessToken,
+                    workosRefreshToken
+                  })
+                )
+            })
+          )
         }
       )
 

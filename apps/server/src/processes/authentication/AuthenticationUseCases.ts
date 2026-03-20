@@ -42,7 +42,7 @@ export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCase
           }
 
           return yield* pipe(
-            authenticationQueryModule.loadAuthenticationContext({
+            authenticationQueryModule.retrieveAuthenticationIdentity({
               workosUserId: workosUser.id,
               workosOrganizationId
             }),
