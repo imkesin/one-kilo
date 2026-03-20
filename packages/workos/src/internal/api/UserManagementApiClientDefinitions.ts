@@ -43,7 +43,7 @@ export interface Client {
     parameters: AuthenticateWithRefreshTokenParameters_WithoutClientFields
   ) => Effect.Effect<
     AuthenticateWithRefreshTokenResponse,
-    WorkOSError.WorkOSCommonError
+    WorkOSError.InvalidRefreshTokenError | WorkOSError.WorkOSCommonError
   >
 
   readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
@@ -156,6 +156,18 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithRefreshTokenResponse),
+            "400": (response) =>
+              pipe(
+                response,
+                HttpClientResponse.schemaBodyJson(AuthenticateWithCodeError.InvalidGrant),
+                Effect.flatMap(() =>
+                  new WorkOSError.InvalidRefreshTokenError({ refreshToken: parameters.refreshToken })
+                ),
+                Effect.catchTags({
+                  "ParseError": () => HttpResponseExtensions.unexpectedStatus(response),
+                  "ResponseError": () => HttpResponseExtensions.unexpectedStatus(response)
+                })
+              ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

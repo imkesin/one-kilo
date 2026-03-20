@@ -36,9 +36,15 @@ export const AuthenticationHttp = pipe(
         .handle(
           "refreshContext",
           Effect.fn(function*({ payload }) {
-            const authenticationContext = yield* authenticationUseCases.refreshContext({
-              refreshToken: payload.refreshToken
-            })
+            const authenticationContext = yield* pipe(
+              authenticationUseCases.refreshContext({
+                refreshToken: payload.refreshToken
+              }),
+              Effect.catchTag(
+                "InvalidRefreshTokenError",
+                () => Effect.fail(AuthenticationApi_RefreshContextSchemas.Error.InvalidRefreshToken.make())
+              )
+            )
 
             return AuthenticationApi_RefreshContextSchemas.Success.make({ authenticationContext })
           })

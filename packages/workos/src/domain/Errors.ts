@@ -1,5 +1,5 @@
 import * as S from "effect/Schema"
-import { AuthenticationCode } from "./Values.ts"
+import { AuthenticationCode, RefreshToken } from "./Values.ts"
 
 const TypeId = "~effect/auth-workos/WorkOSError" as const
 
@@ -53,6 +53,17 @@ export class InvalidAuthenticationCodeError
     "InvalidAuthenticationCodeError",
     {
       code: AuthenticationCode
+    }
+  )
+{
+  readonly [TypeId] = TypeId
+}
+
+export class InvalidRefreshTokenError
+  extends S.TaggedError<InvalidRefreshTokenError>("@effect/auth-workos/InvalidRefreshTokenError")(
+    "InvalidRefreshTokenError",
+    {
+      refreshToken: RefreshToken
     }
   )
 {

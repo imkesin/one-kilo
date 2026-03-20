@@ -4,7 +4,10 @@ import {
   AuthenticationApi_ExchangeCodeSchemas,
   AuthenticationApi_RefreshContextSchemas
 } from "./AuthenticationApiSchemas.ts"
-import { AuthenticationApi_ExchangeCode_InvalidCodeError } from "./internal/AuthenticationApiErrors.ts"
+import {
+  AuthenticationApi_ExchangeCode_InvalidCodeError,
+  AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+} from "./internal/AuthenticationApiErrors.ts"
 
 export class AuthenticationApi extends HttpApiGroup.make("authentication")
   .add(
@@ -17,6 +20,7 @@ export class AuthenticationApi extends HttpApiGroup.make("authentication")
     HttpApiEndpoint.post("refreshContext", "/refresh-context")
       .setPayload(AuthenticationApi_RefreshContextSchemas.Payload)
       .addSuccess(AuthenticationApi_RefreshContextSchemas.Success)
+      .addError(AuthenticationApi_RefreshContext_InvalidRefreshTokenError)
   )
   .prefix("/authentication")
 {}

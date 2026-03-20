@@ -13,3 +13,16 @@ export class AuthenticationApi_ExchangeCode_InvalidCodeError
     })
   )
 {}
+
+export class AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+  extends S.TaggedError<AuthenticationApi_RefreshContext_InvalidRefreshTokenError>(
+    "@one-kilo/server-api/RefreshContext:InvalidRefreshTokenError"
+  )(
+    "RefreshContext:InvalidRefreshTokenError",
+    {},
+    HttpApiSchema.annotations({
+      status: 401,
+      description: "A session could not be refreshed because the provided refresh token is invalid"
+    })
+  )
+{}

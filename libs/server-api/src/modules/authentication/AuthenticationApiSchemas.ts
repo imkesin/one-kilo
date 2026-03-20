@@ -48,7 +48,23 @@ class AuthenticationApi_RefreshContext_Success extends S.TaggedClass<Authenticat
   HttpApiSchema.annotations({ status: 200 })
 ) {}
 
+class AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+  extends S.TaggedError<AuthenticationApi_RefreshContext_InvalidRefreshTokenError>(
+    "@one-kilo/server-api/RefreshContext:InvalidRefreshTokenError"
+  )(
+    "RefreshContext:InvalidRefreshTokenError",
+    {},
+    HttpApiSchema.annotations({
+      status: 401,
+      description: "A session could not be refreshed because the provided refresh token is invalid"
+    })
+  )
+{}
+
 export const AuthenticationApi_RefreshContextSchemas = {
   Payload: AuthenticationApi_RefreshContext_Payload,
-  Success: AuthenticationApi_RefreshContext_Success
+  Success: AuthenticationApi_RefreshContext_Success,
+  Error: {
+    InvalidRefreshToken: AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+  }
 } as const
