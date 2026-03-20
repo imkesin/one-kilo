@@ -1,9 +1,8 @@
-packages:
-  - apps/*
-  - infra/*
-  - libs/*
-  - packages/*
-  - scripts/*
+# Hard-copy workspace packages into node_modules instead of symlinking.
+# Required for `pnpm deploy` (server Dockerfile) and Next.js standalone output
+# (web Dockerfile), which both break when workspace deps are symlinks pointing
+# back to the monorepo source tree.
+injectWorkspacePackages: true
 
 onlyBuiltDependencies:
   - '@parcel/watcher'
@@ -13,3 +12,10 @@ onlyBuiltDependencies:
   - protobufjs
   - sharp
   - unrs-resolver
+
+packages:
+  - apps/*
+  - infra/*
+  - libs/*
+  - packages/*
+  - scripts/*
