@@ -1,4 +1,4 @@
-import { VariantSchema } from "@effect/experimental"
+import * as VariantSchema from "@effect/experimental/VariantSchema"
 import * as Model from "@effect/sql/Model"
 import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"

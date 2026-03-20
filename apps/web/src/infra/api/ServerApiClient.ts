@@ -1,4 +1,4 @@
-import { NodeHttpClient } from "@effect/platform-node"
+import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as HttpApiClient from "@effect/platform/HttpApiClient"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Config from "effect/Config"

@@ -42,6 +42,7 @@ export default defineConfig(
         {
           packageNames: [
             "effect",
+            "@effect/experimental",
             "@effect/platform",
             "@effect/platform-node",
             "@effect/sql"
