@@ -2,6 +2,10 @@ import { AuthenticationCode, RefreshToken } from "@effect/auth-workos/domain/Val
 import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import * as S from "effect/Schema"
+import {
+  AuthenticationApi_ExchangeCode_InvalidCodeError,
+  AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+} from "./internal/AuthenticationApiErrors.ts"
 
 const AuthenticationApi_ExchangeCode_Payload = S.Struct({ code: AuthenticationCode })
 
@@ -14,19 +18,6 @@ class AuthenticationApi_ExchangeCode_Success extends S.TaggedClass<Authenticatio
   },
   HttpApiSchema.annotations({ status: 200 })
 ) {}
-
-class AuthenticationApi_ExchangeCode_InvalidCodeError
-  extends S.TaggedError<AuthenticationApi_ExchangeCode_InvalidCodeError>(
-    "@one-kilo/server-api/ExchangeCode:InvalidCodeError"
-  )(
-    "ExchangeCode:InvalidCodeError",
-    {},
-    HttpApiSchema.annotations({
-      status: 401,
-      description: "A session could not be created because the provided code is invalid"
-    })
-  )
-{}
 
 export const AuthenticationApi_ExchangeCodeSchemas = {
   Payload: AuthenticationApi_ExchangeCode_Payload,
@@ -47,19 +38,6 @@ class AuthenticationApi_RefreshContext_Success extends S.TaggedClass<Authenticat
   },
   HttpApiSchema.annotations({ status: 200 })
 ) {}
-
-class AuthenticationApi_RefreshContext_InvalidRefreshTokenError
-  extends S.TaggedError<AuthenticationApi_RefreshContext_InvalidRefreshTokenError>(
-    "@one-kilo/server-api/RefreshContext:InvalidRefreshTokenError"
-  )(
-    "RefreshContext:InvalidRefreshTokenError",
-    {},
-    HttpApiSchema.annotations({
-      status: 401,
-      description: "A session could not be refreshed because the provided refresh token is invalid"
-    })
-  )
-{}
 
 export const AuthenticationApi_RefreshContextSchemas = {
   Payload: AuthenticationApi_RefreshContext_Payload,

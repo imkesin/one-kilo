@@ -1,5 +1,5 @@
 import * as Effect from "effect/Effect"
-import { runWithServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
+import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 
 const workspacesPage = Effect.succeed(
   <div>
@@ -8,5 +8,5 @@ const workspacesPage = Effect.succeed(
 )
 
 export default async function WorkspacesPage() {
-  return runWithServerRuntime(workspacesPage)
+  return runWithWebServerRuntime(workspacesPage)
 }

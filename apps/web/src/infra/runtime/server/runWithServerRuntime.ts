@@ -3,18 +3,18 @@ import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import * as Runtime from "effect/Runtime"
 import { isDynamicServerError, isRedirectError } from "~/lib/errors"
-import { getManagedServerRuntime } from "./getManagedServerRuntime"
-import type { ServerLayerSuccess } from "./serverLayer"
+import { getManagedWebServerRuntime } from "./getManagedServerRuntime"
+import type { WebServerLayerSuccess } from "./webServerLayer"
 
-export async function runWithServerRuntime<
+export async function runWithWebServerRuntime<
   A,
   E,
-  R extends ServerLayerSuccess
+  R extends WebServerLayerSuccess
 >(
   effect: Effect.Effect<A, E, R>,
   options?: { readonly signal?: AbortSignal }
 ) {
-  const managedRuntime = getManagedServerRuntime()
+  const managedRuntime = getManagedWebServerRuntime()
   const runtime = await managedRuntime.runtime()
 
   const exit = await Runtime.runPromiseExit(runtime, effect, options)

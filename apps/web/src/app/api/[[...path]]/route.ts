@@ -3,7 +3,7 @@ import * as HttpMiddleware from "@effect/platform/HttpMiddleware"
 import * as HttpServer from "@effect/platform/HttpServer"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import { getManagedServerRuntime } from "~/infra/runtime/server/getManagedServerRuntime"
+import { getManagedWebServerRuntime } from "~/infra/runtime/server/getManagedServerRuntime"
 import { WebApi } from "../WebApi"
 
 const WebApiLive = HttpApiBuilder.api(WebApi)
@@ -22,7 +22,7 @@ const { dispose, handler } = pipe(
   Layer.merge(middleware),
   Layer.provideMerge(WebApiLive),
   Layer.merge(HttpServer.layerContext),
-  (_) => HttpApiBuilder.toWebHandler(_, { memoMap: getManagedServerRuntime().memoMap })
+  (_) => HttpApiBuilder.toWebHandler(_, { memoMap: getManagedWebServerRuntime().memoMap })
 )
 
 type Handler = (req: Request) => Promise<Response>

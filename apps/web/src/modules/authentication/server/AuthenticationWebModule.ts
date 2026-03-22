@@ -1,9 +1,20 @@
+import "server-only"
+
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
+import { UserId } from "@one-kilo/domain/ids/UserId"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
-import { dieWithUnexpectedErrorCallback, UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import {
+  dieWithUnexpectedError,
+  dieWithUnexpectedErrorCallback,
+  UnexpectedError
+} from "@one-kilo/lib/errors/UnexpectedError"
+import * as Cache from "effect/Cache"
 import * as Clock from "effect/Clock"
 import * as Effect from "effect/Effect"
+import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
+import * as Predicate from "effect/Predicate"
+import * as RcMap from "effect/RcMap"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
 import { isDynamicServerError as isNextDynamicServerError } from "next/dist/client/components/hooks-server-context"
@@ -13,23 +24,11 @@ import { DynamicServerError } from "~/lib/errors"
 
 const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
 
-// TODO => Rename these
-export class AccessTokenCookieNotFoundError extends S.TaggedError<AccessTokenCookieNotFoundError>()(
-  "AccessTokenCookieNotFoundError",
+export class AuthenticationContextCookieNotFoundError extends S.TaggedError<AuthenticationContextCookieNotFoundError>()(
+  "AuthenticationContextCookieNotFoundError",
   {},
   {
-    description: "An access token cookie was not found"
-  }
-) {}
-
-// TODO => Rename these
-export class AccessTokenExpiredError extends S.TaggedError<AccessTokenExpiredError>()(
-  "AccessTokenExpiredError",
-  {
-    accessToken: WorkOSValues.AccessToken
-  },
-  {
-    description: "The access token is expired"
+    description: "The authentication context cookie was not found"
   }
 ) {}
 
@@ -39,8 +38,8 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
   "AuthenticationWebModule",
   {
     dependencies: [ServerApiClient.Default],
-    effect: Effect.gen(function*() {
-      const { client: serverApiClient } = yield* ServerApiClient
+    scoped: Effect.gen(function*() {
+      const serverApiClient = yield* ServerApiClient
 
       const cookiesStoreEffect = pipe(
         Effect.tryPromise({
@@ -82,47 +81,114 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         }
       )
 
-      const rawAuthenticationContextEffect = Effect.gen(function*() {
+      const currentAuthenticationContextEffect = Effect.gen(function*() {
         const cookieStore = yield* cookiesStoreEffect
         const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
 
-        if (cookie === undefined) {
-          return yield* Effect.fail(new AccessTokenCookieNotFoundError())
+        if (Predicate.isUndefined(cookie)) {
+          return yield* Effect.fail(new AuthenticationContextCookieNotFoundError())
         }
 
         const decodedAuthenticationContext = yield* pipe(
           cookie.value,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
-          Effect.mapError(() => new AccessTokenCookieNotFoundError())
+          Effect.mapError(() => new AuthenticationContextCookieNotFoundError())
         )
 
         return decodedAuthenticationContext
       })
 
-      const _checkAccessTokenExpiration = Effect.fn(function*(accessToken: WorkOSValues.AccessToken) {
-        const { exp } = Jose.decodeJwt(accessToken)
-        if (exp === undefined) {
-          return yield* Effect.die(new UnexpectedError({ message: "JWT is missing expiration" }))
-        }
-
-        const expirationInMillis = exp * 1000
-        const nowInMillis = yield* Clock.currentTimeMillis
-
-        if (expirationInMillis < nowInMillis) {
-          return yield* Effect.fail(new AccessTokenExpiredError({ accessToken }))
-        }
-
-        return accessToken
+      const refreshedAuthenticationContextCache = yield* Cache.makeWith({
+        capacity: 10,
+        lookup: (refreshToken: WorkOSValues.RefreshToken) =>
+          pipe(
+            serverApiClient.authentication.refreshContext({ payload: { refreshToken } }),
+            Effect.map(({ authenticationContext }) => authenticationContext)
+          ),
+        timeToLive: (exit) =>
+          Exit.isFailure(exit)
+            ? "50 millis"
+            : "5 seconds"
       })
 
-      const _getAuthenticationContext = Effect.fn(function*() {
-        const _rawContext = yield* rawAuthenticationContextEffect
-
-        // If invalid, then refresh
-
-        // Otherwise, fall through and give the context
+      const refreshTokenLocks = yield* RcMap.make({
+        lookup: (_refreshToken: WorkOSValues.RefreshToken) => Effect.makeSemaphore(1),
+        idleTimeToLive: "10 seconds"
       })
+      const withRefreshTokenLock =
+        (refreshToken: WorkOSValues.RefreshToken) => <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+          pipe(
+            refreshTokenLocks,
+            RcMap.get(refreshToken),
+            Effect.flatMap((semaphore) =>
+              pipe(
+                effect,
+                semaphore.withPermits(1)
+              )
+            ),
+            Effect.scoped
+          )
+
+      const refreshAndSetAuthenticationContext = Effect.fn(
+        function*(refreshToken: WorkOSValues.RefreshToken) {
+          const authenticationContext = yield* refreshedAuthenticationContextCache.get(refreshToken)
+
+          yield* setAuthenticationContext(authenticationContext)
+
+          return authenticationContext
+        },
+        (effect, refreshToken) =>
+          pipe(
+            effect,
+            withRefreshTokenLock(refreshToken)
+          )
+      )
+
+      const userIdLocks = yield* RcMap.make({
+        lookup: (_userId: UserId) => Effect.makeSemaphore(1),
+        idleTimeToLive: "1 minute"
+      })
+      const withUserIdLock = (userId: UserId) => <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+        pipe(
+          userIdLocks,
+          RcMap.get(userId),
+          Effect.flatMap((semaphore) =>
+            pipe(
+              effect,
+              semaphore.withPermits(1)
+            )
+          ),
+          Effect.scoped
+        )
+
+      const lockedMaybeRefreshAuthenticationContext = Effect.fn(
+        function*(authenticationContext: AuthenticationContext) {
+          const { exp } = Jose.decodeJwt(authenticationContext.workosAccessToken)
+          if (Predicate.isUndefined(exp)) {
+            return yield* dieWithUnexpectedError("JWT is missing expiration")
+          }
+
+          const expirationInMillis = exp * 1000
+          const nowInMillis = yield* Clock.currentTimeMillis
+
+          if (expirationInMillis > nowInMillis) {
+            return authenticationContext
+          }
+
+          return yield* refreshAndSetAuthenticationContext(authenticationContext.workosRefreshToken)
+        },
+        (effect, { userId }) =>
+          pipe(
+            effect,
+            withUserIdLock(userId)
+          )
+      )
+
+      const liveAuthenticationContextEffect = pipe(
+        currentAuthenticationContextEffect,
+        Effect.andThen(lockedMaybeRefreshAuthenticationContext)
+      )
 
       const handleExchangeCode = Effect.fn("AuthenticationWebModule.handleExchangeCode")(
         function*(code: WorkOSValues.AuthenticationCode) {
@@ -137,7 +203,10 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         }
       )
 
-      return { handleExchangeCode }
+      return {
+        authenticationContext: liveAuthenticationContextEffect,
+        handleExchangeCode
+      }
     })
   }
 ) {}

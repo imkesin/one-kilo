@@ -2,7 +2,7 @@ import * as WorkOSPublicApiClient from "@effect/auth-workos/PublicApiClient"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import type { NextRequest } from "next/server"
-import { runWithServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
+import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { serverRedirect } from "~/lib/serverRedirect"
 
 const signInRoute = Effect.gen(function*() {
@@ -24,7 +24,7 @@ const signInRoute = Effect.gen(function*() {
 export async function GET(request: NextRequest) {
   console.log("Going to sign-in", request.url)
 
-  return runWithServerRuntime(
+  return runWithWebServerRuntime(
     signInRoute,
     { signal: request.signal }
   )

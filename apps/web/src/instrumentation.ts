@@ -1,8 +1,8 @@
-import { getManagedServerRuntime } from "./infra/runtime/server/getManagedServerRuntime"
+import { getManagedWebServerRuntime } from "./infra/runtime/server/getManagedServerRuntime"
 
 export function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const managedServerRuntime = getManagedServerRuntime()
+    const managedServerRuntime = getManagedWebServerRuntime()
 
     const shutdown = () => {
       managedServerRuntime.dispose()

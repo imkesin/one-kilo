@@ -15,9 +15,7 @@ export class ServerApiClient extends Effect.Service<ServerApiClient>()(
         Config.withDefault("http://localhost:10000")
       )
 
-      const client = yield* HttpApiClient.make(ServerApi, { baseUrl: serverBaseUrl })
-
-      return { client }
+      return yield* HttpApiClient.make(ServerApi, { baseUrl: serverBaseUrl })
     })
   }
 ) {}

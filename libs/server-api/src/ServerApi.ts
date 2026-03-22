@@ -1,11 +1,11 @@
 import * as HttpApi from "@effect/platform/HttpApi"
 import * as HttpApiError from "@effect/platform/HttpApiError"
-import { Authentication } from "./infra/Authentication.ts"
+import { ApplicationApi_AuthenticationMiddleware } from "./infra/AuthenticationMiddleware.ts"
 import { AuthenticationApi as AuthenticationApiGroup } from "./modules/authentication/AuthenticationApi.ts"
 import { HealthApi } from "./modules/health/HealthApi.ts"
 
 const ApplicationApi = HttpApi.make("@one-kilo/ApplicationApi")
-  .middleware(Authentication)
+  .middleware(ApplicationApi_AuthenticationMiddleware)
 
 const AuthenticationApi = HttpApi.make("@one-kilo/AuthenticationApi")
   .add(AuthenticationApiGroup)
