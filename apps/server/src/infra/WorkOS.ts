@@ -16,7 +16,7 @@ const DirectApiClientLive = WorkOSApiClient.layerConfig({
   )
 })
 
-export const ApiGatewayAndDirectClientLive = pipe(
+export const WorkOSApiGatewayAndDirectClientLive = pipe(
   WorkOSApiGateway.layer(),
   Layer.provideMerge(DirectApiClientLive)
 )

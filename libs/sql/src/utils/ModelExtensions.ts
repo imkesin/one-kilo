@@ -33,11 +33,15 @@ export const DateTimeArchived = Model.Field({
  *
  * @see Model.JsonFromString
  */
-export const JsonFromStringOnWrite = <S extends S.Schema.All | S.PropertySignature.All>(
-  schema: S
+export const JsonFromStringOnWrite = <
+  A,
+  I
+>(
+  schema:
+    | S.Schema<A, I, never>
+    | S.Annotable<S.Schema<A, I, never>, A, I, never>
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsed = S.parseJson(schema as any)
+  const parsed = S.parseJson(schema)
 
   return Model.Field({
     select: schema,

@@ -10,7 +10,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { createServer } from "node:http"
 import { SqlLive } from "./infra/Sql.ts"
-import { ApiGatewayAndDirectClientLive } from "./infra/WorkOS.ts"
+import { WorkOSApiGatewayAndDirectClientLive } from "./infra/WorkOS.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
 
@@ -21,7 +21,7 @@ const ServerApiLive = pipe(
     HealthHttp
   ]),
   Layer.provide([
-    ApiGatewayAndDirectClientLive,
+    WorkOSApiGatewayAndDirectClientLive,
     SqlLive
   ]),
   Layer.provide(NodeHttpClient.layerUndici)

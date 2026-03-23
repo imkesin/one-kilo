@@ -52,6 +52,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       WorkspacesCreationModule.Default
     ],
     effect: Effect.gen(function*() {
+      const pg = yield* PgClient.PgClient
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
       const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
@@ -59,8 +60,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       const fallbackNameGenerator = yield* PersonFallbackNameGenerator
       const usersCreationModule = yield* UsersCreationModule
       const workspacesCreationModule = yield* WorkspacesCreationModule
-
-      const pg = yield* PgClient.PgClient
 
       const persistRegistration = Effect.fn("RegistrationUseCases.persistRegistration")(
         function*(

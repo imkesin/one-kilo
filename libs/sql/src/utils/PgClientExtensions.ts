@@ -17,18 +17,18 @@ const SqlErrorWithRetryableCause = S.Struct({
   cause: RetryablePgError
 })
 
-export const withDeferredConstraints = (
-  ...constraints: Arr.NonEmptyArray<string>
-) =>
-<A, E, R>(self: Effect.Effect<A, E, R>) =>
-  pipe(
-    Effect.flatMap(SqlClient.SqlClient, (sql) => sql`SET CONSTRAINTS ${sql.unsafe(constraints.join(", "))} DEFERRED`),
-    Effect.catchTag(
-      "SqlError",
-      dieWithUnexpectedErrorCallback("Failed to mark constraints as deferred")
-    ),
-    Effect.andThen(self)
-  )
+export const withDeferredConstraints =
+  (...constraints: Arr.NonEmptyArray<string>) =>
+  (sql: SqlClient.SqlClient) =>
+  <A, E, R>(self: Effect.Effect<A, E, R>) =>
+    pipe(
+      sql`SET CONSTRAINTS ${sql.unsafe(constraints.join(", "))} DEFERRED`,
+      Effect.catchTag(
+        "SqlError",
+        dieWithUnexpectedErrorCallback("Failed to mark constraints as deferred")
+      ),
+      Effect.andThen(self)
+    )
 
 export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(self: Effect.Effect<A, E, R>) => {
   const transactionEffect = pipe(
