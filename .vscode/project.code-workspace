@@ -103,6 +103,7 @@
       "crockford",
       "hstack",
       "millis",
+      "overrideable",
       "pulumi",
       "pkce",
       "timestamptz",

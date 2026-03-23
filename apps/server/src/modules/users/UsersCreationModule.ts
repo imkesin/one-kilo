@@ -7,6 +7,7 @@ import { ActivityLogsRepository } from "@one-kilo/sql/modules/activity-logs/Acti
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import { UsersRepository } from "@one-kilo/sql/modules/users/UsersRepository"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 
 type CreateHumanUserParameters = {
@@ -50,11 +51,14 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
 
       const createPersonUser = Effect.fn("UsersCreationModule.createPersonUser")(
         function*({ id, preferredName, fullName, workosUserId }: CreateHumanUserParameters) {
-          const person = yield* personsRepository.insert({
-            preferredName,
-            fullName,
-            performedByUserId: id
-          })
+          const person = yield* pipe(
+            personsRepository.insert({
+              preferredName,
+              fullName,
+              performedByUserId: id
+            }),
+            personsRepository.withDeferredForeignKeyConstraints
+          )
 
           const user = yield* usersRepository.insert({
             id,

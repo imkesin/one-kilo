@@ -61,14 +61,16 @@ export const layer = (options?: PgLayerOptions) =>
     })
   })
 
-const layerMigrator = () =>
-  pipe(
+const layerMigrator = () => {
+  const path = fileURLToPath(new URL("./migrations", import.meta.url))
+
+  return pipe(
     PgMigrator.layer({
-      loader: PgMigrator.fromFileSystem(
-        fileURLToPath(new URL("./migrations", import.meta.url))
-      )
+      loader: PgMigrator.fromFileSystem(path),
+      schemaDirectory: path
     }),
     Layer.provide(NodeContext.layer)
   )
+}
 
 export const layerWithMigrations = (options?: PgLayerOptions) => Layer.provideMerge(layerMigrator(), layer(options))

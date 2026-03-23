@@ -11,7 +11,7 @@ const UserActivityLogBuilder = ActivityBuilder.make({
 })
 
 export class UserCreatedActivityLog extends S.Class<UserCreatedActivityLog>("@one-kilo/domain/UserCreatedActivityLog")(
-  UserActivityLogBuilder.Activity("User.Created"),
+  UserActivityLogBuilder.Activity({ type: "User.Created" }),
   {
     title: "User Created Activity Log",
     description: "A log marking the creation of a user"

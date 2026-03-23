@@ -22,6 +22,6 @@ export default Effect.gen(function*() {
     )
   `
 
-  yield* sql`CREATE INDEX idx_al_performed_by_user_id ON activity_logs (performed_by_user_id)`
+  yield* sql`CREATE INDEX idx_al_performed_by ON activity_logs (performed_by_user_id)`
   yield* sql`CREATE INDEX idx_al_targets ON activity_logs USING GIN (targets jsonb_path_ops)`
 })

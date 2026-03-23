@@ -17,9 +17,12 @@ export default Effect.gen(function*() {
 
       name TEXT NOT NULL,
       type TEXT NOT NULL,
-      workos_organization_id TEXT NOT NULL
+      workos_organization_id TEXT NOT NULL,
+
+      CONSTRAINT fk_ws_created_by FOREIGN KEY (created_by_user_id) REFERENCES users (id),
+      CONSTRAINT fk_ws_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES users (id)
     )
   `
 
-  yield* sql`CREATE UNIQUE INDEX idx_ws_workos_organization_id ON workspaces (workos_organization_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_ws_workos_organization ON workspaces (workos_organization_id)`
 })

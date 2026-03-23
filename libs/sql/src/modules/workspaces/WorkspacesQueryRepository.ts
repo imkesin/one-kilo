@@ -43,6 +43,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
               AND ws.archived_at IS NULL
               AND wsm.user_id = ${userId}
               AND wsm.archived_at IS NULL
+            GROUP BY ws.id
           `
       })
       const findPersonalWorkspaceAndMembershipEntitiesByUserId = Effect.fn(

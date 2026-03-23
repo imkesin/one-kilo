@@ -28,6 +28,6 @@ export default Effect.gen(function*() {
   `
 
   yield* sql`CREATE UNIQUE INDEX idx_wm_user_workspace ON workspace_memberships (user_id, workspace_id)`
-  yield* sql`CREATE INDEX idx_wm_workspace_id ON workspace_memberships (workspace_id)`
-  yield* sql`CREATE UNIQUE INDEX idx_wm_workos_org_membership_id ON workspace_memberships (workos_organization_membership_id)`
+  yield* sql`CREATE INDEX idx_wm_workspace ON workspace_memberships (workspace_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_wm_workos_org_membership ON workspace_memberships (workos_organization_membership_id)`
 })

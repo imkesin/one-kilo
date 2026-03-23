@@ -15,10 +15,7 @@ export default Effect.gen(function*() {
 
       archived_at TIMESTAMPTZ,
 
-      name TEXT NOT NULL,
-
-      CONSTRAINT fk_mc_created_by FOREIGN KEY (created_by_user_id) REFERENCES users (id),
-      CONSTRAINT fk_mc_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES users (id)
+      name TEXT NOT NULL
     )
   `
 })

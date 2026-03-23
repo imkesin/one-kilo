@@ -4,6 +4,7 @@ import { UserId } from "@one-kilo/domain/ids/UserId"
 import { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import * as ModelExtensions from "../../utils/ModelExtensions.ts"
 
 export class ActivityLogsModel extends Model.Class<ActivityLogsModel>(
   "ActivityLogsModel"
@@ -15,11 +16,14 @@ export class ActivityLogsModel extends Model.Class<ActivityLogsModel>(
    * The context is intentionally marked as unknown at the model-level.
    */
   context: S.Unknown,
-  targets: S.NonEmptyArray(
-    S.Struct({
-      id: UUIDv7,
-      type: S.NonEmptyTrimmedString
-    })
+  targets: pipe(
+    S.NonEmptyArray(
+      S.Struct({
+        id: UUIDv7,
+        type: S.NonEmptyTrimmedString
+      })
+    ),
+    ModelExtensions.JsonFromStringOnWrite
   ),
   timestamp: Model.DateTimeInsert,
   traceId: S.NonEmptyTrimmedString,

@@ -188,10 +188,13 @@ export class User extends S.Class<User>("@effect/auth-workos/User")({
     S.NullOr
   ),
 
-  metadata: S.Record({
-    key: S.String,
-    value: S.Unknown
-  }),
+  metadata: pipe(
+    S.Record({
+      key: S.String,
+      value: S.Unknown
+    }),
+    S.optional
+  ),
 
   createdAt: pipe(
     S.Date,

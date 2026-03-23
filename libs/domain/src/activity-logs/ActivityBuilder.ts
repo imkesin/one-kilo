@@ -28,12 +28,18 @@ interface ActivityBuilder<Targets extends S.Schema.All> {
   readonly [TypeId]: TypeId
 
   Activity: <Type extends string>(
-    type: Type
+    parameters: {
+      type: Type
+      version?: Version
+    }
   ) => ActivityMetadataFields<Type, Targets>
 
   ActivityWithContext: <Type extends string, Context extends S.Schema.All>(
-    type: Type,
-    context: Context
+    parameters: {
+      type: Type
+      context: Context
+      version?: Version
+    }
   ) => ActivityMetadataFields<Type, Targets> & { context: Context }
 }
 

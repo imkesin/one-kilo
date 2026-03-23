@@ -24,3 +24,24 @@ export const DateTimeArchived = Model.Field({
   update: DateTimeWithDefaultNull,
   json: S.NullOr(S.DateTimeUtc)
 })
+
+/**
+ * A field that represents a JSON(B) value stored as text in the database.
+ *
+ * This helps in situations where the database client is already transforming certain columns
+ * into JSON objects when they are read.
+ *
+ * @see Model.JsonFromString
+ */
+export const JsonFromStringOnWrite = <S extends S.Schema.All | S.PropertySignature.All>(
+  schema: S
+) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const parsed = S.parseJson(schema as any)
+
+  return Model.Field({
+    select: schema,
+    insert: parsed,
+    update: parsed
+  })
+}

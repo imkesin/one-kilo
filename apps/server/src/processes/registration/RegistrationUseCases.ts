@@ -194,8 +194,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           const workosOrganizationMembership = yield* pipe(
             workosGatewayClient.userManagement.createOrganizationMembership({
               userId: workosUser.id,
-              organizationId: workosOrganization.id,
-              roles: []
+              organizationId: workosOrganization.id
             }),
             orDieWithUnexpectedError("Failed to create WorkOS organization membership during registration.")
           )

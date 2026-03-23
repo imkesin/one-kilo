@@ -237,8 +237,8 @@ export class CreateOrganizationMembershipParameters
       S.fromKey("organization_id")
     ),
     roles: pipe(
-      S.Array(S.NonEmptyTrimmedString),
-      S.propertySignature,
+      S.NonEmptyArray(S.NonEmptyTrimmedString),
+      S.optional,
       S.fromKey("role_slugs")
     )
   })

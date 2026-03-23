@@ -7,6 +7,8 @@ import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
+import * as PgClientExtensions from "../../utils/PgClientExtensions.ts"
+import { PersonsCreatedByForeignKey, PersonsUpdatedByForeignKey } from "./PersonsForeignKeys.ts"
 import { PersonsModel } from "./PersonsModel.ts"
 
 type InsertPersonParameters = {
@@ -68,7 +70,15 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
         orDieWithUnexpectedError("Failed to insert person")
       )
 
-      return { insert }
+      const withDeferredForeignKeyConstraints = PgClientExtensions.withDeferredConstraints(
+        PersonsCreatedByForeignKey,
+        PersonsUpdatedByForeignKey
+      )
+
+      return {
+        insert,
+        withDeferredForeignKeyConstraints
+      }
     })
   }
 ) {}

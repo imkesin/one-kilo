@@ -456,7 +456,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
                       id: generateOrganizationMembershipId(),
                       userId: user.id,
                       organizationId: organization.id,
-                      roles: parameters.roles.map((slug) => Role.make({ slug })),
+                      roles: parameters.roles?.map((slug) => Role.make({ slug })) ?? [],
                       status: OrganizationMembershipStatus.make("active"),
                       createdAt: now,
                       updatedAt: now
