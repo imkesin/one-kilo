@@ -2,7 +2,7 @@ import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
-const INVALID_CODE_ERROR_MESSAGE = "A session could not be created because the provided code is invalid"
+const INVALID_CODE_ERROR_MESSAGE = "An authentication context could not be created because the provided code is invalid"
 
 export class AuthenticationApi_ExchangeCode_InvalidCodeError
   extends S.TaggedError<AuthenticationApi_ExchangeCode_InvalidCodeError>(
@@ -24,7 +24,7 @@ export class AuthenticationApi_ExchangeCode_InvalidCodeError
 {}
 
 const INVALID_REFRESH_TOKEN_ERROR_MESSAGE =
-  "A session could not be refreshed because the provided refresh token is invalid"
+  "The authentication context could not be refreshed because the provided refresh token is invalid"
 
 export class AuthenticationApi_RefreshContext_InvalidRefreshTokenError
   extends S.TaggedError<AuthenticationApi_RefreshContext_InvalidRefreshTokenError>(

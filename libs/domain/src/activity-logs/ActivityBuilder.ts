@@ -12,7 +12,7 @@ type Version = 1 | 2 | 3
 type ActivityMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
   // Inputs
   readonly id: typeof ActivityLogId
-  readonly actorId: typeof UserId
+  readonly performedByUserId: typeof UserId
   readonly targets: Targets
 
   // Derived
@@ -129,7 +129,7 @@ export function make(
       }
     ) => ({
       id: ActivityLogId,
-      actorId: UserId,
+      performedByUserId: UserId,
       targets,
 
       timestamp: S.DateTimeUtc,
@@ -146,7 +146,7 @@ export function make(
       }
     ) => ({
       id: ActivityLogId,
-      actorId: UserId,
+      performedByUserId: UserId,
       context: parameters.context,
       targets,
 

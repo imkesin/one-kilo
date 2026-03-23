@@ -14,7 +14,7 @@ export const ActivityLogId = pipe(
 )
 export type ActivityLogId = typeof ActivityLogId.Type
 
-const ACTIVITY_LOG_PREFIX = "alog_"
+const ACTIVITY_LOG_PREFIX = "al_"
 
 export const PrefixedActivityLogId = pipe(
   S.NonEmptyTrimmedString,

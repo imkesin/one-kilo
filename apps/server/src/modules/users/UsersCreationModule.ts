@@ -37,7 +37,7 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
 
           const activityLog = yield* UserCreatedActivityLog.build({
             id,
-            actorId: user.id,
+            performedByUserId: user.id,
             targets: [{ id: user.id, type: "User" as const }]
           })
 

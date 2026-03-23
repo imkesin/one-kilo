@@ -14,7 +14,7 @@ import { ActivityLogsModel } from "./ActivityLogsModel.ts"
 import { toActivityLog } from "./internal/ActivityLogsModelTransformations.ts"
 
 type InsertActivityLogParameters = {
-  readonly actorId: UserId
+  readonly performedByUserId: UserId
   readonly encodedContext: Option.Option<string>
   readonly targets: readonly [
     ActivityLogDefinitions.ActivityLogTarget,
@@ -43,7 +43,7 @@ export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepositor
       })
       const insert = Effect.fn("ActivityLogsRepository.insert")(
         function*({
-          actorId,
+          performedByUserId,
           encodedContext,
           targets,
           traceId,
@@ -63,7 +63,7 @@ export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepositor
               (activityLogId) =>
                 insertSchema({
                   id: activityLogId,
-                  actorId,
+                  performedByUserId,
                   context: Option.getOrNull(encodedContext),
                   targets,
                   /*

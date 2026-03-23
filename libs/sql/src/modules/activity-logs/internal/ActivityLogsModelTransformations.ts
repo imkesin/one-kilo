@@ -7,7 +7,7 @@ import type { ActivityLogsModel } from "../ActivityLogsModel.ts"
 
 export const toActivityLog = ({
   id,
-  actorId,
+  performedByUserId,
   targets,
   timestamp,
   traceId,
@@ -22,7 +22,7 @@ export const toActivityLog = ({
     return Effect.succeed(
       new UserCreatedActivityLog({
         id,
-        actorId,
+        performedByUserId,
         targets,
         timestamp,
         traceId,

@@ -10,7 +10,7 @@ export class ActivityLogsModel extends Model.Class<ActivityLogsModel>(
 )({
   id: Model.GeneratedByApp(ActivityLogId),
 
-  actorId: UserId,
+  performedByUserId: UserId,
   /*
    * The context is intentionally marked as unknown at the model-level.
    */

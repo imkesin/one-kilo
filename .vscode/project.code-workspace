@@ -105,8 +105,10 @@
       "millis",
       "pulumi",
       "pkce",
+      "timestamptz",
       "vstack",
-      "workos"
+      "workos",
+      "uuidv7"
     ],
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
