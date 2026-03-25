@@ -20,7 +20,7 @@
   "scripts": {
     "build": "turbo build",
     "clean": "turbo clean && rm -rf .turbo",
-    "dev": "turbo dev",
+    "dev": "turbo watch dev",
     "lint": "turbo lint",
     "start": "turbo start",
     "test:once": "turbo test:once",

@@ -4,6 +4,7 @@ import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
 import * as Effect from "effect/Effect"
@@ -25,10 +26,12 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
   "@one-kilo/server/WorkspacesCreationModule",
   {
     dependencies: [
+      WorkspaceMembershipsRepository.Default,
       WorkspacesQueryRepository.Default,
       WorkspacesRepository.Default
     ],
     effect: Effect.gen(function*() {
+      const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
       const workspacesRepository = yield* WorkspacesRepository
 
@@ -57,7 +60,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             performedByUserId: userId
           })
 
-          const workspaceMembership = yield* workspacesRepository.insertMembership({
+          const workspaceMembership = yield* workspaceMembershipsRepository.insert({
             id: workspaceMembershipParameters.id,
             userId,
             workspaceId: workspace.id,

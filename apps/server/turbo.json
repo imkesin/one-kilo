@@ -2,11 +2,6 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tasks": {
-    "build": {
-      "env": [
-        "WORKOS_CLIENT_ID"
-      ]
-    },
     "dev": {
       "dependsOn": ["^build"],
       "persistent": true

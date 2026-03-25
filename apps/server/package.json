@@ -21,8 +21,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
-    "dev": "pnpm /dev:.+/",
-    "dev:node": "pnpm node:base --watch dist/src/dev.js",
+    "dev": "tsc --build tsconfig.src.json --watch --preserveWatchOutput > /dev/null 2>&1 & node --env-file=.env.local --enable-source-maps --watch dist/src/dev.js",
     "docker:build": "docker build -f Dockerfile -t one-kilo-server ../..",
     "lint": "eslint .",
     "node:base": "node --env-file=.env.local --enable-source-maps",
