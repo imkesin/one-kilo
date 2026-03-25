@@ -1,3 +1,3 @@
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 
-export const buildWorkspacePageUrl = (workspaceId: WorkspaceId) => `/w/${workspaceId}` as const
+export const buildWorkspacePageUrl = (workspaceId: WorkspaceId) => `/ws/${workspaceId}` as const

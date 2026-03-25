@@ -3,7 +3,7 @@ import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRun
 
 const workspacesPage = Effect.succeed(
   <div>
-    <h1>Workspaces Page</h1>
+    <h1>(Unsecured) Workspaces Page</h1>
   </div>
 )
 

@@ -28,8 +28,12 @@ export const PrefixedWorkspaceId = pipe(
 )
 export type PrefixedWorkspaceId = typeof PrefixedWorkspaceId.Type
 
-export const WorkspaceIdFromPrefixed = makeIdFromPrefixed(PrefixedWorkspaceId, WorkspaceId, {
-  prefix: WORKSPACE_PREFIX,
-  makeId: WorkspaceId.make,
-  makePrefixed: PrefixedWorkspaceId.make
-})
+export const WorkspaceIdFromPrefixed = makeIdFromPrefixed(
+  PrefixedWorkspaceId,
+  WorkspaceId,
+  {
+    prefix: WORKSPACE_PREFIX,
+    makeId: WorkspaceId.make,
+    makePrefixed: PrefixedWorkspaceId.make
+  }
+)

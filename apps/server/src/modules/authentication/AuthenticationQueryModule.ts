@@ -8,7 +8,10 @@ export class AuthenticationQueryModule extends Effect.Service<AuthenticationQuer
     effect: Effect.gen(function*() {
       const authenticationQueryRepository = yield* AuthenticationQueryRepository
 
-      return { retrieveAuthenticationIdentity: authenticationQueryRepository.findAuthenticationIdentity }
+      return {
+        retrieveAuthenticationIdentity: authenticationQueryRepository.findAuthenticationIdentity,
+        retrieveDefaultAuthenticationIdentity: authenticationQueryRepository.findDefaultAuthenticationIdentity
+      }
     })
   }
 ) {}
