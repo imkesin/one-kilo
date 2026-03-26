@@ -2,14 +2,14 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 
-const workspacePageEffect = pipe(
+const userPageEffect = pipe(
   Effect.succeed(
     <div>
-      <h1>(Unsecured) Workspace Page</h1>
+      <h1>(Unsecured) User Page</h1>
     </div>
   )
 )
 
-export default async function WorkspacesPage() {
-  return runWithWebServerRuntime(workspacePageEffect)
+export default async function UserPage() {
+  return runWithWebServerRuntime(userPageEffect)
 }

@@ -1,5 +1,3 @@
-import "server-only"
-
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
@@ -19,27 +17,20 @@ import * as S from "effect/Schema"
 import * as Jose from "jose"
 import { isDynamicServerError as isNextDynamicServerError } from "next/dist/client/components/hooks-server-context"
 import { cookies } from "next/headers"
-import { ServerApiClient } from "~/infra/api/ServerApiClient"
+import { AuthenticationServerApiClient } from "~/infra/api/server/ServerApiClients"
 import { DynamicServerError } from "~/lib/errors"
+import { Authentication_ContextCookieNotFoundError, Authentication_ContextExpiredError } from "./AuthenticationErrors"
 
 const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
-
-export class AuthenticationContextCookieNotFoundError extends S.TaggedError<AuthenticationContextCookieNotFoundError>()(
-  "AuthenticationContextCookieNotFoundError",
-  {},
-  {
-    description: "The authentication context cookie was not found"
-  }
-) {}
 
 const HTTP_ONLY_COOKIE_NAME = "one-kilo/web/AuthenticationContext"
 
 export class AuthenticationWebModule extends Effect.Service<AuthenticationWebModule>()(
   "AuthenticationWebModule",
   {
-    dependencies: [ServerApiClient.Default],
+    dependencies: [AuthenticationServerApiClient.Default],
     scoped: Effect.gen(function*() {
-      const serverApiClient = yield* ServerApiClient
+      const authenticationClient = yield* AuthenticationServerApiClient
 
       const cookiesStoreEffect = pipe(
         Effect.tryPromise({
@@ -81,29 +72,54 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         }
       )
 
-      const currentAuthenticationContextEffect = Effect.gen(function*() {
+      const rawAuthenticationContextEffect = Effect.gen(function*() {
         const cookieStore = yield* cookiesStoreEffect
         const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
 
         if (Predicate.isUndefined(cookie)) {
-          return yield* Effect.fail(new AuthenticationContextCookieNotFoundError())
+          return yield* Effect.fail(new Authentication_ContextCookieNotFoundError())
         }
 
         const decodedAuthenticationContext = yield* pipe(
           cookie.value,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
-          Effect.mapError(() => new AuthenticationContextCookieNotFoundError())
+          Effect.mapError(() => new Authentication_ContextCookieNotFoundError())
         )
 
         return decodedAuthenticationContext
       })
 
+      const withValidAuthenticationContextOr = <A, E, R>(
+        onExpired: (invalidAuthenticationContextEffect: AuthenticationContext) => Effect.Effect<A, E, R>
+      ) =>
+        Effect.gen(function*() {
+          const authenticationContext = yield* rawAuthenticationContextEffect
+
+          const { exp } = Jose.decodeJwt(authenticationContext.workosAccessToken)
+          if (Predicate.isUndefined(exp)) {
+            return yield* dieWithUnexpectedError("JWT is missing expiration")
+          }
+
+          const nowInMillis = yield* Clock.currentTimeMillis
+          const expirationInMillis = exp * 1000
+
+          if (nowInMillis < expirationInMillis) {
+            return authenticationContext
+          }
+
+          return yield* onExpired(authenticationContext)
+        })
+
+      const currentAuthenticationContextEffect = withValidAuthenticationContextOr(
+        () => Effect.fail(new Authentication_ContextExpiredError())
+      )
+
       const refreshedAuthenticationContextCache = yield* Cache.makeWith({
         capacity: 10,
         lookup: (refreshToken: WorkOSValues.RefreshToken) =>
           pipe(
-            serverApiClient.authentication.refreshContext({ payload: { refreshToken } }),
+            authenticationClient.authentication.refreshContext({ payload: { refreshToken } }),
             Effect.map(({ authenticationContext }) => authenticationContext)
           ),
         timeToLive: (exit) =>
@@ -162,38 +178,17 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           Effect.scoped
         )
 
-      const lockedMaybeRefreshAuthenticationContext = Effect.fn(
-        function*(authenticationContext: AuthenticationContext) {
-          const { exp } = Jose.decodeJwt(authenticationContext.workosAccessToken)
-          if (Predicate.isUndefined(exp)) {
-            return yield* dieWithUnexpectedError("JWT is missing expiration")
-          }
-
-          const expirationInMillis = exp * 1000
-          const nowInMillis = yield* Clock.currentTimeMillis
-
-          if (expirationInMillis > nowInMillis) {
-            return authenticationContext
-          }
-
-          return yield* refreshAndSetAuthenticationContext(authenticationContext.workosRefreshToken)
-        },
-        (effect, { userId }) =>
-          pipe(
-            effect,
-            withUserIdLock(userId)
-          )
-      )
-
-      const liveAuthenticationContextEffect = pipe(
-        currentAuthenticationContextEffect,
-        Effect.andThen(lockedMaybeRefreshAuthenticationContext)
+      const refreshedAuthenticationContextEffect = withValidAuthenticationContextOr(({ userId, workosRefreshToken }) =>
+        pipe(
+          refreshAndSetAuthenticationContext(workosRefreshToken),
+          withUserIdLock(userId)
+        )
       )
 
       const handleExchangeCode = Effect.fn("AuthenticationWebModule.handleExchangeCode")(
         function*(code: WorkOSValues.AuthenticationCode) {
           const authenticationContext = yield* pipe(
-            serverApiClient.authentication.exchangeCode({ payload: { code } }),
+            authenticationClient.authentication.exchangeCode({ payload: { code } }),
             Effect.map(({ authenticationContext }) => authenticationContext)
           )
 
@@ -204,7 +199,9 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
       )
 
       return {
-        authenticationContext: liveAuthenticationContextEffect,
+        currentAuthenticationContext: currentAuthenticationContextEffect,
+        refreshedAuthenticationContext: refreshedAuthenticationContextEffect,
+
         handleExchangeCode
       }
     })

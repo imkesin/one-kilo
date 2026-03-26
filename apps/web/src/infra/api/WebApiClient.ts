@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect"
 import { WebApi } from "~/app/api/WebApi"
 
 export class WebApiClient extends Effect.Service<WebApiClient>()(
-  "WebApiClient",
+  "@one-kilo/web/WebApiClient",
   {
     dependencies: [FetchHttpClient.layer],
     effect: Effect.gen(function*() {

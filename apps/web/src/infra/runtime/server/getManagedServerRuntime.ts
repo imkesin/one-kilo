@@ -1,3 +1,5 @@
+import "server-only"
+
 import * as ManagedRuntime from "effect/ManagedRuntime"
 import { type WebServerLayerSuccess, WebServerLive } from "./webServerLayer"
 
