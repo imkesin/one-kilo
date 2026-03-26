@@ -1,4 +1,5 @@
-import { NodeContext, NodeRuntime } from "@effect/platform-node"
+import * as NodeContext from "@effect/platform-node/NodeContext"
+import * as NodeRuntime from "@effect/platform-node/NodeRuntime"
 import * as Command from "@effect/platform/Command"
 import { PostgresDefaults } from "@one-kilo/sql/configs/Defaults"
 import * as Duration from "effect/Duration"

@@ -4,10 +4,12 @@
     "@effect/platform": "^0.94.2",
     "@effect/platform-node": "^0.104.1",
     "@one-kilo/sql": "workspace:*",
+    "@effect/sql": "^0.49.0",
     "effect": "^3.19.15"
   },
   "private": true,
   "scripts": {
+    "pg:reset": "node src/reset-local-postgres.ts",
     "pg:setup": "node src/setup-local-postgres-container.ts",
     "typecheck": "tsc -b tsconfig.json"
   },

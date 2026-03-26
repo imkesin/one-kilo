@@ -8,6 +8,7 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
+import { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import { PersonFallbackNameGenerator } from "@one-kilo/domain/values/PersonFallbackNameGenerator"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -25,6 +26,7 @@ type PersistRegistrationParameters = {
     readonly id: UserId
     readonly preferredName: PreferredName
     readonly fullName: FullName
+    readonly emailAddress: EmailAddress
     readonly workosUserId: WorkOSIds.UserId
   }
   readonly workspaceParameters: {
@@ -73,6 +75,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             id: userParameters.id,
             preferredName: userParameters.preferredName,
             fullName: userParameters.fullName,
+            emailAddress: userParameters.emailAddress,
             workosUserId: userParameters.workosUserId
           })
 
@@ -153,6 +156,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
           const { preferredName, fullName, workosName } = yield* derivePersonNamesFromWorkosUser(workosUser)
 
+          // TODO: We need to parse and fail hard if this is a strange value
+          const emailAddress = EmailAddress.make(workosUser.email)
+
           const [workosOrganization] = yield* Effect.all(
             [
               pipe(
@@ -211,7 +217,8 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               id: userId,
               workosUserId: workosUser.id,
               preferredName,
-              fullName
+              fullName,
+              emailAddress
             },
             workspaceParameters: {
               id: workspaceId,

@@ -2,8 +2,10 @@ import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import { UserCreatedActivityLog } from "@one-kilo/domain/activity-logs/UserActivityLogs"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
+import type { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { ActivityLogsRepository } from "@one-kilo/sql/modules/activity-logs/ActivityLogsRepository"
+import { EmailAddressesRepository } from "@one-kilo/sql/modules/email-addresses/EmailAddressesRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import { UsersRepository } from "@one-kilo/sql/modules/users/UsersRepository"
 import * as Effect from "effect/Effect"
@@ -14,6 +16,7 @@ type CreateHumanUserParameters = {
   id: UserId
   preferredName: PreferredName
   fullName: FullName
+  emailAddress: EmailAddress
   workosUserId: WorkOSIds.UserId
 }
 
@@ -23,11 +26,13 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
     dependencies: [
       ActivityLogsRepository.Default,
       DomainIdGenerator.Default,
+      EmailAddressesRepository.Default,
       PersonsRepository.Default,
       UsersRepository.Default
     ],
     effect: Effect.gen(function*() {
       const activityLogsRepository = yield* ActivityLogsRepository
+      const emailAddressesRepository = yield* EmailAddressesRepository
       const idGenerator = yield* DomainIdGenerator
       const personsRepository = yield* PersonsRepository
       const usersRepository = yield* UsersRepository
@@ -50,7 +55,7 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
       )
 
       const createPersonUser = Effect.fn("UsersCreationModule.createPersonUser")(
-        function*({ id, preferredName, fullName, workosUserId }: CreateHumanUserParameters) {
+        function*({ id, preferredName, fullName, emailAddress, workosUserId }: CreateHumanUserParameters) {
           const person = yield* pipe(
             personsRepository.insert({
               preferredName,
@@ -67,7 +72,14 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
             workosUserId
           })
 
-          yield* recordUserCreated(user)
+          yield* Effect.all([
+            emailAddressesRepository.insert({
+              personId: person.id,
+              value: emailAddress,
+              performedByUserId: id
+            }),
+            recordUserCreated(user)
+          ], { concurrency: "unbounded" })
 
           return user
         }
