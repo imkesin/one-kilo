@@ -135,7 +135,7 @@
         "fileMatch": ["turbo.json", "**/turbo.json"]
       }
     ],
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.preferences.importModuleSpecifierEnding": "js"
+    "js/ts.preferences.importModuleSpecifierEnding": "js",
+    "js/ts.tsdk.path": "root/node_modules/typescript/lib"
   }
 }

@@ -1,6 +1,7 @@
 import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
 import { FullName, PreferredName } from "../values/PersonValues.ts"
+import { EmailAddressOnPerson } from "./EmailAddress.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
@@ -27,7 +28,9 @@ export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/
 export class PersonOnUser extends S.TaggedClass<PersonOnUser>("@one-kilo/domain/PersonOnUser")(
   "PersonOnUser",
   {
-    ...EntityBaseFields
+    ...EntityBaseFields,
+
+    emailAddresses: S.NonEmptyArray(EmailAddressOnPerson)
   },
   {
     identifier: "PersonOnUser",

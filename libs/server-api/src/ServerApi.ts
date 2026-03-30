@@ -3,8 +3,10 @@ import * as HttpApiError from "@effect/platform/HttpApiError"
 import { ApplicationApi_AuthenticationMiddleware } from "./infra/AuthenticationMiddleware.ts"
 import { AuthenticationApi as AuthenticationApiGroup } from "./modules/authentication/AuthenticationApi.ts"
 import { HealthApi } from "./modules/health/HealthApi.ts"
+import { UsersApi } from "./modules/users/UsersApi.ts"
 
 export const ApplicationApi = HttpApi.make("@one-kilo/ApplicationApi")
+  .add(UsersApi)
   .middleware(ApplicationApi_AuthenticationMiddleware)
   .addError(HttpApiError.InternalServerError)
 

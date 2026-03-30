@@ -13,12 +13,14 @@ import { SqlLive } from "./infra/Sql.ts"
 import { WorkOSApiGatewayAndDirectClientLive } from "./infra/WorkOS.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
+import { UsersHttp } from "./modules/users/UsersHttp.ts"
 
 const ServerApiLive = pipe(
   HttpApiBuilder.api(ServerApi),
   Layer.provide([
     AuthenticationHttp,
-    HealthHttp
+    HealthHttp,
+    UsersHttp
   ]),
   Layer.provide([
     WorkOSApiGatewayAndDirectClientLive,

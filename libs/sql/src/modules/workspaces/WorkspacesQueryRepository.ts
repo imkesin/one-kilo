@@ -44,6 +44,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
               AND wsm.user_id = ${userId}
               AND wsm.archived_at IS NULL
             GROUP BY ws.id
+            LIMIT 1
           `
       })
       const findPersonalWorkspaceAndMembershipEntitiesByUserId = Effect.fn(
@@ -67,8 +68,11 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         execute: (workosOrganizationId) =>
           sql`
             SELECT *
-            FROM workspaces
-            WHERE workos_organization_id = ${workosOrganizationId}
+            FROM workspaces ws
+            WHERE
+              ws.workos_organization_id = ${workosOrganizationId}
+              AND ws.archived_at IS NULL
+            LIMIT 1
           `
       })
       const findWorkspaceEntityByWorkOSOrganizationId = Effect.fn(

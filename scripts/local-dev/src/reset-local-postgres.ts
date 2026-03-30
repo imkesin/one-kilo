@@ -12,7 +12,8 @@ const main = Effect.gen(function*() {
   const tables = yield* sql<{ tableName: string }>`
     SELECT table_name
     FROM information_schema.tables
-    WHERE table_schema = 'public'
+    WHERE
+      table_schema = 'public'
       AND table_type = 'BASE TABLE'
       AND table_name != ${MIGRATION_TABLE}
   `

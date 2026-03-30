@@ -41,6 +41,7 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
               AND u.archived_at IS NULL
               AND wsm.archived_at IS NULL
               AND ws.archived_at IS NULL
+            LIMIT 1
           `
       })
       const findAuthenticationIdentity = Effect.fn("AuthenticationQueryRepository.findAuthenticationIdentity")(
@@ -74,6 +75,7 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
               AND u.archived_at IS NULL
               AND wsm.archived_at IS NULL
               AND ws.archived_at IS NULL
+            LIMIT 1
           `
       })
       const findDefaultAuthenticationIdentity = Effect.fn(
