@@ -11,4 +11,17 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
   value: EmailAddress,
 
   ...ModelAuditFields
-}) {}
+}) {
+  static asJsonBBuildObject({ alias } = { alias: "ea" }) {
+    return `
+      JSONB_BUILD_OBJECT(
+        'id', ${alias}.id,
+        'person_id', ${alias}.person_id,
+        'value', ${alias}.value,
+        'created_at', ${alias}.created_at,
+        'updated_at', ${alias}.updated_at,
+        'archived_at', ${alias}.archived_at
+      )
+    `
+  }
+}
