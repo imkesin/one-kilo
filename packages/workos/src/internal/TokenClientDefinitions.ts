@@ -22,7 +22,13 @@ const DateFromSeconds = S.transform(
 const DecodedAccessTokenCommonFields = {
   iss: S.NonEmptyTrimmedString,
   exp: DateFromSeconds,
-  iat: DateFromSeconds
+  iat: DateFromSeconds,
+  orgId: pipe(
+    OrganizationId,
+    S.optionalWith({ as: "Option" }),
+    S.fromKey("org_id")
+  ),
+  jti: S.NonEmptyTrimmedString
 } as const
 
 class DecodedMachineAccessToken extends S.Class<DecodedMachineAccessToken>("DecodedMachineAccessToken")({
@@ -37,19 +43,12 @@ class DecodedMachineAccessToken extends S.Class<DecodedMachineAccessToken>("Deco
 
   ...DecodedAccessTokenCommonFields,
 
-  sub: ApplicationClientId,
-  orgId: pipe(
-    OrganizationId,
-    S.optional,
-    S.fromKey("org_id")
-  ),
-  jti: S.NonEmptyTrimmedString
+  sub: ApplicationClientId
 }) {}
 
 const DecodedOAuthTokenCommonFields = {
   ...DecodedAccessTokenCommonFields,
 
-  aud: S.NonEmptyTrimmedString,
   sub: UserId
 } as const
 
@@ -65,9 +64,9 @@ class DecodedOAuthAccessToken extends S.Class<DecodedOAuthAccessToken>("DecodedO
 
   ...DecodedOAuthTokenCommonFields,
 
-  sid: S.NonEmptyTrimmedString,
-  jti: S.NonEmptyTrimmedString
+  sid: S.NonEmptyTrimmedString
 }) {}
+
 class DecodedOAuthIdToken extends S.TaggedClass<DecodedOAuthIdToken>()(
   "DecodedOAuthIdToken",
   {
@@ -93,11 +92,6 @@ class DecodedSessionAccessToken extends S.Class<DecodedSessionAccessToken>("Deco
     act: pipe(
       S.Struct({ sub: EmailAddress }),
       S.optional
-    ),
-    orgId: pipe(
-      OrganizationId,
-      S.optional,
-      S.fromKey("org_id")
     ),
     roles: S.Array(S.NonEmptyTrimmedString),
     permissions: pipe(

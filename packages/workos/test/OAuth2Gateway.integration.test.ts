@@ -3,7 +3,7 @@ import { describe, layer } from "@effect/vitest"
 import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import { ApplicationClientId } from "../src/domain/Ids.ts"
+import { ApplicationClientId, EnvironmentClientId } from "../src/domain/Ids.ts"
 import * as OAuth2Client from "../src/OAuth2Client.ts"
 import * as OAuth2Gateway from "../src/OAuth2Gateway.ts"
 import * as TokenClient from "../src/TokenClient.ts"
@@ -18,7 +18,7 @@ const oauth2Gateway = pipe(
 const tokenClient = TokenClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
-    Config.map(ApplicationClientId.make)
+    Config.map(EnvironmentClientId.make)
   )
 })
 const configIntegration = Config.nested(
