@@ -19,7 +19,9 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
         'person_id', ${alias}.person_id,
         'value', ${alias}.value,
         'created_at', ${alias}.created_at,
+        'created_by_user_id', ${alias}.created_by_user_id,
         'updated_at', ${alias}.updated_at,
+        'updated_by_user_id', ${alias}.updated_by_user_id,
         'archived_at', ${alias}.archived_at
       )
     `

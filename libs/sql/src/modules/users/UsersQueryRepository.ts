@@ -125,7 +125,10 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
         orDieWithUnexpectedError("An unexpected error occurred while finding a user")
       )
 
-      return { findUserEntityByWorkOSUserId, findUserByUserId }
+      return {
+        findUserEntityByWorkOSUserId,
+        findUserByUserId
+      }
     })
   }
 ) {}
