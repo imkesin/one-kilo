@@ -13,7 +13,7 @@
     "@one-kilo/server-api": "workspace:*",
     "@one-kilo/sql": "workspace:*",
     "effect": "^3.21.0",
-    "jose": "^6.1.3"
+    "jose": "^6.2.2"
   },
   "keywords": [],
   "license": "ISC",

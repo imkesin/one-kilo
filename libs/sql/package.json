@@ -10,10 +10,10 @@
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "effect": "^3.21.0",
-    "pg": "^8.16.0"
+    "pg": "^8.20.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.16.0"
+    "@types/pg": "^8.20.0"
   },
   "exports": {
     "./*": "./dist/src/*.js",

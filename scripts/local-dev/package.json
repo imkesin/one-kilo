@@ -1,11 +1,11 @@
 {
   "name": "@one-kilo/local-dev",
   "devDependencies": {
-    "@effect/platform": "^0.94.2",
-    "@effect/platform-node": "^0.104.1",
+    "@effect/platform": "^0.96.0",
+    "@effect/platform-node": "^0.106.0",
     "@one-kilo/sql": "workspace:*",
-    "@effect/sql": "^0.49.0",
-    "effect": "^3.19.15"
+    "@effect/sql": "^0.51.0",
+    "effect": "^3.21.0"
   },
   "private": true,
   "scripts": {
