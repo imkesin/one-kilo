@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "dependencies": {
     "@effect/auth-workos": "workspace:*",
-    "@effect/platform": "^0.94.2",
+    "@effect/platform": "^0.96.0",
     "@one-kilo/domain": "workspace:*",
-    "effect": "^3.19.15"
+    "effect": "^3.21.0"
   },
   "exports": {
     "./*": "./dist/src/*.js",

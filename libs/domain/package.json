@@ -4,7 +4,7 @@
   "dependencies": {
     "@effect/auth-workos": "workspace:*",
     "@one-kilo/lib": "workspace:*",
-    "effect": "^3.19.15"
+    "effect": "^3.21.0"
   },
   "exports": {
     "./*": "./dist/src/*.js",
