@@ -44,9 +44,25 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             )
           )
 
-          const registerHumanUserEffect = Effect.map(
-            registrationProcesses.registerHumanUser({ workosUser, workosRefreshToken }),
-            CodeExchangeOutcome.NewlyCreatedUser
+          const registerHumanUserEffect = pipe(
+            registrationProcesses.registerHumanUser({ workosUser }),
+            Effect.flatMap(({ userId, workspaceId, workosOrganizationId }) =>
+              pipe(
+                workosDirectClient.userManagement.authenticateWithRefreshToken({
+                  refreshToken: workosRefreshToken,
+                  organizationId: workosOrganizationId
+                }),
+                orDieWithUnexpectedError("Failed to refresh WorkOS token after registration."),
+                Effect.map(({ accessToken, refreshToken }) =>
+                  CodeExchangeOutcome.NewlyCreatedUser({
+                    userId,
+                    workspaceId,
+                    workosAccessToken: accessToken,
+                    workosRefreshToken: refreshToken
+                  })
+                )
+              )
+            )
           )
 
           /*

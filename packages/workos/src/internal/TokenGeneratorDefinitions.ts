@@ -16,14 +16,15 @@ class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect/auth
 ) {}
 
 export interface Generator {
-  readonly generateAccessToken: (parameters: {
-    sessionId: SessionId
-    userId: UserId
+  readonly generateMachineAccessToken: (parameters: {
+    readonly clientId: ApplicationClientId
+    readonly orgId: OrganizationId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
-  readonly generateMachineAccessToken: (parameters: {
-    clientId: ApplicationClientId
-    orgId: OrganizationId
+  readonly generateSessionAccessToken: (parameters: {
+    readonly sessionId: SessionId
+    readonly userId: UserId
+    readonly orgId?: OrganizationId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
   readonly generateRefreshToken: () => Effect.Effect<RefreshToken>
@@ -38,34 +39,10 @@ export const makeTest = (
   const ALG = "RS256"
   const DEFAULT_DURATION = Duration.seconds(5)
 
-  const CORE_ISS = "https://api.workos.com"
   const CONNECT_ISS = `https://${options.authKitDomain}`
+  const CORE_ISS = "https://api.workos.com"
 
   return {
-    generateAccessToken: Effect.fnUntraced(function*({ sessionId, userId }) {
-      const issuedAt = yield* DateTime.nowAsDate
-      const tokenId = generateRandomString("Id")
-
-      return yield* pipe(
-        Effect.tryPromise({
-          try: () =>
-            new Jose.SignJWT({ roles: [], sid: sessionId })
-              .setProtectedHeader({
-                alg: ALG,
-                typ: "JWT"
-              })
-              .setIssuer(CORE_ISS)
-              .setSubject(userId)
-              .setExpirationTime(new Date(issuedAt.getTime() + Duration.toMillis(DEFAULT_DURATION)))
-              .setIssuedAt(issuedAt)
-              .setJti(tokenId)
-              .sign(options.privateKey),
-          catch: (e) => new GenerateTokenError({ cause: e })
-        }),
-        Effect.map(AccessToken.make)
-      )
-    }),
-
     generateMachineAccessToken: Effect.fnUntraced(function*({ clientId, orgId }) {
       const issuedAt = yield* DateTime.nowAsDate
       const tokenId = generateRandomString("Id")
@@ -90,6 +67,34 @@ export const makeTest = (
       )
     }),
 
-    generateRefreshToken: () => Effect.succeed(RefreshToken.make(generateRandomString("RefreshToken")))
+    generateRefreshToken: () => Effect.succeed(RefreshToken.make(generateRandomString("RefreshToken"))),
+
+    generateSessionAccessToken: Effect.fnUntraced(function*({ sessionId, userId, orgId }) {
+      const issuedAt = yield* DateTime.nowAsDate
+      const tokenId = generateRandomString("Id")
+
+      return yield* pipe(
+        Effect.tryPromise({
+          try: () =>
+            new Jose.SignJWT({
+              org_id: orgId,
+              roles: ["member"],
+              sid: sessionId
+            })
+              .setProtectedHeader({
+                alg: ALG,
+                typ: "JWT"
+              })
+              .setIssuer(CORE_ISS)
+              .setSubject(userId)
+              .setExpirationTime(new Date(issuedAt.getTime() + Duration.toMillis(DEFAULT_DURATION)))
+              .setIssuedAt(issuedAt)
+              .setJti(tokenId)
+              .sign(options.privateKey),
+          catch: (e) => new GenerateTokenError({ cause: e })
+        }),
+        Effect.map(AccessToken.make)
+      )
+    })
   }
 }

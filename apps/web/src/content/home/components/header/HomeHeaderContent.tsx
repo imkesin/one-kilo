@@ -1,20 +1,6 @@
-import { ChevronRight } from "lucide-react"
-import { signInRouteUrl } from "~/app/(auth)/sign-in/url"
 import { css } from "~/generated/styled-system/css"
 import { HStack } from "~/generated/styled-system/jsx"
-import { hstack } from "~/generated/styled-system/patterns"
-import { Button } from "~/ui/components/button/Button"
-
-function Navigation() {
-  return (
-    <nav className={hstack({ justifyContent: "end" })}>
-      <Button render={<a href={signInRouteUrl} />}>
-        Sign in
-        <ChevronRight size={20} />
-      </Button>
-    </nav>
-  )
-}
+import { HomeHeaderNavigation } from "./HomeHeaderNavigation"
 
 export function HomeHeaderContent() {
   return (
@@ -28,7 +14,7 @@ export function HomeHeaderContent() {
       >
         WorkOS + Effect
       </span>
-      <Navigation />
+      <HomeHeaderNavigation />
     </HStack>
   )
 }

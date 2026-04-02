@@ -1,8 +1,6 @@
-import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import * as PgClient from "@effect/sql-pg/PgClient"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
@@ -40,7 +38,6 @@ type PersistRegistrationParameters = {
 }
 
 type RegisterHumanUserParameters = {
-  readonly workosRefreshToken: WorkOSValues.RefreshToken
   readonly workosUser: WorkOSEntities.User
 }
 
@@ -56,7 +53,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
     effect: Effect.gen(function*() {
       const pg = yield* PgClient.PgClient
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
-      const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
       const idGenerator = yield* DomainIdGenerator
       const fallbackNameGenerator = yield* PersonFallbackNameGenerator
@@ -144,7 +140,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
       const registerHumanUser = Effect.fn("RegistrationUseCases.registerHumanUser")(
         function*({
-          workosRefreshToken: inputWorkosRefreshToken,
           workosUser
         }: RegisterHumanUserParameters) {
           const userId = yield* idGenerator.userId
@@ -204,14 +199,6 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             orDieWithUnexpectedError("Failed to create WorkOS organization membership during registration.")
           )
 
-          const refreshTokenResponse = yield* pipe(
-            workosDirectClient.userManagement.authenticateWithRefreshToken({
-              refreshToken: inputWorkosRefreshToken,
-              organizationId: workosOrganization.id
-            }),
-            orDieWithUnexpectedError("Failed to refresh WorkOS token within registration.")
-          )
-
           yield* persistRegistration({
             userParameters: {
               id: userId,
@@ -233,8 +220,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           return {
             userId,
             workspaceId,
-            workosAccessToken: refreshTokenResponse.accessToken,
-            workosRefreshToken: refreshTokenResponse.refreshToken
+            workosOrganizationId: workosOrganization.id
           }
         },
         Effect.scoped

@@ -139,7 +139,7 @@ export interface OAuth2Client {
 
 export type MakeOptions = {
   initialMachineClients?: ReadonlyArray<{
-    clientId: ApplicationClientId
+    id: ApplicationClientId
     orgId: OrganizationId
     secret: Redacted.Redacted<string>
   }>
@@ -361,9 +361,9 @@ export const make = (options?: MakeOptions): Effect.Effect<
       yield* setClients(
         new Map(
           options.initialMachineClients.map((client) => [
-            client.clientId,
+            client.id,
             ClientsModel.make({
-              id: client.clientId,
+              id: client.id,
               orgId: client.orgId,
               secret: Redacted.value(client.secret)
             })

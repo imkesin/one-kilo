@@ -25,7 +25,7 @@ const testSuiteContext = Layer.succeed(
 const store = pipe(
   Store.layerTest({
     initialMachineClients: [{
-      clientId: machineClientId,
+      id: machineClientId,
       orgId: machineClientOrgId,
       secret: machineClientSecret
     }]

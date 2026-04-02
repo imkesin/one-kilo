@@ -24,7 +24,7 @@ describe("TokenClient - Unit", () => {
         const sessionId = generateSessionId()
         const userId = generateUserId()
 
-        const accessToken = yield* tokenGenerator.generateAccessToken({ sessionId, userId })
+        const accessToken = yield* tokenGenerator.generateSessionAccessToken({ sessionId, userId })
 
         const decoded = yield* tokenClient.decodeAccessToken(accessToken)
 
@@ -53,7 +53,7 @@ describe("TokenClient - Unit", () => {
         const sessionId = generateSessionId()
         const userId = generateUserId()
 
-        const token = yield* tokenGenerator.generateAccessToken({ sessionId, userId })
+        const token = yield* tokenGenerator.generateSessionAccessToken({ sessionId, userId })
 
         const decoded = yield* tokenClient.decodeAccessToken(token)
 

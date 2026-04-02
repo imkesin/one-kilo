@@ -49,7 +49,8 @@ class DecodedMachineAccessToken extends S.Class<DecodedMachineAccessToken>("Deco
 const DecodedOAuthTokenCommonFields = {
   ...DecodedAccessTokenCommonFields,
 
-  sub: UserId
+  sub: UserId,
+  aud: S.NonEmptyTrimmedString
 } as const
 
 class DecodedOAuthAccessToken extends S.Class<DecodedOAuthAccessToken>("DecodedOAuthAccessToken")({
@@ -93,7 +94,7 @@ class DecodedSessionAccessToken extends S.Class<DecodedSessionAccessToken>("Deco
       S.Struct({ sub: EmailAddress }),
       S.optional
     ),
-    roles: S.Array(S.NonEmptyTrimmedString),
+    roles: S.NonEmptyArray(S.NonEmptyTrimmedString),
     permissions: pipe(
       S.Array(S.NonEmptyTrimmedString),
       S.optional
@@ -102,8 +103,7 @@ class DecodedSessionAccessToken extends S.Class<DecodedSessionAccessToken>("Deco
       S.Array(S.NonEmptyTrimmedString),
       S.optional
     ),
-    sid: S.NonEmptyTrimmedString,
-    jti: S.NonEmptyTrimmedString
+    sid: S.NonEmptyTrimmedString
   }
 ) {}
 
