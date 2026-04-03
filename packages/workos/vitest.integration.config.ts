@@ -1,4 +1,4 @@
-import { fileURLToPath } from "url"
+import { fileURLToPath } from "node:url"
 import { loadEnv } from "vite"
 import { defineConfig } from "vitest/config"
 import { commonConfig } from "./vitest.config.ts"
