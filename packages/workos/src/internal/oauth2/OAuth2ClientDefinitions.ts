@@ -33,8 +33,6 @@ import {
 } from "./OAuth2ClientDefinitionSchemas.ts"
 
 export interface Client {
-  readonly httpClient: HttpClient.HttpClient
-
   readonly authorizeDevice: (
     parameters: typeof AuthorizeDeviceParameters.Type
   ) => Effect.Effect<
@@ -106,7 +104,6 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     )
 
   return {
-    httpClient,
     authorizeDevice: (parameters) =>
       pipe(
         parameters,

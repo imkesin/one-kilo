@@ -23,11 +23,11 @@ const ServerApiLive = pipe(
     HealthHttp,
     UsersHttp
   ]),
-  Layer.provide(AuthenticationMiddlewareLive),
-  Layer.provide([
-    WorkOSLive,
-    SqlLive
-  ]),
+  Layer.provide(AuthenticationMiddlewareLive)
+)
+
+const ServerInfraLive = pipe(
+  Layer.merge(SqlLive, WorkOSLive),
   Layer.provide(NodeHttpClient.layerUndici)
 )
 
@@ -38,7 +38,7 @@ const middleware = (httpApp: HttpApp.Default) =>
     HttpMiddleware.xForwardedHeaders
   )
 
-export const HttpTest = HttpApiBuilder
+export const HttpTestWithoutInfra = HttpApiBuilder
   .serve(middleware)
   .pipe(
     Layer.provide(ServerApiLive),
@@ -50,6 +50,7 @@ export const HttpLive = HttpApiBuilder
   .pipe(
     HttpServer.withLogAddress,
     Layer.provide(ServerApiLive),
+    Layer.provide(ServerInfraLive),
     Layer.provide(
       NodeHttpServer.layerConfig(
         createServer,

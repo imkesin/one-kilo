@@ -1,5 +1,7 @@
+import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSStore from "@effect/auth-workos/Store"
+import * as WorkOSTokenClient from "@effect/auth-workos/TokenClient"
 import * as WorkOSTokenGenerator from "@effect/auth-workos/TokenGenerator"
 import * as NodeKeyValueStore from "@effect/platform-node/NodeKeyValueStore"
 import * as Encoding from "effect/Encoding"
@@ -41,11 +43,17 @@ export const layerTest = (options: {
   const StoreLayer = pipe(
     WorkOSStore.layerTest(),
     Layer.provide(NodeKeyValueStore.layerFileSystem(dataDirectoryPath)),
-    Layer.provide(WorkOSTokenGenerator.layerKeyPairTest({ authKitDomain: "test.authkit.app" }))
+    Layer.provideMerge(WorkOSTokenGenerator.layerKeyPairTest({ authKitDomain: "test.authkit.app" }))
   )
+
+  const ApiClientLayer = WorkOSApiClient.layerNotImplemented()
+  const TokenClientLayer = WorkOSTokenClient.layerKeyPairTest()
+
+  const StandaloneLayers = Layer.merge(ApiClientLayer, TokenClientLayer)
 
   return pipe(
     WorkOSApiGateway.layerTest(),
-    Layer.provide(StoreLayer)
+    Layer.provideMerge(StoreLayer),
+    Layer.merge(StandaloneLayers)
   )
 }

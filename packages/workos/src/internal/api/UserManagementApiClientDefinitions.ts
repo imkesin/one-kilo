@@ -32,8 +32,6 @@ type AuthenticateWithRefreshTokenParameters_WithoutClientFields = Omit<
 >
 
 export interface Client {
-  readonly httpClient: HttpClient.HttpClient
-
   readonly authenticateWithCode: (parameters: AuthenticateWithCodeParameters_WithoutClientFields) => Effect.Effect<
     AuthenticateWithCodeResponse,
     WorkOSError.InvalidAuthenticationCodeError | WorkOSError.WorkOSCommonError
@@ -106,8 +104,6 @@ export const make = (
     )
 
   return {
-    httpClient,
-
     authenticateWithCode: (parameters) =>
       pipe(
         {

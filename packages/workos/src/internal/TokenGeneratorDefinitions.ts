@@ -18,13 +18,13 @@ class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect/auth
 export interface Generator {
   readonly generateMachineAccessToken: (parameters: {
     readonly clientId: ApplicationClientId
-    readonly orgId: OrganizationId
+    readonly organizationId: OrganizationId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
   readonly generateSessionAccessToken: (parameters: {
-    readonly sessionId: SessionId
     readonly userId: UserId
-    readonly orgId?: OrganizationId
+    readonly organizationId?: OrganizationId
+    readonly sessionId?: SessionId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
   readonly generateRefreshToken: () => Effect.Effect<RefreshToken>
@@ -37,20 +37,20 @@ export const makeTest = (
   }
 ): Generator => {
   const ALG = "RS256"
-  const DEFAULT_DURATION = Duration.seconds(5)
+  const DEFAULT_DURATION = Duration.seconds(30)
 
   const CONNECT_ISS = `https://${options.authKitDomain}`
   const CORE_ISS = "https://api.workos.com"
 
   return {
-    generateMachineAccessToken: Effect.fnUntraced(function*({ clientId, orgId }) {
+    generateMachineAccessToken: Effect.fnUntraced(function*({ clientId, organizationId }) {
       const issuedAt = yield* DateTime.nowAsDate
       const tokenId = generateRandomString("Id")
 
       return yield* pipe(
         Effect.tryPromise({
           try: () =>
-            new Jose.SignJWT({ org_id: orgId })
+            new Jose.SignJWT({ org_id: organizationId })
               .setProtectedHeader({
                 alg: ALG,
                 typ: "JWT"
@@ -69,15 +69,21 @@ export const makeTest = (
 
     generateRefreshToken: () => Effect.succeed(RefreshToken.make(generateRandomString("RefreshToken"))),
 
-    generateSessionAccessToken: Effect.fnUntraced(function*({ sessionId, userId, orgId }) {
+    generateSessionAccessToken: Effect.fnUntraced(function*({
+      userId,
+      organizationId,
+      sessionId: inputSessionId
+    }) {
       const issuedAt = yield* DateTime.nowAsDate
+
+      const sessionId = inputSessionId ?? generateRandomString("Id")
       const tokenId = generateRandomString("Id")
 
       return yield* pipe(
         Effect.tryPromise({
           try: () =>
             new Jose.SignJWT({
-              org_id: orgId,
+              org_id: organizationId,
               roles: ["member"],
               sid: sessionId
             })

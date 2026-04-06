@@ -11,8 +11,6 @@ import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import { CreateOrganizationParameters, DeleteOrganizationOutcome } from "./OrganizationsApiClientDefinitionSchemas.ts"
 
 export interface Client {
-  readonly httpClient: HttpClient.HttpClient
-
   readonly createOrganization: (
     parameters: typeof CreateOrganizationParameters.Type
   ) => Effect.Effect<Organization, WorkOSError.WorkOSCommonError>
@@ -51,8 +49,6 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
     )
 
   return {
-    httpClient,
-
     createOrganization: (parameters) =>
       pipe(
         parameters,

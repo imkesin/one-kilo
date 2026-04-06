@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /*
+     * We force these tests to be non-composite because declarations are never consumed. Fixtures leveraging
+     * Effect.Service sometimes infers types that transitively reference things like `Stream`, which causes
+     * declaration emit failures.
+     */
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": [
+    "test/**/*.ts",
+    "vitest.*.ts"
+  ],
+  "references": [
+    { "path": "./tsconfig.src.json" }
+  ]
+}

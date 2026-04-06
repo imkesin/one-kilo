@@ -1,3 +1,4 @@
+import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { AuthenticationCode, RefreshToken } from "./Values.ts"
 
@@ -26,7 +27,10 @@ export class HttpResponseError extends S.TaggedError<HttpResponseError>(
 export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/auth-workos/UnexpectedError")(
   "UnexpectedError",
   {
-    cause: S.Defect,
+    cause: pipe(
+      S.Defect,
+      S.optional
+    ),
     message: S.NonEmptyTrimmedString
   }
 ) {}

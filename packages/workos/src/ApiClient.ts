@@ -7,6 +7,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Redacted from "effect/Redacted"
+import { UnexpectedError, WorkOSCommonError } from "./domain/Errors.ts"
 import type { EnvironmentClientId } from "./domain/Ids.ts"
 import * as OrganizationsClientDefinitions from "./internal/api/OrganizationsApiClientDefinitions.ts"
 import * as UserManagementClientDefinitions from "./internal/api/UserManagementApiClientDefinitions.ts"
@@ -19,6 +20,40 @@ export interface Service {
 export class ApiClient extends Context.Tag(
   "@effect/auth-workos/ApiClient"
 )<ApiClient, Service>() {}
+
+export const makeNotImplemented = (): Service => {
+  const failWithNotImplementedError = (methodName: string) => () =>
+    Effect.fail(
+      new WorkOSCommonError({
+        reason: new UnexpectedError({
+          message: `\`${methodName}\` is intentionally not implemented`
+        })
+      })
+    )
+
+  return ApiClient.of({
+    userManagement: {
+      authenticateWithCode: failWithNotImplementedError("authenticateWithCode"),
+      authenticateWithRefreshToken: failWithNotImplementedError("authenticateWithRefreshToken"),
+      createOrganizationMembership: failWithNotImplementedError("createOrganizationMembership"),
+      createUser: failWithNotImplementedError("createUser"),
+      deleteOrganizationMembership: failWithNotImplementedError("deleteOrganizationMembership"),
+      deleteUser: failWithNotImplementedError("deleteUser"),
+      retrieveUser: failWithNotImplementedError("retrieveUser"),
+      updateUser: failWithNotImplementedError("updateUser")
+    },
+    organizations: {
+      createOrganization: failWithNotImplementedError("createOrganization"),
+      deleteOrganization: failWithNotImplementedError("deleteOrganization"),
+      retrieveOrganization: failWithNotImplementedError("retrieveOrganization")
+    }
+  })
+}
+
+/**
+ * Intended to be used in tests
+ */
+export const layerNotImplemented = (): Layer.Layer<ApiClient> => Layer.succeed(ApiClient, makeNotImplemented())
 
 export const make = (
   options: {

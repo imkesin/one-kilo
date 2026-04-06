@@ -1,9 +1,6 @@
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import * as TokenClient from "@effect/auth-workos/TokenClient"
-import {
-  ApplicationApi_AuthenticationMiddleware,
-  ApplicationApi_UnauthenticatedError
-} from "@one-kilo/server-api/infra/AuthenticationMiddleware"
+import { AuthenticationMiddleware, UnauthenticatedError } from "@one-kilo/server-api/infra/AuthenticationSecurity"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
@@ -13,23 +10,24 @@ import { AuthenticationQueryModule } from "../modules/authentication/Authenticat
 
 export const AuthenticationMiddlewareLive = pipe(
   Layer.effect(
-    ApplicationApi_AuthenticationMiddleware,
+    AuthenticationMiddleware,
     Effect.gen(function*() {
       const workosTokenClient = yield* TokenClient.TokenClient
       const authenticationQueryModule = yield* AuthenticationQueryModule
 
-      return ApplicationApi_AuthenticationMiddleware.of({
+      return AuthenticationMiddleware.of({
         jwt: Effect.fn("AuthenticationMiddleware.jwt")(function*(bearerToken) {
           const decodedAccessToken = yield* pipe(
             workosTokenClient.verifyAccessToken(WorkOSValues.AccessToken.make(Redacted.value(bearerToken))),
-            Effect.orElseFail(() => new ApplicationApi_UnauthenticatedError())
+            Effect.tapErrorCause(Effect.logError),
+            Effect.orElseFail(() => new UnauthenticatedError())
           )
 
           if (
             decodedAccessToken._tag === "DecodedMachineAccessToken"
             || Option.isNone(decodedAccessToken.orgId)
           ) {
-            return yield* new ApplicationApi_UnauthenticatedError()
+            return yield* new UnauthenticatedError()
           }
 
           return yield* pipe(
@@ -39,7 +37,7 @@ export const AuthenticationMiddlewareLive = pipe(
             }),
             Effect.flatMap(
               Option.match({
-                onNone: () => Effect.fail(new ApplicationApi_UnauthenticatedError()),
+                onNone: () => Effect.fail(new UnauthenticatedError()),
                 onSome: Effect.succeed
               })
             )

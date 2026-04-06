@@ -1,3 +1,4 @@
+import { AccessToken } from "@effect/auth-workos/domain/Values"
 import * as HttpApiMiddleware from "@effect/platform/HttpApiMiddleware"
 import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import * as HttpApiSecurity from "@effect/platform/HttpApiSecurity"
@@ -5,9 +6,19 @@ import { Actor } from "@one-kilo/domain/tags/Actor"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
+export class AuthenticationHeaders extends S.Class<AuthenticationHeaders>(
+  "@one-kilo/ServerApi/AuthenticationHeaders"
+)({
+  authorization: S.NonEmptyTrimmedString
+}) {
+  static fromAccessToken(accessToken: AccessToken) {
+    return AuthenticationHeaders.make({ authorization: `Bearer ${accessToken}` })
+  }
+}
+
 const UNAUTHENTICATED_ERROR_MESSAGE = "Authentication is required and has failed or has not been provided"
 
-export class ApplicationApi_UnauthenticatedError extends S.TaggedError<ApplicationApi_UnauthenticatedError>(
+export class UnauthenticatedError extends S.TaggedError<UnauthenticatedError>(
   "@one-kilo/server-api/UnauthenticatedError"
 )(
   "UnauthenticatedError",
@@ -24,15 +35,13 @@ export class ApplicationApi_UnauthenticatedError extends S.TaggedError<Applicati
   HttpApiSchema.annotations({ status: 401 })
 ) {}
 
-export class ApplicationApi_AuthenticationMiddleware
-  extends HttpApiMiddleware.Tag<ApplicationApi_AuthenticationMiddleware>()(
-    "@one-kilo/server-api/AuthenticationMiddleware",
-    {
-      failure: ApplicationApi_UnauthenticatedError,
-      provides: Actor,
-      security: {
-        jwt: HttpApiSecurity.bearer
-      }
+export class AuthenticationMiddleware extends HttpApiMiddleware.Tag<AuthenticationMiddleware>()(
+  "@one-kilo/server-api/AuthenticationMiddleware",
+  {
+    failure: UnauthenticatedError,
+    provides: Actor,
+    security: {
+      jwt: HttpApiSecurity.bearer
     }
-  )
-{}
+  }
+) {}

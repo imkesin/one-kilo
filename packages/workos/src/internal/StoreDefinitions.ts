@@ -534,7 +534,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           const accessToken = yield* pipe(
             tokenGenerator.generateMachineAccessToken({
               clientId: parameters.clientId,
-              orgId: client.orgId
+              organizationId: client.orgId
             }),
             Effect.orDie
           )
