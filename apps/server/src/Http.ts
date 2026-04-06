@@ -38,28 +38,26 @@ const middleware = (httpApp: HttpApp.Default) =>
     HttpMiddleware.xForwardedHeaders
   )
 
-export const HttpTestWithoutInfra = HttpApiBuilder
-  .serve(middleware)
-  .pipe(
-    Layer.provide(ServerApiLive),
-    Layer.provideMerge(NodeHttpServer.layerTest)
-  )
+export const HttpTestWithoutInfra = pipe(
+  HttpApiBuilder.serve(middleware),
+  Layer.provide(ServerApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
 
-export const HttpLive = HttpApiBuilder
-  .serve(middleware)
-  .pipe(
-    HttpServer.withLogAddress,
-    Layer.provide(ServerApiLive),
-    Layer.provide(ServerInfraLive),
-    Layer.provide(
-      NodeHttpServer.layerConfig(
-        createServer,
-        {
-          port: pipe(
-            Config.number("PORT"),
-            Config.withDefault(10000)
-          )
-        }
-      )
+export const HttpLive = pipe(
+  HttpApiBuilder.serve(middleware),
+  HttpServer.withLogAddress,
+  Layer.provide(ServerApiLive),
+  Layer.provide(ServerInfraLive),
+  Layer.provide(
+    NodeHttpServer.layerConfig(
+      createServer,
+      {
+        port: pipe(
+          Config.number("PORT"),
+          Config.withDefault(10000)
+        )
+      }
     )
   )
+)
