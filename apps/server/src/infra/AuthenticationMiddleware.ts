@@ -1,5 +1,6 @@
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import * as TokenClient from "@effect/auth-workos/TokenClient"
+import { Actor } from "@one-kilo/domain/tags/Actor"
 import { AuthenticationMiddleware, UnauthenticatedError } from "@one-kilo/server-api/infra/AuthenticationSecurity"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -30,7 +31,10 @@ export const AuthenticationMiddlewareLive = pipe(
             return yield* new UnauthenticatedError()
           }
 
-          return yield* pipe(
+          /*
+           * TODO: I need to create a dedicated path for loading the actor details with much more depth.
+           */
+          const authenticationIdentity = yield* pipe(
             authenticationQueryModule.retrieveAuthenticationIdentity({
               workosUserId: decodedAccessToken.sub,
               workosOrganizationId: decodedAccessToken.orgId.value
@@ -42,6 +46,12 @@ export const AuthenticationMiddlewareLive = pipe(
               })
             )
           )
+
+          return Actor.of({
+            userId: authenticationIdentity.userId,
+            workspaceId: authenticationIdentity.workspaceId,
+            permissions: new Set()
+          })
         })
       })
     })
