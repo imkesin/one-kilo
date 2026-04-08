@@ -8,7 +8,8 @@ import { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import { MachineClientName } from "@one-kilo/domain/values/MachineClientValues"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { UserType } from "@one-kilo/domain/values/UserValues"
-import { absurd, pipe } from "effect/Function"
+import { pipe } from "effect/Function"
+import * as Match from "effect/Match"
 import * as S from "effect/Schema"
 import { ApiAuditFields } from "../../internal/ApiFields.ts"
 
@@ -80,6 +81,14 @@ const UsersApi_User = S.Union(
   UsersApi_MachineClientUser
 )
 
+const matchDomainToApi = pipe(
+  Match.type<User>(),
+  Match.tagsExhaustive({
+    "User:MachineClient": (user) => UsersApi_MachineClientUser.fromDomain(user),
+    "User:Person": (user) => UsersApi_PersonUser.fromDomain(user)
+  })
+)
+
 class UsersApi_Me_Success extends S.TaggedClass<UsersApi_Me_Success>("@one-kilo/server-api/Me:Success")(
   "Me:Success",
   {
@@ -87,22 +96,8 @@ class UsersApi_Me_Success extends S.TaggedClass<UsersApi_Me_Success>("@one-kilo/
   },
   HttpApiSchema.annotations({ status: 200 })
 ) {
-  static fromDomain(user: User): UsersApi_Me_Success {
-    switch (user._tag) {
-      case "User:MachineClient": {
-        return UsersApi_Me_Success.make({
-          user: UsersApi_MachineClientUser.fromDomain(user)
-        })
-      }
-      case "User:Person": {
-        return UsersApi_Me_Success.make({
-          user: UsersApi_PersonUser.fromDomain(user)
-        })
-      }
-      default: {
-        return absurd(user)
-      }
-    }
+  static fromDomain(user: User) {
+    return new UsersApi_Me_Success({ user: matchDomainToApi(user) })
   }
 }
 
