@@ -1,7 +1,6 @@
-import { expect, layer } from "@effect/vitest"
+import { describe, expect, layer } from "@effect/vitest"
 import { AuthenticationHeaders } from "@one-kilo/server-api/infra/AuthenticationSecurity"
 import * as Effect from "effect/Effect"
-import { describe } from "node:test"
 import { TestApplicationApiClient } from "../../factories/TestApiClients.ts"
 import { TestUserFactory } from "../../factories/TestUserFactory.ts"
 import * as HttpFixtures from "../../fixtures/HttpFixtures.ts"

@@ -15,7 +15,9 @@
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
     "lint": "eslint .",
-    "typecheck": "tsc --build"
+    "test": "vitest",
+    "test:once": "vitest run",
+    "typecheck": "tsc --build && tsc --project tsconfig.test.json --noEmit"
   },
   "type": "module"
 }
