@@ -151,8 +151,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
           const { preferredName, fullName, workosName } = yield* derivePersonNamesFromWorkosUser(workosUser)
 
-          // TODO: We need to parse and fail hard if this is a strange value
-          const emailAddress = EmailAddress.make(workosUser.email)
+          const emailAddress = yield* pipe(
+            workosUser.email,
+            S.decode(EmailAddress),
+            orDieWithUnexpectedError("The `email` on the WorkOS user does not conform to our email address standards")
+          )
 
           const [workosOrganization] = yield* Effect.all(
             [
