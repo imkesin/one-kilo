@@ -1,4 +1,6 @@
 import { UserCreatedActivityLog } from "@one-kilo/domain/activity-logs/UserActivityLogs"
+import { WorkspaceCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceActivityLogs"
+import { WorkspaceMembershipCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceMembershipActivityLogs"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -27,6 +29,42 @@ export const toActivityLog = ({
         timestamp,
         traceId,
         type: "User.Created",
+        version: 1
+      })
+    )
+  }
+
+  if (
+    type === "Workspace.Created"
+    && version === 1
+    && S.is(WorkspaceCreatedActivityLog.fields.targets)(targets)
+  ) {
+    return Effect.succeed(
+      new WorkspaceCreatedActivityLog({
+        id,
+        performedByUserId,
+        targets,
+        timestamp,
+        traceId,
+        type: "Workspace.Created",
+        version: 1
+      })
+    )
+  }
+
+  if (
+    type === "WorkspaceMembership.Created"
+    && version === 1
+    && S.is(WorkspaceMembershipCreatedActivityLog.fields.targets)(targets)
+  ) {
+    return Effect.succeed(
+      new WorkspaceMembershipCreatedActivityLog({
+        id,
+        performedByUserId,
+        targets,
+        timestamp,
+        traceId,
+        type: "WorkspaceMembership.Created",
         version: 1
       })
     )
