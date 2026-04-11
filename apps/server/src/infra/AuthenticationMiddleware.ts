@@ -7,14 +7,15 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
-import { AuthenticationQueryModule } from "../modules/authentication/AuthenticationQueryModule.ts"
+import { ActorQueryModule } from "../modules/actor/ActorQueryModule.ts"
 
 export const AuthenticationMiddlewareLive = pipe(
   Layer.effect(
     AuthenticationMiddleware,
     Effect.gen(function*() {
       const workosTokenClient = yield* TokenClient.TokenClient
-      const authenticationQueryModule = yield* AuthenticationQueryModule
+
+      const actorQueryModule = yield* ActorQueryModule
 
       return AuthenticationMiddleware.of({
         jwt: Effect.fn("AuthenticationMiddleware.jwt")(function*(bearerToken) {
@@ -31,11 +32,8 @@ export const AuthenticationMiddlewareLive = pipe(
             return yield* new UnauthenticatedError()
           }
 
-          /*
-           * TODO: I need to create a dedicated path for loading the actor details with much more depth.
-           */
-          const authenticationIdentity = yield* pipe(
-            authenticationQueryModule.retrieveAuthenticationIdentity({
+          const actorIdentity = yield* pipe(
+            actorQueryModule.retrieveActorIdentity({
               workosUserId: decodedAccessToken.sub,
               workosOrganizationId: decodedAccessToken.orgId.value
             }),
@@ -48,13 +46,12 @@ export const AuthenticationMiddlewareLive = pipe(
           )
 
           return Actor.of({
-            userId: authenticationIdentity.userId,
-            workspaceId: authenticationIdentity.workspaceId,
+            ...actorIdentity,
             permissions: new Set()
           })
         })
       })
     })
   ),
-  Layer.provide(AuthenticationQueryModule.Default)
+  Layer.provide(ActorQueryModule.Default)
 )

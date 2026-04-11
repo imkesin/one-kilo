@@ -23,7 +23,7 @@ export const UsersHttp = pipe(
             const actor = yield* Actor
 
             const user = yield* pipe(
-              usersQueryModule.retrieveUser({ userId: actor.userId }),
+              usersQueryModule.retrieveUser({ userId: actor.user.id }),
               Effect.andThen(
                 Option.match({
                   onNone: dieWithUnexpectedErrorCallback("Failed to retrieve an authenticated user"),
