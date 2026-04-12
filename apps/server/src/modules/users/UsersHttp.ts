@@ -1,4 +1,5 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
+import { UsersQueryModule } from "@one-kilo/core/modules/users/UsersQueryModule"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import { UsersApi_MeSchemas } from "@one-kilo/server-api/modules/users/UsersApiSchemas"
@@ -7,7 +8,6 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
-import { UsersQueryModule } from "./UsersQueryModule.ts"
 
 export const UsersHttp = pipe(
   HttpApiBuilder.group(

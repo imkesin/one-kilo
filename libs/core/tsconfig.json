@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /* Base Options: */
+    "target": "ES2024",
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+
+    /* Project References */
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+
+    /* If transpiling with TypeScript: */
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
+
+    /* If your code doesn't run in the DOM: */
+    "lib": ["ES2024"]
+  },
+  "include": [],
+  "references": [
+    { "path": "./tsconfig.src.json" }
+  ]
+}

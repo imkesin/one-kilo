@@ -1,0 +1,30 @@
+{
+  "name": "@one-kilo/core",
+  "version": "0.1.0",
+  "dependencies": {
+    "@effect/auth-workos": "workspace:*",
+    "@effect/platform": "^0.96.0",
+    "@effect/platform-node": "^0.106.0",
+    "@effect/sql": "^0.51.0",
+    "@effect/sql-pg": "^0.52.1",
+    "@one-kilo/domain": "workspace:*",
+    "@one-kilo/lib": "workspace:*",
+    "@one-kilo/sql": "workspace:*",
+    "effect": "^3.21.0",
+    "jose": "^6.2.2"
+  },
+  "exports": {
+    "./*": "./dist/src/*.js",
+    "./internal/*": null
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc --build tsconfig.src.json",
+    "clean": "rm -rf .turbo dist",
+    "lint": "eslint .",
+    "test": "vitest",
+    "test:once": "vitest run",
+    "typecheck": "tsc --build && tsc --project tsconfig.test.json --noEmit"
+  },
+  "type": "module"
+}

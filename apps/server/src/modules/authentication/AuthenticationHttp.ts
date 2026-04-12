@@ -1,4 +1,6 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
+import { AuthenticationOrchestrator } from "@one-kilo/core/processes/authentication/AuthenticationOrchestrator"
+import { AuthenticationUseCases } from "@one-kilo/core/processes/authentication/AuthenticationUseCases"
 import {
   AuthenticationApi_ExchangeCodeSchemas,
   AuthenticationApi_RefreshContextSchemas
@@ -7,8 +9,6 @@ import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import { AuthenticationOrchestrator } from "../../processes/authentication/AuthenticationOrchestrator.ts"
-import { AuthenticationUseCases } from "../../processes/authentication/AuthenticationUseCases.ts"
 
 export const AuthenticationHttp = pipe(
   HttpApiBuilder.group(

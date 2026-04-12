@@ -63,6 +63,9 @@ importers:
       '@effect/sql-pg':
         specifier: ^0.52.1
         version: 0.52.1(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(effect@3.21.0)
+      '@one-kilo/core':
+        specifier: workspace:*
+        version: link:../../libs/core
       '@one-kilo/domain':
         specifier: workspace:*
         version: link:../../libs/domain
@@ -163,6 +166,39 @@ importers:
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
+
+  libs/core:
+    dependencies:
+      '@effect/auth-workos':
+        specifier: workspace:*
+        version: link:../../packages/workos
+      '@effect/platform':
+        specifier: ^0.96.0
+        version: 0.96.0(effect@3.21.0)
+      '@effect/platform-node':
+        specifier: ^0.106.0
+        version: 0.106.0(@effect/cluster@0.55.0(@effect/platform@0.96.0(effect@3.21.0))(@effect/rpc@0.72.2(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/workflow@0.15.1(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(@effect/rpc@0.72.2(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(@effect/rpc@0.72.2(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(effect@3.21.0)
+      '@effect/sql':
+        specifier: ^0.51.0
+        version: 0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0)
+      '@effect/sql-pg':
+        specifier: ^0.52.1
+        version: 0.52.1(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(@effect/platform@0.96.0(effect@3.21.0))(effect@3.21.0))(effect@3.21.0)
+      '@one-kilo/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@one-kilo/lib':
+        specifier: workspace:*
+        version: link:../lib
+      '@one-kilo/sql':
+        specifier: workspace:*
+        version: link:../sql
+      effect:
+        specifier: ^3.21.0
+        version: 3.21.0
+      jose:
+        specifier: ^6.2.2
+        version: 6.2.2
 
   libs/domain:
     dependencies:

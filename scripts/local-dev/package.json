@@ -3,8 +3,8 @@
   "devDependencies": {
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
-    "@one-kilo/sql": "workspace:*",
     "@effect/sql": "^0.51.0",
+    "@one-kilo/sql": "workspace:*",
     "effect": "^3.21.0"
   },
   "private": true,

@@ -20,6 +20,10 @@
     },
     // Libraries
     {
+      "name": "@one-kilo/core",
+      "path": "../libs/core"
+    },
+    {
       "name": "@one-kilo/domain",
       "path": "../libs/domain"
     },

@@ -1,10 +1,10 @@
 import * as WorkOSStore from "@effect/auth-workos/Store"
 import * as WorkOSTokenGenerator from "@effect/auth-workos/TokenGenerator"
+import { RegistrationUseCases } from "@one-kilo/core/processes/registration/RegistrationUseCases"
 import * as Effect from "effect/Effect"
 import * as Encoding from "effect/Encoding"
 import { pipe } from "effect/Function"
 import { randomBytes } from "node:crypto"
-import { RegistrationUseCases } from "../../src/processes/registration/RegistrationUseCases.ts"
 
 export class TestUserFactory extends Effect.Service<TestUserFactory>()(
   "@one-kilo/server/TestUserFactory",
