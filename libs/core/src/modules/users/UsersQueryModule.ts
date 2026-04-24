@@ -2,7 +2,7 @@ import { UsersQueryRepository } from "@one-kilo/sql/modules/users/UsersQueryRepo
 import * as Effect from "effect/Effect"
 
 export class UsersQueryModule extends Effect.Service<UsersQueryModule>()(
-  "@one-kilo/server/UsersQueryModule",
+  "@one-kilo/core/UsersQueryModule",
   {
     dependencies: [UsersQueryRepository.Default],
     effect: Effect.gen(function*() {

@@ -5,7 +5,7 @@
     "@effect/platform-node": "^0.106.0",
     "@effect/sql": "^0.51.0",
     "@one-kilo/sql": "workspace:*",
-    "effect": "^3.21.0"
+    "effect": "^3.21.2"
   },
   "private": true,
   "scripts": {

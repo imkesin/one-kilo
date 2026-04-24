@@ -2,7 +2,7 @@ import { AuthenticationQueryRepository } from "@one-kilo/sql/modules/authenticat
 import * as Effect from "effect/Effect"
 
 export class AuthenticationQueryModule extends Effect.Service<AuthenticationQueryModule>()(
-  "@one-kilo/server/AuthenticationQueryModule",
+  "@one-kilo/core/AuthenticationQueryModule",
   {
     dependencies: [AuthenticationQueryRepository.Default],
     effect: Effect.gen(function*() {

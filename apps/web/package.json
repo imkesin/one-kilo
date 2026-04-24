@@ -11,7 +11,7 @@
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/server-api": "workspace:*",
     "babel-plugin-react-compiler": "1.0.0",
-    "effect": "^3.21.0",
+    "effect": "^3.21.2",
     "jose": "^6.2.2",
     "lucide-react": "0.564.0",
     "next": "16.2.2",

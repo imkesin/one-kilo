@@ -27,7 +27,7 @@ type CreatePersonalWorkspaceParameters = {
 }
 
 export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationModule>()(
-  "@one-kilo/server/WorkspacesCreationModule",
+  "@one-kilo/core/WorkspacesCreationModule",
   {
     dependencies: [
       ActivityLogsRepository.Default,

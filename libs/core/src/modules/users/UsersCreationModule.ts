@@ -21,7 +21,7 @@ type CreateHumanUserParameters = {
 }
 
 export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
-  "@one-kilo/server/UsersCreationModule",
+  "@one-kilo/core/UsersCreationModule",
   {
     dependencies: [
       ActivityLogsRepository.Default,

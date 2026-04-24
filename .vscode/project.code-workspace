@@ -10,6 +10,10 @@
       "path": "../apps/server"
     },
     {
+      "name": "@one-kilo/runner",
+      "path": "../apps/runner"
+    },
+    {
       "name": "@one-kilo/web",
       "path": "../apps/web"
     },
@@ -42,6 +46,10 @@
     {
       "name": "@one-kilo/telemetry",
       "path": "../libs/telemetry"
+    },
+    {
+      "name": "@one-kilo/workflow",
+      "path": "../libs/workflow",
     },
     // Packages
     {

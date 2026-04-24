@@ -2,14 +2,14 @@
   "name": "@one-kilo/lib",
   "version": "0.1.0",
   "devDependencies": {
-    "effect": "^3.21.0"
+    "effect": "^3.21.2"
   },
   "exports": {
     "./*": "./dist/src/*.js",
     "./internal/*": null
   },
   "peerDependencies": {
-    "effect": "^3.21.0"
+    "effect": "^3.21.2"
   },
   "private": true,
   "scripts": {

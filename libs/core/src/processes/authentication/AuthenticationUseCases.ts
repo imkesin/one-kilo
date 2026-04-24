@@ -12,7 +12,7 @@ type RefreshContextParameters = {
 }
 
 export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCases>()(
-  "@one-kilo/server/AuthenticationUseCases",
+  "@one-kilo/core/AuthenticationUseCases",
   {
     dependencies: [
       AuthenticationQueryModule.Default

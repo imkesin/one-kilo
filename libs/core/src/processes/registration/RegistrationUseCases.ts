@@ -42,7 +42,7 @@ type RegisterHumanUserParameters = {
 }
 
 export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()(
-  "@one-kilo/server/RegistrationUseCases",
+  "@one-kilo/core/RegistrationUseCases",
   {
     dependencies: [
       DomainIdGenerator.Default,

@@ -1,9 +1,10 @@
 {
-  "name": "@one-kilo/domain",
+  "name": "@one-kilo/workflow",
   "version": "0.1.0",
   "dependencies": {
     "@effect/auth-workos": "workspace:*",
-    "@one-kilo/lib": "workspace:*",
+    "@effect/workflow": "^0.18.0",
+    "@one-kilo/domain": "workspace:*",
     "effect": "^3.21.2"
   },
   "exports": {
@@ -15,9 +16,7 @@
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
     "lint": "eslint .",
-    "test": "vitest",
-    "test:once": "vitest run",
-    "typecheck": "tsc --build && tsc --project tsconfig.test.json --noEmit"
+    "typecheck": "tsc --build"
   },
   "type": "module"
 }

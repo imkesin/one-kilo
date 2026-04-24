@@ -4,7 +4,7 @@
   "devDependencies": {
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
-    "effect": "^3.21.0",
+    "effect": "^3.21.2",
     "jose": "^6.2.2"
   },
   "exports": {
@@ -16,7 +16,7 @@
   },
   "peerDependencies": {
     "@effect/platform": "^0.96.0",
-    "effect": "^3.21.0",
+    "effect": "^3.21.2",
     "jose": "^6.2.2"
   },
   "scripts": {

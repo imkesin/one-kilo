@@ -5,7 +5,7 @@
     "@effect/opentelemetry": "^0.63.0",
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
-    "effect": "^3.21.0"
+    "effect": "^3.21.2"
   },
   "exports": {
     "./*": "./dist/src/*.js",

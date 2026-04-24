@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2024",
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
+
+    "lib": ["ES2024"]
+  },
+  "include": [],
+  "references": [
+    { "path": "./tsconfig.src.json" }
+  ]
+}

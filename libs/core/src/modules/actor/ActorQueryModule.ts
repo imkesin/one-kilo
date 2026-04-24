@@ -2,7 +2,7 @@ import { ActorQueryRepository } from "@one-kilo/sql/modules/actor/ActorQueryRepo
 import * as Effect from "effect/Effect"
 
 export class ActorQueryModule extends Effect.Service<ActorQueryModule>()(
-  "@one-kilo/server/ActorQueryModule",
+  "@one-kilo/core/ActorQueryModule",
   {
     dependencies: [ActorQueryRepository.Default],
     effect: Effect.gen(function*() {

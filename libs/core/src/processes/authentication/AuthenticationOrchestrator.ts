@@ -17,7 +17,7 @@ type CodeExchangeOutcome = Data.TaggedEnum<{
 const CodeExchangeOutcome = Data.taggedEnum<CodeExchangeOutcome>()
 
 export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrchestrator>()(
-  "@one-kilo/server/AuthenticationOrchestrator",
+  "@one-kilo/core/AuthenticationOrchestrator",
   {
     dependencies: [
       AuthenticationQueryModule.Default,

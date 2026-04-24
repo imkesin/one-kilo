@@ -7,10 +7,12 @@
     "@effect/platform-node": "^0.106.0",
     "@effect/sql": "^0.51.0",
     "@effect/sql-pg": "^0.52.1",
+    "@effect/workflow": "^0.18.0",
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/sql": "workspace:*",
-    "effect": "^3.21.0",
+    "@one-kilo/workflow": "workspace:*",
+    "effect": "^3.21.2",
     "jose": "^6.2.2"
   },
   "exports": {
