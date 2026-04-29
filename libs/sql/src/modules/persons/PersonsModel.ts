@@ -1,6 +1,8 @@
 import * as Model from "@effect/sql/Model"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import { pipe } from "effect/Function"
+import * as S from "effect/Schema"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 
@@ -39,4 +41,20 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
       )
     `
   }
+
+  static partialUpdate = S.Struct({
+    id: PersonId,
+
+    preferredName: pipe(
+      PreferredName,
+      S.optionalWith({ exact: true })
+    ),
+    fullName: pipe(
+      FullName,
+      S.optionalWith({ exact: true })
+    ),
+
+    updatedAt: PersonsModel.update.fields.updatedAt,
+    updatedByUserId: PersonsModel.update.fields.updatedByUserId
+  })
 }

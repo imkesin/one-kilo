@@ -59,10 +59,13 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
           )
         )
 
-        const updated = yield* gatewayClient.userManagement.updateUser(user.id, {
-          firstName: "Updated",
-          externalId: "ext-123"
-        })
+        const updated = yield* gatewayClient.userManagement.updateUser(
+          user.id,
+          {
+            firstName: "Updated",
+            externalId: "ext-123"
+          }
+        )
 
         expect(updated.id).toEqual(user.id)
         expect(updated.firstName).toEqual("Updated")

@@ -1,8 +1,6 @@
 import { WorkspaceMembership } from "@one-kilo/domain/entities/WorkspaceMembership"
 import type { WorkspaceMembershipsModel } from "../WorkspaceMembershipsModel.ts"
 
-type WorkspaceMembershipModelSelect = typeof WorkspaceMembershipsModel.select.Type
-
 export const toWorkspaceMembershipEntity = ({
   id,
   userId,
@@ -12,7 +10,7 @@ export const toWorkspaceMembershipEntity = ({
   createdAt,
   updatedAt,
   archivedAt
-}: WorkspaceMembershipModelSelect): WorkspaceMembership =>
+}: typeof WorkspaceMembershipsModel.select.Type) =>
   WorkspaceMembership.make({
     id,
     userId,
