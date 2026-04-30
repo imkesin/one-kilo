@@ -1,3 +1,4 @@
+import { PersonUpdatedActivityLog } from "@one-kilo/domain/activity-logs/PersonActivityLogs"
 import { UserCreatedActivityLog } from "@one-kilo/domain/activity-logs/UserActivityLogs"
 import { WorkspaceCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceActivityLogs"
 import { WorkspaceMembershipCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceMembershipActivityLogs"
@@ -10,6 +11,7 @@ import type { ActivityLogsModel } from "../ActivityLogsModel.ts"
 export const toActivityLog = ({
   id,
   performedByUserId,
+  context,
   targets,
   timestamp,
   traceId,
@@ -31,6 +33,33 @@ export const toActivityLog = ({
         type: "User.Created",
         version: 1
       })
+    )
+  }
+
+  if (
+    type === "Person.Updated"
+    && version === 1
+    && S.is(PersonUpdatedActivityLog.fields.targets)(targets)
+  ) {
+    return pipe(
+      PersonUpdatedActivityLog.decodeContextUnknown(context),
+      Effect.map((decodedContext) =>
+        new PersonUpdatedActivityLog({
+          id,
+          performedByUserId,
+          context: decodedContext,
+          targets,
+          timestamp,
+          traceId,
+          type: "Person.Updated",
+          version: 1
+        })
+      ),
+      Effect.catchTag("ParseError", () =>
+        pipe(
+          dieWithUnexpectedError("Failed to decode `Person.Updated` activity log context"),
+          Effect.annotateLogs({ activityLog: { id, type, version } })
+        ))
     )
   }
 
