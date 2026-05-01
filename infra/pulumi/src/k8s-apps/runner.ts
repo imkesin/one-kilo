@@ -116,8 +116,8 @@ export function createRunner({
                 { secretRef: { name: sharedConfig.postgresPasswordSecret.metadata.name } }
               ],
               resources: {
-                requests: { cpu: "250m", memory: "256Mi" },
-                limits: { cpu: "1000m", memory: "1Gi" }
+                requests: { cpu: "250m", memory: "512Mi" },
+                limits: { cpu: "1000m", memory: "2Gi" }
               },
               startupProbe: {
                 tcpSocket: { port: RUNNER_PORT },

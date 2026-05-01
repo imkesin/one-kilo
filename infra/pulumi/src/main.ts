@@ -19,6 +19,7 @@ const cluster = new GCP.container.Cluster(
         enabled: true
       }
     },
+    datapathProvider: "ADVANCED_DATAPATH",
     nodeConfig: {
       machineType: "e2-standard-4",
       spot: true
@@ -185,11 +186,11 @@ const _cloudflared = new K8s.apps.v1.Deployment(
             }],
             resources: {
               requests: {
-                cpu: "250m",
+                cpu: "50m",
                 memory: "128Mi"
               },
               limits: {
-                cpu: "500m",
+                cpu: "250m",
                 memory: "256Mi"
               }
             }

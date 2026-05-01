@@ -42,8 +42,8 @@ export function createServer({
                 { secretRef: { name: sharedConfig.postgresPasswordSecret.metadata.name } }
               ],
               resources: {
-                requests: { cpu: "500m", memory: "512Mi" },
-                limits: { cpu: "1000m", memory: "1Gi" }
+                requests: { cpu: "500m", memory: "1Gi" },
+                limits: { cpu: "2000m", memory: "4Gi" }
               },
               startupProbe: {
                 httpGet: { path: "/livez", port: SERVER_PORT },
