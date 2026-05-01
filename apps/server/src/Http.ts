@@ -10,6 +10,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { createServer } from "node:http"
 import { AuthenticationMiddlewareLive } from "./infra/AuthenticationMiddleware.ts"
+import { WorkflowEngineLive } from "./infra/Cluster.ts"
 import { SqlLive } from "./infra/Sql.ts"
 import { WorkOSLive } from "./infra/WorkOS.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
@@ -27,7 +28,8 @@ const ServerApiLive = pipe(
 )
 
 const ServerInfraLive = pipe(
-  Layer.merge(SqlLive, WorkOSLive),
+  Layer.merge(WorkflowEngineLive, WorkOSLive),
+  Layer.provideMerge(SqlLive),
   Layer.provide(NodeHttpClient.layerUndici)
 )
 

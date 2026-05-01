@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "dependencies": {
     "@effect/auth-workos": "workspace:*",
+    "@effect/cluster": "^0.58.1",
     "@effect/experimental": "^0.60.0",
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
     "@effect/sql": "^0.51.0",
     "@effect/sql-pg": "^0.52.1",
+    "@effect/workflow": "^0.18.0",
     "@one-kilo/core": "workspace:*",
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
