@@ -44,6 +44,8 @@ jobs:
             dockerfile: apps/web/Dockerfile
           - app: server
             dockerfile: apps/server/Dockerfile
+          - app: runner
+            dockerfile: apps/runner/Dockerfile
     env:
       REGISTRY: ${{ vars.DOCKER_REGISTRY }}
     steps:

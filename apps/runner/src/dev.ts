@@ -10,15 +10,13 @@ import { makeRunnerLive } from "./Runner.ts"
 
 const RunnerConfig = pipe(
   Config.all({
-    host: Config.string("HOST"),
+    host: pipe(
+      Config.string("HOST"),
+      Config.withDefault("localhost")
+    ),
     port: pipe(
       Config.number("PORT"),
       Config.withDefault(12000)
-    ),
-    k8sNamespace: Config.string("K8S_NAMESPACE"),
-    k8sLabelSelector: pipe(
-      Config.string("K8S_LABEL_SELECTOR"),
-      Config.withDefault("app=runner")
     )
   }),
   Config.nested("RUNNER")
@@ -32,11 +30,7 @@ const ClusterLive = pipe(
       transport: "http",
       serialization: "msgpack",
       storage: "sql",
-      runnerHealth: "k8s",
-      runnerHealthK8s: {
-        namespace: config.k8sNamespace,
-        labelSelector: config.k8sLabelSelector
-      },
+      runnerHealth: "ping",
       shardingConfig: {
         runnerAddress: Option.some(RunnerAddress.make(config.host, config.port))
       }
