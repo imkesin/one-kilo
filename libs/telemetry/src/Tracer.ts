@@ -1,41 +1,53 @@
 import * as OtlpSerialization from "@effect/opentelemetry/OtlpSerialization"
 import * as OtlpTracer from "@effect/opentelemetry/OtlpTracer"
+import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import * as Redacted from "effect/Redacted"
 
-const HoneycombConfig = Config.nested(
+const DEFAULT_LOCAL_BASE_URL = "http://localhost:4318"
+
+const OtelConfig = pipe(
   Config.all({
-    apiKey: pipe(
-      Config.string("API_KEY"),
-      (_) => Config.redacted(_)
-    ),
-    dataset: pipe(
-      Config.string("DATASET"),
-      Config.withDefault("effect-workos.integration")
+    baseUrl: pipe(
+      Config.string("EXPORTER_OTLP_ENDPOINT"),
+      Config.withDefault(DEFAULT_LOCAL_BASE_URL)
     )
   }),
-  "HONEYCOMB"
+  Config.nested("OTEL")
 )
 
-export const TracerLive = pipe(
-  Layer.unwrapEffect(
-    Effect.gen(function*() {
-      const honeycombConfig = yield* HoneycombConfig
+type TracerLayerParameters = {
+  serviceName: string
+  serviceVersion: string
+}
 
-      return OtlpTracer.layer({
-        url: "https://api.honeycomb.io/v1/traces",
-        resource: {
-          serviceName: honeycombConfig.dataset
-        },
-        headers: {
-          "x-honeycomb-team": Redacted.value(honeycombConfig.apiKey),
-          "x-honeycomb-dataset": honeycombConfig.dataset
-        }
+export const layer = ({
+  serviceName,
+  serviceVersion
+}: TracerLayerParameters): Layer.Layer<never> =>
+  pipe(
+    Layer.unwrapEffect(
+      Effect.gen(function*() {
+        const { baseUrl } = yield* OtelConfig
+
+        /*
+         * Implicitly extracts `OTEL_RESOURCE_ATTRIBUTES` if it is defined in the environment.
+         */
+        return OtlpTracer.layer({
+          url: `${baseUrl}/v1/traces`,
+          resource: {
+            serviceName,
+            serviceVersion,
+            attributes: {
+              "service.namespace": "one-kilo"
+            }
+          }
+        })
       })
-    })
-  ),
-  Layer.provide(OtlpSerialization.layerJson)
-)
+    ),
+    Layer.provide(OtlpSerialization.layerJson),
+    Layer.provide(NodeHttpClient.layerUndici),
+    Layer.orDie
+  )

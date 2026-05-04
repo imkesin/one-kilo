@@ -63,6 +63,9 @@ importers:
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../../libs/sql
+      '@one-kilo/telemetry':
+        specifier: workspace:*
+        version: link:../../libs/telemetry
       '@one-kilo/workflow':
         specifier: workspace:*
         version: link:../../libs/workflow
@@ -111,6 +114,9 @@ importers:
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../../libs/sql
+      '@one-kilo/telemetry':
+        specifier: workspace:*
+        version: link:../../libs/telemetry
       effect:
         specifier: ^3.21.2
         version: 3.21.2
@@ -317,6 +323,9 @@ importers:
       '@effect/platform-node':
         specifier: ^0.106.0
         version: 0.106.0(@effect/cluster@0.58.1(@effect/platform@0.96.0(effect@3.21.2))(@effect/rpc@0.75.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.18.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.96.0(effect@3.21.2))(@effect/rpc@0.75.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.96.0(effect@3.21.2))(@effect/rpc@0.75.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.51.0(@effect/experimental@0.60.0(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.96.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2)
+      '@one-kilo/lib':
+        specifier: workspace:*
+        version: link:../lib
       effect:
         specifier: ^3.21.2
         version: 3.21.2

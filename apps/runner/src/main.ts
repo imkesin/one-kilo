@@ -6,6 +6,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
+import { TelemetryLive } from "./infra/Telemetry.ts"
 import { makeRunnerLive } from "./Runner.ts"
 
 const RunnerConfig = pipe(
@@ -49,6 +50,7 @@ const RunnerLive = makeRunnerLive(ClusterLive)
 
 pipe(
   RunnerLive,
+  Layer.provide(TelemetryLive),
   Layer.launch,
   NodeRuntime.runMain
 )

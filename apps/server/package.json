@@ -15,6 +15,7 @@
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/server-api": "workspace:*",
     "@one-kilo/sql": "workspace:*",
+    "@one-kilo/telemetry": "workspace:*",
     "effect": "^3.21.2",
     "jose": "^6.2.2"
   },

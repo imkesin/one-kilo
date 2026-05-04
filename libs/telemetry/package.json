@@ -5,6 +5,7 @@
     "@effect/opentelemetry": "^0.63.0",
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
+    "@one-kilo/lib": "workspace:*",
     "effect": "^3.21.2"
   },
   "exports": {
