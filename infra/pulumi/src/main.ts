@@ -13,23 +13,28 @@ const cluster = new GCP.container.Cluster(
   "one-kilo-cluster",
   {
     location: gcpConfig.require("zone"),
+
     initialNodeCount: 1,
+    nodeConfig: {
+      machineType: "e2-standard-4",
+      spot: true
+    },
+
     addonsConfig: {
       gkeBackupAgentConfig: {
         enabled: true
       }
     },
     datapathProvider: "ADVANCED_DATAPATH",
-    nodeConfig: {
-      machineType: "e2-standard-4",
-      spot: true
-    },
     maintenancePolicy: {
       recurringWindow: {
         startTime: "2026-01-01T05:00:00Z",
         endTime: "2026-01-01T10:00:00Z",
         recurrence: "FREQ=DAILY"
       }
+    },
+    managedOpentelemetryConfig: {
+      scope: "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"
     }
   }
 )
