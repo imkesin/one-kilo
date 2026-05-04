@@ -1,9 +1,9 @@
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as Activity from "@effect/workflow/Activity"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as ActivityExtensions from "./ActivityExtensions.ts"
 
 type UpdateWorkOSUserPayload = {
   readonly workosUserId: WorkOSIds.UserId
@@ -12,8 +12,8 @@ type UpdateWorkOSUserPayload = {
 }
 
 export const updateWorkOSUser = (payload: UpdateWorkOSUserPayload) =>
-  Activity.make({
-    name: "WorkOSActivities.updateWorkOSUser",
+  ActivityExtensions.makeWithDurableRetry({
+    name: "WorkOSSyncActivities.updateWorkOSUser",
     execute: Effect.gen(function*() {
       const workos = yield* WorkOSApiGateway.ApiGateway
 
