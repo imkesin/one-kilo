@@ -25,6 +25,13 @@ export const DateTimeArchived = Model.Field({
   json: S.NullOr(S.DateTimeUtc)
 })
 
+export const DateTimeNullable = Model.Field({
+  select: S.NullOr(S.DateTimeUtc),
+  insert: DateTimeWithDefaultNull,
+  update: DateTimeWithDefaultNull,
+  json: S.NullOr(S.DateTimeUtc)
+})
+
 /**
  * A field that represents a JSON(B) value stored as text in the database.
  *

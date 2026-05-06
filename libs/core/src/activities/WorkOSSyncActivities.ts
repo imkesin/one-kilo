@@ -7,8 +7,10 @@ import * as ActivityExtensions from "./ActivityExtensions.ts"
 
 type UpdateWorkOSUserPayload = {
   readonly workosUserId: WorkOSIds.UserId
-  readonly firstName: string
-  readonly lastName: string
+  readonly expected: {
+    firstName: string
+    lastName: string
+  }
 }
 
 export const updateWorkOSUser = (payload: UpdateWorkOSUserPayload) =>
@@ -21,8 +23,8 @@ export const updateWorkOSUser = (payload: UpdateWorkOSUserPayload) =>
         workos.userManagement.updateUser(
           payload.workosUserId,
           {
-            firstName: payload.firstName,
-            lastName: payload.lastName
+            firstName: "FIX ME",
+            lastName: "FIX ME"
           }
         ),
         orDieWithUnexpectedError("Failed to update WorkOS user")

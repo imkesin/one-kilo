@@ -17,7 +17,7 @@ type DurableRetryOptions<E> = {
   /**
    * If not provided, the activity will retry indefinitely
    */
-  readonly while?: (e: E) => boolean
+  readonly while?: ((e: E) => boolean) | undefined
 }
 
 /**
@@ -80,9 +80,10 @@ export const makeWithDurableRetry = <
 >(
   options: {
     readonly name: string
+    readonly execute: Effect.Effect<Success["Type"], Error["Type"], R>
     readonly success?: Success
     readonly error?: Error
-    readonly execute: Effect.Effect<Success["Type"], Error["Type"], R>
+    readonly while?: (error: Error["Type"]) => boolean
   }
 ) =>
   Activity.make({
@@ -91,6 +92,9 @@ export const makeWithDurableRetry = <
     error: options.error,
     execute: pipe(
       options.execute,
-      retryDurable({ name: options.name })
+      retryDurable({
+        name: options.name,
+        while: options.while
+      })
     )
   })
