@@ -9,7 +9,8 @@ export class UsersQueryModule extends Effect.Service<UsersQueryModule>()(
       const usersQueryRepository = yield* UsersQueryRepository
 
       return {
-        retrieveUser: usersQueryRepository.findUserByUserId
+        retrieveUser: usersQueryRepository.findUserByUserId,
+        retrieveUserByWorkOSUserId: usersQueryRepository.findUserByWorkOSUserId
       }
     })
   }

@@ -3,8 +3,8 @@ import * as Workflow from "@effect/workflow/Workflow"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
-export const SyncUserToWorkOS = Workflow.make({
-  name: "@one-kilo/workflow/SyncUserToWorkOS",
+export const PushWorkOSUserChange = Workflow.make({
+  name: "@one-kilo/workflow/PushWorkOSUserChange",
   payload: {
     workosUserId: WorkOSIds.UserId,
     expected: pipe(
@@ -13,7 +13,7 @@ export const SyncUserToWorkOS = Workflow.make({
         lastName: S.String
       }),
       S.annotations({
-        description: "The expected state of the WorkOS user."
+        description: "The expected state of the WorkOS user before applying changes."
       })
     )
   },

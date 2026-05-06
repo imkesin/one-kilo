@@ -1,9 +1,9 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
-import type { User, UserEntity } from "@one-kilo/domain/entities/User"
+import type { PersonUser, User } from "@one-kilo/domain/entities/User"
 import { UserId } from "@one-kilo/domain/ids/UserId"
-import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
@@ -12,7 +12,6 @@ import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 import { MachineClientsModel } from "../machine-clients/MachineClientsModel.ts"
 import { PersonsModel } from "../persons/PersonsModel.ts"
 import { toUser } from "./internal/UsersModelTransformations.ts"
-import { toUserEntity } from "./internal/UsersModelTransformations.ts"
 import { UsersModel } from "./UsersModel.ts"
 
 type FindUserEntityByWorkOSUserIdParameters = {
@@ -30,31 +29,56 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
     effect: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findUserEntityByWorkOSUserIdSchema = SqlSchema.findOne({
+      const findUserByWorkOSUserIdSchema = SqlSchema.findOne({
         Request: WorkOSIds.UserId,
-        Result: UsersModel.select,
+        Result: S.extend(
+          UsersModel.select,
+          S.Struct({
+            machineClient: S.Null,
+            person: S.extend(
+              PersonsModel.select,
+              S.Struct({ emailAddresses: S.Array(EmailAddressesModel.select) })
+            )
+          })
+        ),
         execute: (workosUserId) =>
           sql`
-            SELECT *
+            SELECT
+              u.*,
+              NULL AS machine_client,
+              ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())} AS person,
             FROM users u
+            LEFT JOIN persons p
+              ON p.id = u.person_id
+              AND p.archived_at IS NULL
+            LEFT JOIN email_addresses ea
+              ON ea.person_id = p.id
+              AND ea.archived_at IS NULL
             WHERE
               u.workos_user_id = ${workosUserId}
+              AND u.type = 'Person'
               AND u.archived_at IS NULL
+            GROUP BY
+              u.id,
+              p.id
             LIMIT 1
           `
       })
-      const findUserEntityByWorkOSUserId = Effect.fn("UsersQueryRepository.findUserEntityByWorkOSUserId")(
+      const findUserByWorkOSUserId = Effect.fn("UsersQueryRepository.findUserByWorkOSUserId")(
         function*({ workosUserId }: FindUserEntityByWorkOSUserIdParameters) {
-          const maybeUserModel = yield* findUserEntityByWorkOSUserIdSchema(workosUserId)
+          const maybeUserModel = yield* findUserByWorkOSUserIdSchema(workosUserId)
 
           if (Option.isNone(maybeUserModel)) {
-            return Option.none<UserEntity>()
+            return Option.none<PersonUser>()
           }
 
-          return yield* Effect.map(
-            toUserEntity(maybeUserModel.value),
-            Option.some
-          )
+          const user = yield* toUser(maybeUserModel.value)
+
+          if (user.type !== "Person") {
+            return yield* dieWithUnexpectedError("Expected user to be a person")
+          }
+
+          return Option.some(user)
         },
         orDieWithUnexpectedError("An unexpected error occurred while finding a user entity")
       )
@@ -82,23 +106,23 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
             SELECT
               u.*,
               CASE
-                WHEN u.type = 'Person'
-                THEN ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())}
-              END AS person,
-              CASE
                 WHEN u.type = 'MachineClient'
                 THEN ${sql.unsafe(MachineClientsModel.asJsonBBuildObject())}
-              END AS machine_client
+              END AS machine_client,
+              CASE
+                WHEN u.type = 'Person'
+                THEN ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())}
+              END AS person
             FROM users u
+            LEFT JOIN machine_clients mc
+              ON mc.id = u.machine_client_id
+              AND mc.archived_at IS NULL
             LEFT JOIN persons p
               ON p.id = u.person_id
               AND p.archived_at IS NULL
             LEFT JOIN email_addresses ea
               ON ea.person_id = p.id
               AND ea.archived_at IS NULL
-            LEFT JOIN machine_clients mc
-              ON mc.id = u.machine_client_id
-              AND mc.archived_at IS NULL
             WHERE
               u.id = ${userId}
               AND u.archived_at IS NULL
@@ -111,14 +135,14 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
       })
       const findUserByUserId = Effect.fn("UsersQueryRepository.findUserByUserId")(
         function*({ userId }: FindUserByUserIdParameters) {
-          const maybeResult = yield* findUserByUserIdSchema(userId)
+          const maybeUserModel = yield* findUserByUserIdSchema(userId)
 
-          if (Option.isNone(maybeResult)) {
+          if (Option.isNone(maybeUserModel)) {
             return Option.none<User>()
           }
 
           return yield* Effect.map(
-            toUser(maybeResult.value),
+            toUser(maybeUserModel.value),
             Option.some
           )
         },
@@ -126,8 +150,8 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
       )
 
       return {
-        findUserEntityByWorkOSUserId,
-        findUserByUserId
+        findUserByUserId,
+        findUserByWorkOSUserId
       }
     })
   }
