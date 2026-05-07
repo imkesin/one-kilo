@@ -9,8 +9,8 @@ export const PushWorkOSUserChange = Workflow.make({
     workosUserId: WorkOSIds.UserId,
     expected: pipe(
       S.Struct({
-        firstName: S.String,
-        lastName: S.String
+        firstName: S.NonEmptyTrimmedString,
+        lastName: S.NonEmptyTrimmedString
       }),
       S.annotations({
         description: "The expected state of the WorkOS user before applying changes."
@@ -19,3 +19,4 @@ export const PushWorkOSUserChange = Workflow.make({
   },
   idempotencyKey: ({ workosUserId }) => workosUserId
 })
+  .annotate(Workflow.SuspendOnFailure, true)

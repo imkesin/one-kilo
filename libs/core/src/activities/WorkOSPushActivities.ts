@@ -23,6 +23,11 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
       const usersQueryModule = yield* UsersQueryModule
 
       const _user = yield* usersQueryModule.retrieveUserByWorkOSUserId({ workosUserId: parameters.workosUserId })
+      // We need to fail if doesn't exist
+
+      // Now load from WorkOS and compare
+      // If it doesn't match expectations, also fail
+      // If change isn't needed, that's an early success
 
       yield* pipe(
         workosGatewayClient.userManagement.updateUser(
@@ -32,7 +37,10 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
             lastName: "FIX ME"
           }
         ),
+        // This failure needs to be retryable
         orDieWithUnexpectedError("Failed to update WorkOS user")
       )
+
+      // If we got here, succeed clearly
     })
   })
