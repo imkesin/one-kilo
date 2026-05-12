@@ -1,6 +1,5 @@
 # Hard-copy workspace packages into node_modules instead of symlinking.
-# Required for `pnpm deploy` (server Dockerfile) and Next.js standalone output
-# (web Dockerfile), which both break when workspace deps are symlinks pointing
+# Required for `pnpm deploy` in a Dockerfile, which would otherwise break when workspace deps are symlinks pointing
 # back to the monorepo source tree.
 injectWorkspacePackages: true
 
@@ -8,14 +7,14 @@ injectWorkspacePackages: true
 # Mitigates supply-chain attacks via freshly compromised releases.
 minimumReleaseAge: 4320
 
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@pulumi/kubernetes'
-  - esbuild
-  - msgpackr-extract
-  - protobufjs
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  '@parcel/watcher': true
+  '@pulumi/kubernetes': true
+  esbuild: true
+  msgpackr-extract: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
 
 packages:
   - apps/*

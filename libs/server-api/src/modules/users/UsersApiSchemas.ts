@@ -21,9 +21,9 @@ const Api_MachineClientOnUser = S.Struct({
 })
 
 class UsersApi_MachineClientUser extends S.TaggedClass<UsersApi_MachineClientUser>(
-  "@one-kilo/server-api/MachineClientUser"
+  "@one-kilo/server-api/User:MachineClient"
 )(
-  "MachineClientUser",
+  "User:MachineClient",
   {
     id: UserIdFromPrefixed,
     type: pipe(
@@ -57,9 +57,9 @@ const Api_PersonOnUser = S.Struct({
 })
 
 class UsersApi_PersonUser extends S.TaggedClass<UsersApi_PersonUser>(
-  "@one-kilo/server-api/PersonUser"
+  "@one-kilo/server-api/User:Person"
 )(
-  "PersonUser",
+  "User:Person",
   {
     id: UserIdFromPrefixed,
     type: pipe(
