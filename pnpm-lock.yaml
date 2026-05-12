@@ -60,6 +60,9 @@ importers:
       '@one-kilo/core':
         specifier: workspace:*
         version: link:../../libs/core
+      '@one-kilo/lib':
+        specifier: workspace:*
+        version: link:../../libs/lib
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../../libs/sql

@@ -5,7 +5,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { AliveCron } from "./crons/AliveCron.ts"
 import { WorkOSLive } from "./infra/WorkOS.ts"
-import { PushWorkOSUserChangeLive } from "./workflows/WorkOSPushWorkflows.ts"
+import { PushWorkOSUserChangeLive } from "./workflows/PushWorkOSUserChangeWorkflow.ts"
 
 const SqlLive = PgLayers.layer()
 
