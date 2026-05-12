@@ -4,6 +4,10 @@
 # back to the monorepo source tree.
 injectWorkspacePackages: true
 
+# Refuse to install package versions published less than 3 days ago.
+# Mitigates supply-chain attacks via freshly compromised releases.
+minimumReleaseAge: 4320
+
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@pulumi/kubernetes'
