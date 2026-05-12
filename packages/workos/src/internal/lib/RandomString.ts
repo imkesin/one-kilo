@@ -1,3 +1,6 @@
+import crypto from "node:crypto"
+import { TextDecoder } from "node:util"
+
 const Alphabet = {
   Base62: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   CrockfordBase32: "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
