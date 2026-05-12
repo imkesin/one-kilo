@@ -1,5 +1,5 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import * as Effect from "effect/Effect"
+import type * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import * as Runtime from "effect/Runtime"
 import { isDynamicServerError, isRedirectError } from "~/lib/errors"

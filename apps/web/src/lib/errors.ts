@@ -1,6 +1,6 @@
 import * as S from "effect/Schema"
 import { DynamicServerError as NextDynamicServerError } from "next/dist/client/components/hooks-server-context"
-import { RedirectError as NextRedirectError } from "next/dist/client/components/redirect-error"
+import type { RedirectError as NextRedirectError } from "next/dist/client/components/redirect-error"
 
 export class DynamicServerError extends S.TaggedError<DynamicServerError>()(
   "DynamicServerError",

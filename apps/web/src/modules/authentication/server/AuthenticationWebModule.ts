@@ -1,5 +1,5 @@
-import * as WorkOSValues from "@effect/auth-workos/domain/Values"
-import { UserId } from "@one-kilo/domain/ids/UserId"
+import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
+import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import {
   dieWithUnexpectedError,

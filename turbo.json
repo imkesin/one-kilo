@@ -26,13 +26,6 @@
     "dev": {
       "cache": false
     },
-    "lint": {
-      "dependsOn": [
-        "^build",
-        "^lint",
-        "^typecheck"
-      ]
-    },
     "start": {
       "cache": false,
       "dependsOn": [

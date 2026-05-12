@@ -1,8 +1,8 @@
 import { expect, type Vitest } from "@effect/vitest"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
-import * as Redacted from "effect/Redacted"
-import { ApplicationClientId } from "../src/domain/Ids.ts"
+import type * as Redacted from "effect/Redacted"
+import type { ApplicationClientId } from "../src/domain/Ids.ts"
 import * as OAuth2Gateway from "../src/OAuth2Gateway.ts"
 import * as TokenClient from "../src/TokenClient.ts"
 

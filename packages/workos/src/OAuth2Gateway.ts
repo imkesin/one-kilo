@@ -2,7 +2,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import * as StoreDefinitions from "./internal/StoreDefinitions.ts"
+import type * as StoreDefinitions from "./internal/StoreDefinitions.ts"
 import * as OAuth2Client from "./OAuth2Client.ts"
 import * as Store from "./Store.ts"
 

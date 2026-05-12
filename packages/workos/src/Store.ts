@@ -1,9 +1,9 @@
-import * as KeyValueStore from "@effect/platform/KeyValueStore"
+import type * as KeyValueStore from "@effect/platform/KeyValueStore"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
 import * as StoreDefinitions from "./internal/StoreDefinitions.ts"
-import * as TokenGenerator from "./TokenGenerator.ts"
+import type * as TokenGenerator from "./TokenGenerator.ts"
 
 export interface Service {
   readonly apiClient: StoreDefinitions.ApiClient

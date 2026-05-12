@@ -3,7 +3,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
-import * as Jose from "jose"
+import type * as Jose from "jose"
 import { KeyPairTest } from "./internal/KeyPair.ts"
 import * as TokenGeneratorDefinitions from "./internal/TokenGeneratorDefinitions.ts"
 

@@ -1,5 +1,5 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
-import * as WorkOSValues from "@effect/auth-workos/domain/Values"
+import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import type { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import { dieWithUnexpectedErrorCallback, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Data from "effect/Data"

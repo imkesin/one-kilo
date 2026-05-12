@@ -26,7 +26,7 @@ import {
   DeleteOrganizationOutcome
 } from "./api/OrganizationsApiClientDefinitionSchemas.ts"
 import {
-  CreateOrganizationMembershipParameters,
+  type CreateOrganizationMembershipParameters,
   type CreateUserParameters,
   DeleteOrganizationMembershipOutcome,
   DeleteUserOutcome,

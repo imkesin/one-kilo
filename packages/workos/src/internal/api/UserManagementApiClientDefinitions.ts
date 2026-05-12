@@ -1,4 +1,4 @@
-import * as HttpClient from "@effect/platform/HttpClient"
+import type * as HttpClient from "@effect/platform/HttpClient"
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"

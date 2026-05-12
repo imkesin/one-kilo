@@ -22,8 +22,7 @@
   "devDependencies": {
     "@pandacss/dev": "1.9.1",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint-config-next": "16.2.2"
+    "@types/react-dom": "^19"
   },
   "private": true,
   "scripts": {
@@ -31,7 +30,6 @@
     "clean": "rm -rf .next .turbo dist",
     "dev": "next dev --port 11000",
     "docker:build": "docker build --file Dockerfile --tag one-kilo-web ../..",
-    "lint": "eslint .",
     "prepare": "panda codegen",
     "start": "next start --port 11000",
     "typecheck": "tsc --noEmit --outDir dist"

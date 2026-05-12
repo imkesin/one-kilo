@@ -1,4 +1,4 @@
-import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
+import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import { WorkspaceCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceActivityLogs"
 import { WorkspaceMembershipCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceMembershipActivityLogs"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"

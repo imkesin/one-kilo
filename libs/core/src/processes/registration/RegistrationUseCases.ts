@@ -1,6 +1,6 @@
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
-import * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
-import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
+import type * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
+import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as PgClient from "@effect/sql-pg/PgClient"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"

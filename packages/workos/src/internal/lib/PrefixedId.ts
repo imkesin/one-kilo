@@ -1,4 +1,4 @@
-import * as S from "effect/Schema"
+import type * as S from "effect/Schema"
 import * as RandomString from "./RandomString.ts"
 
 export const makePrefixedIdGenerator = <Brand extends string>(

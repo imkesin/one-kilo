@@ -1,4 +1,4 @@
-import { AccessToken } from "@effect/auth-workos/domain/Values"
+import type { AccessToken } from "@effect/auth-workos/domain/Values"
 import * as HttpApiMiddleware from "@effect/platform/HttpApiMiddleware"
 import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import * as HttpApiSecurity from "@effect/platform/HttpApiSecurity"

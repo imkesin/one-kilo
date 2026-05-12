@@ -2,7 +2,7 @@ import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
 import * as ApiClient from "./ApiClient.ts"
-import * as StoreDefinitions from "./internal/StoreDefinitions.ts"
+import type * as StoreDefinitions from "./internal/StoreDefinitions.ts"
 import * as Store from "./Store.ts"
 
 export type Service = StoreDefinitions.ApiClient

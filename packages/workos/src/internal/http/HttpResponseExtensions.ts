@@ -2,7 +2,7 @@ import * as HttpClientError from "@effect/platform/HttpClientError"
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import * as S from "effect/Schema"
+import type * as S from "effect/Schema"
 import * as WorkOSError from "../../domain/Errors.ts"
 
 export const catchNetworkErrors = <A, E>(

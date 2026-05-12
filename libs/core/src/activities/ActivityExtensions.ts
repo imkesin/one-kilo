@@ -6,7 +6,7 @@ import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
-import * as S from "effect/Schema"
+import type * as S from "effect/Schema"
 
 const BASE_DURATION = Duration.seconds(5)
 const BACKOFF_FACTOR = 2

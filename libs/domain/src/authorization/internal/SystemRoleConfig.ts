@@ -1,4 +1,4 @@
-import { PermissionSet } from "./PermissionSet.ts"
+import type { PermissionSet } from "./PermissionSet.ts"
 
 export class SystemRoleConfig<Name extends string, Permission extends PermissionSet<string, string>> {
   readonly name: Name

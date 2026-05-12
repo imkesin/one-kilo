@@ -1,4 +1,4 @@
-import { PropertyConfig } from "@pandacss/dev"
+import type { PropertyConfig } from "@pandacss/dev"
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

@@ -1,5 +1,5 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
-import * as WorkOSValues from "@effect/auth-workos/domain/Values"
+import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"

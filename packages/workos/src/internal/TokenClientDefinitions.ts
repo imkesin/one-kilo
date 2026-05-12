@@ -1,4 +1,4 @@
-import * as HttpClientError from "@effect/platform/HttpClientError"
+import type * as HttpClientError from "@effect/platform/HttpClientError"
 import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -6,7 +6,7 @@ import type { ParseError } from "effect/ParseResult"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
 import { ApplicationClientId, OrganizationId, UserId } from "../domain/Ids.ts"
-import { AccessToken, EmailAddress, type IdToken } from "../domain/Values.ts"
+import { type AccessToken, EmailAddress, type IdToken } from "../domain/Values.ts"
 import { OAuthUserInfoFields } from "./CommonDefinitions.ts"
 
 const DateFromSeconds = S.transform(

@@ -1,5 +1,5 @@
-import * as GCP from "@pulumi/gcp"
-import * as K8s from "@pulumi/kubernetes"
+import type * as GCP from "@pulumi/gcp"
+import type * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
 import { createRunner } from "./k8s-apps/runner.js"
 import { createServer } from "./k8s-apps/server.js"

@@ -1,5 +1,5 @@
-import * as PgClient from "@effect/sql-pg/PgClient"
-import * as SqlClient from "@effect/sql/SqlClient"
+import type * as PgClient from "@effect/sql-pg/PgClient"
+import type * as SqlClient from "@effect/sql/SqlClient"
 import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import type * as Arr from "effect/Array"
 import * as Duration from "effect/Duration"

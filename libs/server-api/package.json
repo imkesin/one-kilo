@@ -15,7 +15,6 @@
   "scripts": {
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint .",
     "typecheck": "tsc --build"
   },
   "type": "module"

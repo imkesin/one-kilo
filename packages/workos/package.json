@@ -1,6 +1,6 @@
 {
   "name": "@effect/auth-workos",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "devDependencies": {
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
@@ -22,7 +22,6 @@
   "scripts": {
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint .",
     "test": "vitest",
     "test:integration": "vitest --config ./vitest.integration.config.ts",
     "test:once": "vitest run",

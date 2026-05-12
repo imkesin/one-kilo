@@ -10,6 +10,7 @@ minimumReleaseAge: 4320
 allowBuilds:
   '@parcel/watcher': true
   '@pulumi/kubernetes': true
+  dprint: true
   esbuild: true
   msgpackr-extract: true
   protobufjs: true

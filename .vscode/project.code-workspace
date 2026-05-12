@@ -56,6 +56,10 @@
       "name": "@effect/auth-workos",
       "path": "../packages/workos"
     },
+    {
+      "name": "@effect/oxc",
+      "path": "../packages/oxc"
+    },
     // Scripts
     {
       "name": "@one-kilo/local-dev",
@@ -116,6 +120,7 @@
       "hstack",
       "millis",
       "overrideable",
+      "oxlint",
       "pulumi",
       "pkce",
       "timestamptz",
@@ -123,17 +128,15 @@
       "workos",
       "uuidv7"
     ],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "dprint.dprint",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+      "source.fixAll.oxc": "explicit"
     },
     "editor.rulers": [
       120
     ],
-    "eslint.validate": [
-      "javascript",
-      "typescript",
-      "typescriptreact"
-    ],
+    "dprint.path": "${workspaceFolder:root}/node_modules/.bin/dprint",
     "search.exclude": {
       "**/.turbo": true,
       "**/dist": true,
@@ -144,7 +147,10 @@
     "json.schemas": [
       {
         "url": "https://turborepo.com/schema.json",
-        "fileMatch": ["turbo.json", "**/turbo.json"]
+        "fileMatch": [
+          "turbo.json",
+          "**/turbo.json"
+        ]
       }
     ],
     "js/ts.preferences.importModuleSpecifierEnding": "js",
