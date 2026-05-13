@@ -1,6 +1,3 @@
 {
-  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "dprint.dprint"
-  },
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal"
 }
