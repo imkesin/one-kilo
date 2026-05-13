@@ -1,15 +1,15 @@
 import * as Model from "@effect/sql/Model"
-import { ActivityLogId } from "@one-kilo/domain/ids/ActivityLogId"
+import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { UserId } from "@one-kilo/domain/ids/UserId"
 import { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import * as ModelExtensions from "../../utils/ModelExtensions.ts"
 
-export class ActivityLogsModel extends Model.Class<ActivityLogsModel>(
-  "ActivityLogsModel"
+export class AuditLogsModel extends Model.Class<AuditLogsModel>(
+  "AuditLogsModel"
 )({
-  id: Model.GeneratedByApp(ActivityLogId),
+  id: Model.GeneratedByApp(AuditLogId),
 
   performedByUserId: UserId,
   /*

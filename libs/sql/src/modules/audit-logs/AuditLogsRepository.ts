@@ -1,7 +1,7 @@
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
-import type * as ActivityLogDefinitions from "@one-kilo/domain/activity-logs/ActivityLogDefinitions"
-import type { ActivityLogId } from "@one-kilo/domain/ids/ActivityLogId"
+import type * as AuditLogDefinitions from "@one-kilo/domain/audit-logs/AuditLogDefinitions"
+import type { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -10,26 +10,26 @@ import type * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
-import { ActivityLogsModel } from "./ActivityLogsModel.ts"
-import { toActivityLog } from "./internal/ActivityLogsModelTransformations.ts"
+import { AuditLogsModel } from "./AuditLogsModel.ts"
+import { toAuditLog } from "./internal/AuditLogsModelTransformations.ts"
 
-type InsertActivityLogParameters = {
+type InsertAuditLogParameters = {
   readonly performedByUserId: UserId
   readonly encodedContext: Option.Option<string>
   readonly targets: readonly [
-    ActivityLogDefinitions.ActivityLogTarget,
-    ...ReadonlyArray<ActivityLogDefinitions.ActivityLogTarget>
+    AuditLogDefinitions.AuditLogTarget,
+    ...ReadonlyArray<AuditLogDefinitions.AuditLogTarget>
   ]
   readonly traceId: string
-  readonly type: ActivityLogDefinitions.ActivityLogType
+  readonly type: AuditLogDefinitions.AuditLogType
   readonly version: 1 | 2 | 3
 
-  readonly id?: ActivityLogId
+  readonly id?: AuditLogId
   readonly timestamp?: DateTime.Utc
 }
 
-export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepository>()(
-  "@one-kilo/sql/ActivityLogsRepository",
+export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
+  "@one-kilo/sql/AuditLogsRepository",
   {
     dependencies: [DomainIdGenerator.Default],
     effect: Effect.gen(function*() {
@@ -37,11 +37,11 @@ export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepositor
       const idGenerator = yield* DomainIdGenerator
 
       const insertSchema = SqlSchema.single({
-        Request: ActivityLogsModel.insert,
-        Result: ActivityLogsModel.select,
-        execute: (request) => sql`INSERT INTO activity_logs ${sql.insert(request).returning("*")}`
+        Request: AuditLogsModel.insert,
+        Result: AuditLogsModel.select,
+        execute: (request) => sql`INSERT INTO audit_logs ${sql.insert(request).returning("*")}`
       })
-      const insert = Effect.fn("ActivityLogsRepository.insert")(
+      const insert = Effect.fn("AuditLogsRepository.insert")(
         function*({
           performedByUserId,
           encodedContext,
@@ -52,17 +52,17 @@ export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepositor
 
           id,
           timestamp
-        }: InsertActivityLogParameters) {
-          const activityLogIdEffect = id
+        }: InsertAuditLogParameters) {
+          const auditLogIdEffect = id
             ? Effect.succeed(id)
-            : idGenerator.activityLogId
+            : idGenerator.auditLogId
 
           return yield* pipe(
             Effect.flatMap(
-              activityLogIdEffect,
-              (activityLogId) =>
+              auditLogIdEffect,
+              (auditLogId) =>
                 insertSchema({
-                  id: activityLogId,
+                  id: auditLogId,
                   performedByUserId,
                   context: Option.getOrNull(encodedContext),
                   targets,
@@ -75,10 +75,10 @@ export class ActivityLogsRepository extends Effect.Service<ActivityLogsRepositor
                   version
                 })
             ),
-            Effect.andThen(toActivityLog)
+            Effect.andThen(toAuditLog)
           )
         },
-        orDieWithUnexpectedError("Failed to insert activity log")
+        orDieWithUnexpectedError("Failed to insert audit log")
       )
 
       return { insert }

@@ -5,7 +5,7 @@ export default Effect.gen(function*() {
   const sql = yield* SqlClient.SqlClient
 
   yield* sql`
-    CREATE TABLE activity_logs (
+    CREATE TABLE audit_logs (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
 
       performed_by_user_id UUID NOT NULL,
@@ -22,6 +22,6 @@ export default Effect.gen(function*() {
     )
   `
 
-  yield* sql`CREATE INDEX idx_al_performed_by ON activity_logs (performed_by_user_id)`
-  yield* sql`CREATE INDEX idx_al_targets ON activity_logs USING GIN (targets jsonb_path_ops)`
+  yield* sql`CREATE INDEX idx_al_performed_by ON audit_logs (performed_by_user_id)`
+  yield* sql`CREATE INDEX idx_al_targets ON audit_logs USING GIN (targets jsonb_path_ops)`
 })

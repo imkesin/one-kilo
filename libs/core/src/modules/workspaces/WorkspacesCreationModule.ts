@@ -1,13 +1,13 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import { WorkspaceCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceActivityLogs"
-import { WorkspaceMembershipCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceMembershipActivityLogs"
+import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
+import { WorkspaceMembershipCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceMembershipAuditLogs"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import { ActivityLogsRepository } from "@one-kilo/sql/modules/activity-logs/ActivityLogsRepository"
+import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
@@ -30,14 +30,14 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
   "@one-kilo/core/WorkspacesCreationModule",
   {
     dependencies: [
-      ActivityLogsRepository.Default,
+      AuditLogsRepository.Default,
       DomainIdGenerator.Default,
       WorkspaceMembershipsRepository.Default,
       WorkspacesQueryRepository.Default,
       WorkspacesRepository.Default
     ],
     effect: Effect.gen(function*() {
-      const activityLogsRepository = yield* ActivityLogsRepository
+      const auditLogsRepository = yield* AuditLogsRepository
       const idGenerator = yield* DomainIdGenerator
       const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
@@ -45,16 +45,16 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
 
       const recordWorkspaceCreated = Effect.fn("WorkspacesCreationModule.recordWorkspaceCreated")(
         function*(workspace: { id: WorkspaceId }, performedByUserId: UserId) {
-          const id = yield* idGenerator.activityLogId
+          const id = yield* idGenerator.auditLogId
 
-          const activityLog = yield* WorkspaceCreatedActivityLog.build({
+          const auditLog = yield* WorkspaceCreatedAuditLog.build({
             id,
             performedByUserId,
             targets: [{ id: workspace.id, type: "Workspace" as const }]
           })
 
-          yield* activityLogsRepository.insert({
-            ...activityLog,
+          yield* auditLogsRepository.insert({
+            ...auditLog,
             encodedContext: Option.none()
           })
         }
@@ -67,9 +67,9 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
           workspaceMembership: { id: WorkspaceMembershipId; userId: UserId; workspaceId: WorkspaceId },
           performedByUserId: UserId
         ) {
-          const id = yield* idGenerator.activityLogId
+          const id = yield* idGenerator.auditLogId
 
-          const activityLog = yield* WorkspaceMembershipCreatedActivityLog.build({
+          const auditLog = yield* WorkspaceMembershipCreatedAuditLog.build({
             id,
             performedByUserId,
             targets: [
@@ -79,8 +79,8 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             ]
           })
 
-          yield* activityLogsRepository.insert({
-            ...activityLog,
+          yield* auditLogsRepository.insert({
+            ...auditLog,
             encodedContext: Option.none()
           })
         }

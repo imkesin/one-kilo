@@ -1,10 +1,10 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import { UserCreatedActivityLog } from "@one-kilo/domain/activity-logs/UserActivityLogs"
+import { UserCreatedAuditLog } from "@one-kilo/domain/audit-logs/UserAuditLogs"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
-import { ActivityLogsRepository } from "@one-kilo/sql/modules/activity-logs/ActivityLogsRepository"
+import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { EmailAddressesRepository } from "@one-kilo/sql/modules/email-addresses/EmailAddressesRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import { UsersRepository } from "@one-kilo/sql/modules/users/UsersRepository"
@@ -24,14 +24,14 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
   "@one-kilo/core/UsersCreationModule",
   {
     dependencies: [
-      ActivityLogsRepository.Default,
+      AuditLogsRepository.Default,
       DomainIdGenerator.Default,
       EmailAddressesRepository.Default,
       PersonsRepository.Default,
       UsersRepository.Default
     ],
     effect: Effect.gen(function*() {
-      const activityLogsRepository = yield* ActivityLogsRepository
+      const auditLogsRepository = yield* AuditLogsRepository
       const emailAddressesRepository = yield* EmailAddressesRepository
       const idGenerator = yield* DomainIdGenerator
       const personsRepository = yield* PersonsRepository
@@ -39,16 +39,16 @@ export class UsersCreationModule extends Effect.Service<UsersCreationModule>()(
 
       const recordUserCreated = Effect.fn("UsersCreationModule.recordUserCreated")(
         function*(user: { id: UserId }) {
-          const id = yield* idGenerator.activityLogId
+          const id = yield* idGenerator.auditLogId
 
-          const activityLog = yield* UserCreatedActivityLog.build({
+          const auditLog = yield* UserCreatedAuditLog.build({
             id,
             performedByUserId: user.id,
             targets: [{ id: user.id, type: "User" as const }]
           })
 
-          yield* activityLogsRepository.insert({
-            ...activityLog,
+          yield* auditLogsRepository.insert({
+            ...auditLog,
             encodedContext: Option.none()
           })
         }

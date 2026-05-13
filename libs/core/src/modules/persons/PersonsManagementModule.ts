@@ -1,10 +1,10 @@
-import { PersonUpdatedActivityLog } from "@one-kilo/domain/activity-logs/PersonActivityLogs"
+import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
-import { ActivityLogsRepository } from "@one-kilo/sql/modules/activity-logs/ActivityLogsRepository"
+import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import * as Effect from "effect/Effect"
 
@@ -28,27 +28,27 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
   "@one-kilo/core/PersonsManagementModule",
   {
     dependencies: [
-      ActivityLogsRepository.Default,
+      AuditLogsRepository.Default,
       DomainIdGenerator.Default,
       PersonsRepository.Default
     ],
     effect: Effect.gen(function*() {
-      const activityLogsRepository = yield* ActivityLogsRepository
+      const auditLogsRepository = yield* AuditLogsRepository
       const idGenerator = yield* DomainIdGenerator
       const personsRepository = yield* PersonsRepository
 
       const recordPersonUpdated = Effect.fn("PersonsManagementModule.recordPersonUpdated")(
         function*({ fields, performedByUserId, personId }: RecordPersonUpdatedParameters) {
-          const id = yield* idGenerator.activityLogId
+          const id = yield* idGenerator.auditLogId
 
-          const activityLog = yield* PersonUpdatedActivityLog.build({
+          const auditLog = yield* PersonUpdatedAuditLog.build({
             id,
             performedByUserId,
             targets: [{ id: personId, type: "Person" as const }],
             context: { fields }
           })
 
-          yield* activityLogsRepository.insert(activityLog.withEncodedContext())
+          yield* auditLogsRepository.insert(auditLog.withEncodedContext())
         }
       )
 

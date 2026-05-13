@@ -6,16 +6,16 @@ import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
 import { FullName, PreferredName } from "../values/PersonValues.ts"
-import * as ActivityBuilder from "./ActivityBuilder.ts"
+import * as AuditBuilder from "./AuditBuilder.ts"
 
-const PersonActivityLogBuilder = ActivityBuilder.make({
+const PersonAuditLogBuilder = AuditBuilder.make({
   id: PersonId,
   type: "Person"
 })
 
-export class PersonUpdatedActivityLog
-  extends S.Class<PersonUpdatedActivityLog>("@one-kilo/domain/PersonUpdatedActivityLog")(
-    PersonActivityLogBuilder.ActivityWithContext({
+export class PersonUpdatedAuditLog
+  extends S.Class<PersonUpdatedAuditLog>("@one-kilo/domain/PersonUpdatedAuditLog")(
+    PersonAuditLogBuilder.AuditWithContext({
       type: "Person.Updated",
       context: pipe(
         S.Struct({
@@ -27,7 +27,7 @@ export class PersonUpdatedActivityLog
       )
     }),
     {
-      title: "Person Updated Activity Log",
+      title: "Person Updated Audit Log",
       description: "A log marking an update to a person's mutable fields"
     }
   )
@@ -35,14 +35,14 @@ export class PersonUpdatedActivityLog
   static build = Effect.fnUntraced(
     function*(
       parameters: Omit<
-        typeof PersonUpdatedActivityLog.Type,
+        typeof PersonUpdatedAuditLog.Type,
         "timestamp" | "traceId" | "type" | "version" | "withEncodedContext"
       >
     ) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 
-      return PersonUpdatedActivityLog.make({ timestamp, traceId, ...parameters })
+      return PersonUpdatedAuditLog.make({ timestamp, traceId, ...parameters })
     }
   )
 
@@ -50,12 +50,12 @@ export class PersonUpdatedActivityLog
    * Assumes that context is already a JSON object.
    */
   static decodeContextUnknown = pipe(
-    PersonUpdatedActivityLog.fields.context,
+    PersonUpdatedAuditLog.fields.context,
     S.decodeUnknown
   )
 
   static encodeContextSync = pipe(
-    PersonUpdatedActivityLog.fields.context,
+    PersonUpdatedAuditLog.fields.context,
     (_) => S.parseJson(_),
     S.encodeSync
   )
@@ -67,7 +67,7 @@ export class PersonUpdatedActivityLog
       ...rest,
       encodedContext: pipe(
         context,
-        PersonUpdatedActivityLog.encodeContextSync,
+        PersonUpdatedAuditLog.encodeContextSync,
         Option.some
       )
     }

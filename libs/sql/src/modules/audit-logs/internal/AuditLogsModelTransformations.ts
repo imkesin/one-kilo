@@ -1,14 +1,14 @@
-import { PersonUpdatedActivityLog } from "@one-kilo/domain/activity-logs/PersonActivityLogs"
-import { UserCreatedActivityLog } from "@one-kilo/domain/activity-logs/UserActivityLogs"
-import { WorkspaceCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceActivityLogs"
-import { WorkspaceMembershipCreatedActivityLog } from "@one-kilo/domain/activity-logs/WorkspaceMembershipActivityLogs"
+import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
+import { UserCreatedAuditLog } from "@one-kilo/domain/audit-logs/UserAuditLogs"
+import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
+import { WorkspaceMembershipCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceMembershipAuditLogs"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import type { ActivityLogsModel } from "../ActivityLogsModel.ts"
+import type { AuditLogsModel } from "../AuditLogsModel.ts"
 
-export const toActivityLog = ({
+export const toAuditLog = ({
   id,
   performedByUserId,
   context,
@@ -17,14 +17,14 @@ export const toActivityLog = ({
   traceId,
   type,
   version
-}: typeof ActivityLogsModel.select.Type) => {
+}: typeof AuditLogsModel.select.Type) => {
   if (
     type === "User.Created"
     && version === 1
-    && S.is(UserCreatedActivityLog.fields.targets)(targets)
+    && S.is(UserCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      UserCreatedActivityLog.make({
+      UserCreatedAuditLog.make({
         id,
         performedByUserId,
         targets,
@@ -39,12 +39,12 @@ export const toActivityLog = ({
   if (
     type === "Person.Updated"
     && version === 1
-    && S.is(PersonUpdatedActivityLog.fields.targets)(targets)
+    && S.is(PersonUpdatedAuditLog.fields.targets)(targets)
   ) {
     return pipe(
-      PersonUpdatedActivityLog.decodeContextUnknown(context),
+      PersonUpdatedAuditLog.decodeContextUnknown(context),
       Effect.map((decodedContext) =>
-        PersonUpdatedActivityLog.make({
+        PersonUpdatedAuditLog.make({
           id,
           performedByUserId,
           context: decodedContext,
@@ -57,8 +57,8 @@ export const toActivityLog = ({
       ),
       Effect.catchTag("ParseError", () =>
         pipe(
-          dieWithUnexpectedError("Failed to decode `Person.Updated` activity log context"),
-          Effect.annotateLogs({ activityLog: { id, type, version } })
+          dieWithUnexpectedError("Failed to decode `Person.Updated` audit log context"),
+          Effect.annotateLogs({ auditLog: { id, type, version } })
         ))
     )
   }
@@ -66,10 +66,10 @@ export const toActivityLog = ({
   if (
     type === "Workspace.Created"
     && version === 1
-    && S.is(WorkspaceCreatedActivityLog.fields.targets)(targets)
+    && S.is(WorkspaceCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      WorkspaceCreatedActivityLog.make({
+      WorkspaceCreatedAuditLog.make({
         id,
         performedByUserId,
         targets,
@@ -84,10 +84,10 @@ export const toActivityLog = ({
   if (
     type === "WorkspaceMembership.Created"
     && version === 1
-    && S.is(WorkspaceMembershipCreatedActivityLog.fields.targets)(targets)
+    && S.is(WorkspaceMembershipCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      WorkspaceMembershipCreatedActivityLog.make({
+      WorkspaceMembershipCreatedAuditLog.make({
         id,
         performedByUserId,
         targets,
@@ -100,9 +100,9 @@ export const toActivityLog = ({
   }
 
   return pipe(
-    dieWithUnexpectedError("An activity log model could not be converted to a domain entity"),
+    dieWithUnexpectedError("An audit log model could not be converted to a domain entity"),
     Effect.annotateLogs({
-      activityLog: {
+      auditLog: {
         id,
         type,
         version

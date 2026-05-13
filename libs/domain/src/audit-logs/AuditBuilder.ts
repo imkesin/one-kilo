@@ -1,17 +1,17 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import * as S from "effect/Schema"
-import { ActivityLogId } from "../ids/ActivityLogId.ts"
+import { AuditLogId } from "../ids/AuditLogId.ts"
 import { UserId } from "../ids/UserId.ts"
 
-const TypeId = "~@one-kilo/domain/ActivityBuilder" as const
+const TypeId = "~@one-kilo/domain/AuditBuilder" as const
 type TypeId = typeof TypeId
 
 type Version = 1 | 2 | 3
 
-type ActivityMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
+type AuditMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
   // Inputs
-  readonly id: typeof ActivityLogId
+  readonly id: typeof AuditLogId
   readonly performedByUserId: typeof UserId
   readonly targets: Targets
 
@@ -24,23 +24,23 @@ type ActivityMetadataFields<Type extends string, Targets extends S.Schema.All = 
   readonly version: S.tag<Version>
 }
 
-interface ActivityBuilder<Targets extends S.Schema.All> {
+interface AuditBuilder<Targets extends S.Schema.All> {
   readonly [TypeId]: TypeId
 
-  Activity: <Type extends string>(
+  Audit: <Type extends string>(
     parameters: {
       type: Type
       version?: Version
     }
-  ) => ActivityMetadataFields<Type, Targets>
+  ) => AuditMetadataFields<Type, Targets>
 
-  ActivityWithContext: <Type extends string, Context extends S.Schema.All>(
+  AuditWithContext: <Type extends string, Context extends S.Schema.All>(
     parameters: {
       type: Type
       context: Context
       version?: Version
     }
-  ) => ActivityMetadataFields<Type, Targets> & { context: Context }
+  ) => AuditMetadataFields<Type, Targets> & { context: Context }
 }
 
 type Target<T extends string = "Unknown"> = {
@@ -53,7 +53,7 @@ type Target<T extends string = "Unknown"> = {
 
 export function make<A extends string>(
   target: Target<A>
-): ActivityBuilder<
+): AuditBuilder<
   S.Tuple<
     readonly [
       S.Struct<{ id: typeof target["id"]; type: S.tag<typeof target["type"]> }>
@@ -66,7 +66,7 @@ export function make<
 >(
   targetA: Target<A>,
   targetB: Target<B>
-): ActivityBuilder<
+): AuditBuilder<
   S.Tuple<
     readonly [
       S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]> }>,
@@ -82,7 +82,7 @@ export function make<
   targetA: Target<A>,
   targetB: Target<B>,
   targetC: Target<C>
-): ActivityBuilder<
+): AuditBuilder<
   S.Tuple<
     readonly [
       S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]> }>,
@@ -128,13 +128,13 @@ export function make(
   return {
     [TypeId]: TypeId,
 
-    Activity: <Type extends string>(
+    Audit: <Type extends string>(
       parameters: {
         type: Type
         version?: Version
       }
     ) => ({
-      id: ActivityLogId,
+      id: AuditLogId,
       performedByUserId: UserId,
       targets,
 
@@ -144,14 +144,14 @@ export function make(
       type: S.tag(parameters.type),
       version: S.tag(parameters.version ?? 1)
     }),
-    ActivityWithContext: <Type extends string, Context extends S.Schema.All>(
+    AuditWithContext: <Type extends string, Context extends S.Schema.All>(
       parameters: {
         type: Type
         context: Context
         version?: Version
       }
     ) => ({
-      id: ActivityLogId,
+      id: AuditLogId,
       performedByUserId: UserId,
       context: parameters.context,
       targets,
