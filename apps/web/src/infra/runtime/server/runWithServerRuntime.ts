@@ -38,5 +38,5 @@ export async function runWithWebServerRuntime<
     throw cause.error
   }
 
-  throw new UnexpectedError({ message: "The server runtime failed", cause })
+  throw UnexpectedError.make({ message: "The server runtime failed", cause })
 }

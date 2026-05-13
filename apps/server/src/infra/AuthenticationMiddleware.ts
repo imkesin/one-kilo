@@ -22,14 +22,14 @@ export const AuthenticationMiddlewareLive = pipe(
           const decodedAccessToken = yield* pipe(
             workosTokenClient.verifyAccessToken(WorkOSValues.AccessToken.make(Redacted.value(bearerToken))),
             Effect.tapErrorCause(Effect.logError),
-            Effect.orElseFail(() => new UnauthenticatedError())
+            Effect.orElseFail(UnauthenticatedError.make)
           )
 
           if (
             decodedAccessToken._tag === "DecodedMachineAccessToken"
             || Option.isNone(decodedAccessToken.orgId)
           ) {
-            return yield* new UnauthenticatedError()
+            return yield* UnauthenticatedError.make()
           }
 
           const actorIdentity = yield* pipe(
@@ -39,7 +39,7 @@ export const AuthenticationMiddlewareLive = pipe(
             }),
             Effect.flatMap(
               Option.match({
-                onNone: () => Effect.fail(new UnauthenticatedError()),
+                onNone: () => Effect.fail(UnauthenticatedError.make()),
                 onSome: Effect.succeed
               })
             )

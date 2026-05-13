@@ -24,7 +24,7 @@ export const toActivityLog = ({
     && S.is(UserCreatedActivityLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      new UserCreatedActivityLog({
+      UserCreatedActivityLog.make({
         id,
         performedByUserId,
         targets,
@@ -44,7 +44,7 @@ export const toActivityLog = ({
     return pipe(
       PersonUpdatedActivityLog.decodeContextUnknown(context),
       Effect.map((decodedContext) =>
-        new PersonUpdatedActivityLog({
+        PersonUpdatedActivityLog.make({
           id,
           performedByUserId,
           context: decodedContext,
@@ -69,7 +69,7 @@ export const toActivityLog = ({
     && S.is(WorkspaceCreatedActivityLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      new WorkspaceCreatedActivityLog({
+      WorkspaceCreatedActivityLog.make({
         id,
         performedByUserId,
         targets,
@@ -87,7 +87,7 @@ export const toActivityLog = ({
     && S.is(WorkspaceMembershipCreatedActivityLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      new WorkspaceMembershipCreatedActivityLog({
+      WorkspaceMembershipCreatedActivityLog.make({
         id,
         performedByUserId,
         targets,

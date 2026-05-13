@@ -14,7 +14,7 @@ import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
   AuthorizeDeviceParameters,
   AuthorizeDeviceResponse,
-  DeviceCodeAuthorizationTerminated,
+  DeviceCodeAuthorizationTerminatedError,
   RetrieveTokenByAuthorizationCodeParameters,
   type RetrieveTokenByAuthorizationCodeParameters_Redacted,
   RetrieveTokenByAuthorizationCodeResponse,
@@ -68,7 +68,7 @@ export interface Client {
     parameters: RetrieveTokenByDeviceCodeParameters_Redacted
   ) => Effect.Effect<
     typeof RetrieveTokenByDeviceCodeResponseSuccess.Type,
-    DeviceCodeAuthorizationTerminated | WorkOSError.WorkOSCommonError
+    DeviceCodeAuthorizationTerminatedError | WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveUserInfo: (
@@ -231,7 +231,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         pollingRequest,
         Effect.catchTags({
           "RetrieveTokenByDeviceCodeResponse.AuthorizationDeclined": () =>
-            new DeviceCodeAuthorizationTerminated({
+            DeviceCodeAuthorizationTerminatedError.make({
               deviceCode: parameters.deviceCode
             })
         })

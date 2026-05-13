@@ -176,7 +176,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () => new WorkOSError.ResourceNotFoundError()
+          () => WorkOSError.ResourceNotFoundError.make()
         ),
         Effect.map(({ value }) => value)
       )
@@ -235,7 +235,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           /*
            * The absence of a client ID is a special case
            */
-          () => new WorkOSError.UnauthorizedError()
+          () => WorkOSError.UnauthorizedError.make()
         ),
         Effect.map(({ value }) => value)
       )
@@ -260,7 +260,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         ),
         Effect.filterOrFail(
           Option.isSome,
-          () => new WorkOSError.ResourceNotFoundError()
+          () => WorkOSError.ResourceNotFoundError.make()
         ),
         Effect.map(({ value }) => value)
       )
@@ -528,7 +528,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           const client = yield* findClientById(parameters.clientId)
 
           if (client.secret !== Redacted.value(parameters.clientSecret)) {
-            return yield* Effect.fail(new WorkOSError.UnauthorizedError())
+            return yield* Effect.fail(WorkOSError.UnauthorizedError.make())
           }
 
           const accessToken = yield* pipe(

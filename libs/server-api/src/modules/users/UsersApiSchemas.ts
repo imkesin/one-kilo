@@ -35,9 +35,7 @@ class UsersApi_MachineClientUser extends S.TaggedClass<UsersApi_MachineClientUse
     ...ApiAuditFields
   }
 ) {
-  static fromDomain(user: MachineClientUser) {
-    return new UsersApi_MachineClientUser(user)
-  }
+  static fromDomain = (user: MachineClientUser) => UsersApi_MachineClientUser.make(user)
 }
 
 const Api_EmailAddressOnPerson = S.Struct({
@@ -71,9 +69,7 @@ class UsersApi_PersonUser extends S.TaggedClass<UsersApi_PersonUser>(
     ...ApiAuditFields
   }
 ) {
-  static fromDomain(user: PersonUser) {
-    return new UsersApi_PersonUser(user)
-  }
+  static fromDomain = (user: PersonUser) => UsersApi_PersonUser.make(user)
 }
 
 const UsersApi_User = S.Union(
@@ -96,9 +92,7 @@ class UsersApi_Me_Success extends S.TaggedClass<UsersApi_Me_Success>("@one-kilo/
   },
   HttpApiSchema.annotations({ status: 200 })
 ) {
-  static fromDomain(user: User) {
-    return new UsersApi_Me_Success({ user: matchDomainToApi(user) })
-  }
+  static fromDomain = (user: User) => UsersApi_Me_Success.make({ user: matchDomainToApi(user) })
 }
 
 export const UsersApi_MeSchemas = {

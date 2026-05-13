@@ -26,7 +26,7 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/l
 export const dieWithUnexpectedError = (message: string) =>
   pipe(
     Effect.logError(message),
-    Effect.andThen(Effect.die(new UnexpectedError({ message })))
+    Effect.andThen(Effect.die(UnexpectedError.make({ message })))
   )
 
 export const dieWithUnexpectedErrorCallback = <E>(message: string) => (error?: E) => {
@@ -39,7 +39,7 @@ export const dieWithUnexpectedErrorCallback = <E>(message: string) => (error?: E
 
   return pipe(
     Effect.logError(message, error),
-    Effect.andThen(Effect.die(new UnexpectedError({ message, cause: error })))
+    Effect.andThen(Effect.die(UnexpectedError.make({ message, cause: error })))
   )
 }
 
@@ -52,6 +52,6 @@ export const orDieWithUnexpectedError = <A, E, R>(message: string) => (self: Eff
         return error
       }
 
-      return new UnexpectedError({ message, cause: error })
+      return UnexpectedError.make({ message, cause: error })
     })
   )

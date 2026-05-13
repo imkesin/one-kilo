@@ -125,7 +125,7 @@ export const make = (
               pipe(
                 response,
                 HttpClientResponse.schemaBodyJson(AuthenticateWithCodeError.InvalidGrant),
-                Effect.flatMap(() => new WorkOSError.InvalidAuthenticationCodeError({ code: parameters.code })),
+                Effect.flatMap(() => WorkOSError.InvalidAuthenticationCodeError.make({ code: parameters.code })),
                 Effect.catchTags({
                   "ParseError": () => HttpResponseExtensions.unexpectedStatus(response),
                   "ResponseError": () => HttpResponseExtensions.unexpectedStatus(response)
@@ -192,7 +192,7 @@ export const make = (
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
+            "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -210,7 +210,7 @@ export const make = (
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(User),
-            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
+            "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

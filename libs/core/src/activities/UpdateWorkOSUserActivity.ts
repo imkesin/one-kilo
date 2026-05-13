@@ -16,6 +16,21 @@ type UpdateWorkOSUserActivityParameters = {
   }
 }
 
+class AlreadySyncedOutcome extends S.TaggedClass<AlreadySyncedOutcome>()(
+  "UpdateWorkOSUserActivity/AlreadySyncedOutcome",
+  {}
+) {}
+
+class UpdatedOutcome extends S.TaggedClass<UpdatedOutcome>()(
+  "UpdateWorkOSUserActivity/UpdatedOutcome",
+  {}
+) {}
+
+const UpdateWorkOSUserActivityOutcome = S.Union(
+  AlreadySyncedOutcome,
+  UpdatedOutcome
+)
+
 class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>()(
   "UpdateWorkOSUserActivity/TargetedUserNotFoundError",
   {
@@ -35,20 +50,44 @@ class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>()(
   readonly isRetryable = false
 }
 
+class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>()(
+  "UpdateWorkOSUserActivity/WorkOSUserStateDriftError",
+  {
+    actual: S.Struct({
+      firstName: pipe(
+        S.NonEmptyTrimmedString,
+        S.NullOr
+      ),
+      lastName: pipe(
+        S.NonEmptyTrimmedString,
+        S.NullOr
+      )
+    }),
+    expected: S.Struct({
+      firstName: S.NonEmptyTrimmedString,
+      lastName: S.NonEmptyTrimmedString
+    })
+  }
+) {
+  readonly isRetryable = false
+}
+
 const UpdateWorkOSUserActivityError = S.Union(
   TargetedUserNotFoundError,
-  WorkOSUserNotFoundError
+  WorkOSUserNotFoundError,
+  WorkOSUserStateDriftError
 )
 
 export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityParameters) =>
   ActivityExtensions.makeWithDurableRetry({
     name: "@one-kilo/activity/UpdateWorkOSUser",
+    success: UpdateWorkOSUserActivityOutcome,
     error: UpdateWorkOSUserActivityError,
     execute: Effect.gen(function*() {
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
       const usersQueryModule = yield* UsersQueryModule
 
-      const [_user, _workosUser] = yield* Effect.all(
+      const [user, workosUser] = yield* Effect.all(
         [
           pipe(
             usersQueryModule.retrieveUserByWorkOSUserId({ workosUserId: parameters.workosUserId }),
@@ -74,21 +113,43 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
         { concurrency: "unbounded" }
       )
 
-      // If it doesn't match expectations, also fail
-      // If change isn't needed, that's an early success
+      const derivedWorkOSName = yield* pipe(
+        user.person.deriveWorkOSName(),
+        orDieWithUnexpectedError("Failed to derive a WorkOS name from the person")
+      )
+
+      if (
+        derivedWorkOSName.firstName === workosUser.firstName
+        && derivedWorkOSName.lastName === workosUser.lastName
+      ) {
+        return AlreadySyncedOutcome.make()
+      }
+
+      if (
+        parameters.expected.firstName !== workosUser.firstName
+        || parameters.expected.lastName !== workosUser.lastName
+      ) {
+        return yield* WorkOSUserStateDriftError.make({
+          actual: {
+            firstName: workosUser.firstName,
+            lastName: workosUser.lastName
+          },
+          expected: parameters.expected
+        })
+      }
 
       yield* pipe(
         workosGatewayClient.userManagement.updateUser(
           parameters.workosUserId,
           {
-            firstName: "FIX ME",
-            lastName: "FIX ME"
+            firstName: derivedWorkOSName.firstName,
+            lastName: derivedWorkOSName.lastName
           }
         ),
         // This failure needs to be retryable
         orDieWithUnexpectedError("Failed to update WorkOS user")
       )
 
-      // If we got here, succeed clearly
+      return UpdatedOutcome.make()
     })
   })

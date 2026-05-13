@@ -166,7 +166,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
       pipe(
         Effect.try({
           try: () => Jose.decodeJwt(token),
-          catch: (e) => new InvalidTokenError({ cause: e, token })
+          catch: (e) => InvalidTokenError.make({ cause: e, token })
         }),
         Effect.andThen(
           S.decodeUnknown(
@@ -182,7 +182,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
       pipe(
         Effect.try({
           try: () => Jose.decodeJwt(token),
-          catch: (e) => new InvalidTokenError({ cause: e, token })
+          catch: (e) => InvalidTokenError.make({ cause: e, token })
         }),
         Effect.andThen(S.decodeUnknown(DecodedOAuthIdToken))
       ),
@@ -196,10 +196,10 @@ export const make = (jwks: JWKsAsEffect): Client => {
             try: () => Jose.jwtVerify(token, _, { currentDate: now }),
             catch: (e) => {
               if (e instanceof Jose.errors.JWTExpired) {
-                return new ExpiredTokenError({ cause: e, token })
+                return ExpiredTokenError.make({ cause: e, token })
               }
 
-              return new InvalidTokenError({ cause: e, token })
+              return InvalidTokenError.make({ cause: e, token })
             }
           })
         ),
@@ -225,10 +225,10 @@ export const make = (jwks: JWKsAsEffect): Client => {
             try: () => Jose.jwtVerify(token, _, { currentDate: now }),
             catch: (e) => {
               if (e instanceof Jose.errors.JWTExpired) {
-                return new ExpiredTokenError({ cause: e, token })
+                return ExpiredTokenError.make({ cause: e, token })
               }
 
-              return new InvalidTokenError({ cause: e, token })
+              return InvalidTokenError.make({ cause: e, token })
             }
           })
         ),

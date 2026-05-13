@@ -83,7 +83,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(Organization),
-            "404": () => Effect.fail(new WorkOSError.ResourceNotFoundError()),
+            "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

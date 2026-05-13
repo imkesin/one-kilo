@@ -24,8 +24,8 @@ export class ApiClient extends Context.Tag(
 export const makeNotImplemented = (): Service => {
   const failWithNotImplementedError = (methodName: string) => () =>
     Effect.fail(
-      new WorkOSCommonError({
-        reason: new UnexpectedError({
+      WorkOSCommonError.make({
+        reason: UnexpectedError.make({
           message: `\`${methodName}\` is intentionally not implemented`
         })
       })

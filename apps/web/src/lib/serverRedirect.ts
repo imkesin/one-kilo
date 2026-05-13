@@ -16,7 +16,7 @@ export const serverRedirect = ({ url }: { url: string }) =>
           return RedirectError.fromNextRedirectError(error)
         }
 
-        return new UnexpectedError({ message: "Failed to redirect", cause: error })
+        return UnexpectedError.make({ message: "Failed to redirect", cause: error })
       }
     }),
     Effect.catchTag("UnexpectedError", Effect.die)

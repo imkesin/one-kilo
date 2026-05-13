@@ -15,8 +15,8 @@ export const encodeCatching = <
       "ParseError",
       (error) =>
         Effect.fail(
-          new WorkOSError.WorkOSCommonError({
-            reason: new WorkOSError.UnexpectedError({
+          WorkOSError.WorkOSCommonError.make({
+            reason: WorkOSError.UnexpectedError.make({
               cause: error,
               message: "Failed to encode input"
             })

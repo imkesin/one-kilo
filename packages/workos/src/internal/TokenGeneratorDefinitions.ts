@@ -61,7 +61,7 @@ export const makeTest = (
               .setIssuedAt(issuedAt)
               .setJti(tokenId)
               .sign(options.privateKey),
-          catch: (e) => new GenerateTokenError({ cause: e })
+          catch: (e) => GenerateTokenError.make({ cause: e })
         }),
         Effect.map(AccessToken.make)
       )
@@ -97,7 +97,7 @@ export const makeTest = (
               .setIssuedAt(issuedAt)
               .setJti(tokenId)
               .sign(options.privateKey),
-          catch: (e) => new GenerateTokenError({ cause: e })
+          catch: (e) => GenerateTokenError.make({ cause: e })
         }),
         Effect.map(AccessToken.make)
       )

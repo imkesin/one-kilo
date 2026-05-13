@@ -40,7 +40,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
               return DynamicServerError.fromNextDynamicServerError(error)
             }
 
-            return new UnexpectedError({ message: "Failed to retrieve cookies", cause: error })
+            return UnexpectedError.make({ message: "Failed to retrieve cookies", cause: error })
           }
         }),
         Effect.catchTag("UnexpectedError", Effect.die)
@@ -77,14 +77,14 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
 
         if (Predicate.isUndefined(cookie)) {
-          return yield* Effect.fail(new Authentication_ContextCookieNotFoundError())
+          return yield* Authentication_ContextCookieNotFoundError.make()
         }
 
         const decodedAuthenticationContext = yield* pipe(
           cookie.value,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
-          Effect.mapError(() => new Authentication_ContextCookieNotFoundError())
+          Effect.mapError(Authentication_ContextCookieNotFoundError.make)
         )
 
         return decodedAuthenticationContext
@@ -112,7 +112,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         })
 
       const currentAuthenticationContextEffect = withValidAuthenticationContextOr(
-        () => Effect.fail(new Authentication_ContextExpiredError())
+        () => Effect.fail(Authentication_ContextExpiredError.make())
       )
 
       const refreshedAuthenticationContextCache = yield* Cache.makeWith({

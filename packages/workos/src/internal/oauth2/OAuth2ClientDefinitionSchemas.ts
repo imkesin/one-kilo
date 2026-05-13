@@ -308,14 +308,14 @@ export class RetrieveTokenByDeviceCodeResponseAuthorizationDeclined
     }
   )
 {}
-export class DeviceCodeAuthorizationTerminated
-  extends S.TaggedError<DeviceCodeAuthorizationTerminated>("@effect/auth-workos/DeviceCodeAuthorizationTerminated")(
-    "DeviceCodeAuthorizationTerminated",
-    {
-      deviceCode: S.NonEmptyTrimmedString
-    }
-  )
-{}
+export class DeviceCodeAuthorizationTerminatedError extends S.TaggedError<DeviceCodeAuthorizationTerminatedError>(
+  "@effect/auth-workos/DeviceCodeAuthorizationTerminatedError"
+)(
+  "DeviceCodeAuthorizationTerminatedError",
+  {
+    deviceCode: S.NonEmptyTrimmedString
+  }
+) {}
 
 export class RetrieveUserInfoResponse extends S.Class<RetrieveUserInfoResponse>("RetrieveUserInfoResponse")({
   ...OAuthUserInfoFields

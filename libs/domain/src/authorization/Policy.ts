@@ -28,8 +28,8 @@ export const policy = <E, R>(
         ? Effect.void
         : Effect.fail(
           message !== undefined
-            ? new PermissionsError({ message })
-            : new PermissionsError()
+            ? PermissionsError.make({ message })
+            : PermissionsError.make()
         )))
 
 const allPermissions = policy((actor) => Effect.succeed(actor.permissions.has("*")))

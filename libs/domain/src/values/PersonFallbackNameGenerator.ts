@@ -36,7 +36,7 @@ export class PersonFallbackNameGenerator extends Effect.Service<PersonFallbackNa
       const animalAdjectiveClusters = Record.values(ANIMAL_ADJECTIVE_LOOKUP)
 
       if (!Arr.isNonEmptyReadonlyArray(animalAdjectiveClusters)) {
-        throw new UnexpectedError({ message: "No animal adjective clusters found" })
+        throw UnexpectedError.make({ message: "No animal adjective clusters found" })
       }
 
       const generate = Effect.gen(function*() {

@@ -12,14 +12,14 @@ export const catchNetworkErrors = <A, E>(
     effect,
     Effect.catchTag("RequestError", (e) =>
       Effect.fail(
-        new WorkOSError.WorkOSCommonError({
-          reason: new WorkOSError.HttpRequestError({ cause: e })
+        WorkOSError.WorkOSCommonError.make({
+          reason: WorkOSError.HttpRequestError.make({ cause: e })
         })
       )),
     Effect.catchTag("ResponseError", (e) =>
       Effect.fail(
-        new WorkOSError.WorkOSCommonError({
-          reason: new WorkOSError.HttpResponseError({ cause: e })
+        WorkOSError.WorkOSCommonError.make({
+          reason: WorkOSError.HttpResponseError.make({ cause: e })
         })
       ))
   )
@@ -31,15 +31,15 @@ export const decodeExpected =
       HttpClientResponse.schemaBodyJson(schema),
       Effect.catchTags({
         "ParseError": (e) =>
-          new WorkOSError.WorkOSCommonError({
-            reason: new WorkOSError.UnexpectedError({
+          WorkOSError.WorkOSCommonError.make({
+            reason: WorkOSError.UnexpectedError.make({
               cause: e,
               message: "Failed to decode response body"
             })
           }),
         "ResponseError": (e) =>
-          new WorkOSError.WorkOSCommonError({
-            reason: new WorkOSError.HttpResponseError({ cause: e })
+          WorkOSError.WorkOSCommonError.make({
+            reason: WorkOSError.HttpResponseError.make({ cause: e })
           })
       })
     )
@@ -49,8 +49,8 @@ export const unexpectedStatus = (response: HttpClientResponse.HttpClientResponse
     Effect.orElseSucceed(response.json, () => "Unexpected status code"),
     (description) =>
       Effect.fail(
-        new WorkOSError.WorkOSCommonError({
-          reason: new WorkOSError.HttpResponseError({
+        WorkOSError.WorkOSCommonError.make({
+          reason: WorkOSError.HttpResponseError.make({
             cause: new HttpClientError.ResponseError({
               request: response.request,
               response,
