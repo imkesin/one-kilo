@@ -129,7 +129,6 @@
       "uuidv7"
     ],
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "dprint.dprint",
     "editor.codeActionsOnSave": {
       "source.fixAll.oxc": "explicit"
     },
@@ -154,6 +153,9 @@
       }
     ],
     "js/ts.preferences.importModuleSpecifierEnding": "js",
-    "js/ts.tsdk.path": "root/node_modules/typescript/lib"
+    "js/ts.tsdk.path": "./node_modules/typescript/lib",
+    "[typescript]": {
+      "editor.defaultFormatter": "dprint.dprint"
+    },
   }
 }

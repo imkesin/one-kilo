@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactNode } from "react"
+import { Children, type PropsWithChildren, type ReactNode } from "react"
 import { cq, grid, hstack, vstack } from "~/generated/styled-system/patterns"
 
 function HomeHeaderBlueprint({ children }: PropsWithChildren) {
@@ -136,7 +136,9 @@ export function HomeLayout({ header, hero, sections, footer }: HomeLayoutProps) 
     >
       <HomeHeaderBlueprint>{header}</HomeHeaderBlueprint>
       <HomeHeroBlueprint>{hero}</HomeHeroBlueprint>
-      {sections.map((section, index) => <HomeSectionBlueprint key={index}>{section}</HomeSectionBlueprint>)}
+      {Children.toArray(sections).map((section) => (
+        <HomeSectionBlueprint key={(section as { key: string }).key}>{section}</HomeSectionBlueprint>
+      ))}
       <HomeFooterBlueprint>{footer}</HomeFooterBlueprint>
     </div>
   )
