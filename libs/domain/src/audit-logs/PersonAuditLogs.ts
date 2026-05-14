@@ -13,25 +13,21 @@ const PersonAuditLogBuilder = AuditBuilder.make({
   type: "Person"
 })
 
-export class PersonUpdatedAuditLog
-  extends S.Class<PersonUpdatedAuditLog>("@one-kilo/domain/PersonUpdatedAuditLog")(
-    PersonAuditLogBuilder.AuditWithContext({
-      type: "Person.Updated",
-      context: pipe(
-        S.Struct({
-          fields: S.Struct({
-            preferredName: S.optionalWith(PreferredName, { exact: true }),
-            fullName: S.optionalWith(FullName, { exact: true })
-          })
-        })
-      )
-    }),
-    {
-      title: "Person Updated Audit Log",
-      description: "A log marking an update to a person's mutable fields"
-    }
-  )
-{
+export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-kilo/domain/PersonUpdatedAuditLog")(
+  PersonAuditLogBuilder.AuditWithContext({
+    type: "Person.Updated",
+    context: S.Struct({
+      fields: S.Struct({
+        preferredName: S.optionalWith(PreferredName, { exact: true }),
+        fullName: S.optionalWith(FullName, { exact: true })
+      })
+    })
+  }),
+  {
+    title: "Person Updated Audit Log",
+    description: "A log marking an update to a person's mutable fields"
+  }
+) {
   static build = Effect.fnUntraced(
     function*(
       parameters: Omit<
