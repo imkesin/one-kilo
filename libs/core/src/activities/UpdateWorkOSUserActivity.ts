@@ -1,6 +1,7 @@
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
+import * as WorkOSError from "@effect/auth-workos/domain/Errors"
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import { dieWithUnexpectedErrorCallback, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
@@ -40,6 +41,18 @@ class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>
   readonly isRetryable = false
 }
 
+class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>()(
+  "UpdateWorkOSUserActivity/WorkOSOperationError",
+  {
+    operation: S.Literal("RetrieveUser", "UpdateUser"),
+    cause: WorkOSError.WorkOSCommonError
+  }
+) {
+  get isRetryable() {
+    return this.cause.isTransient
+  }
+}
+
 class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>()(
   "UpdateWorkOSUserActivity/WorkOSUserNotFoundError",
   {
@@ -74,6 +87,7 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
 
 const UpdateWorkOSUserActivityError = S.Union(
   TargetedUserNotFoundError,
+  WorkOSOperationError,
   WorkOSUserNotFoundError,
   WorkOSUserStateDriftError
 )
@@ -106,7 +120,11 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
                   cause: e,
                   workosUserId: parameters.workosUserId
                 }),
-              "WorkOSCommonError": dieWithUnexpectedErrorCallback("The WorkOS user could not be retrieved")
+              "WorkOSCommonError": (e) =>
+                WorkOSOperationError.make({
+                  cause: e,
+                  operation: "RetrieveUser"
+                })
             })
           )
         ],
@@ -146,8 +164,18 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
             lastName: derivedWorkOSName.lastName
           }
         ),
-        // This failure needs to be retryable
-        orDieWithUnexpectedError("Failed to update WorkOS user")
+        Effect.catchTags({
+          "ResourceNotFoundError": (e) =>
+            WorkOSUserNotFoundError.make({
+              cause: e,
+              workosUserId: parameters.workosUserId
+            }),
+          "WorkOSCommonError": (e) =>
+            WorkOSOperationError.make({
+              cause: e,
+              operation: "UpdateUser"
+            })
+        })
       )
 
       return UpdatedOutcome.make()

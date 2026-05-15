@@ -11,18 +11,30 @@ export class HttpRequestError extends S.TaggedError<HttpRequestError>(
 )(
   "HttpRequestError",
   {
-    cause: S.Defect
+    reason: S.Literal("Encode", "InvalidUrl", "Transport"),
+    description: S.optional(S.String)
   }
-) {}
+) {
+  get isTransient() {
+    return this.reason === "Transport"
+  }
+}
 
 export class HttpResponseError extends S.TaggedError<HttpResponseError>(
   "@effect/auth-workos/HttpResponseError"
 )(
   "HttpResponseError",
   {
-    cause: S.Defect
+    reason: S.Literal("Decode", "EmptyBody", "StatusCode"),
+    status: S.Int,
+    description: S.optional(S.String)
   }
-) {}
+) {
+  get isTransient() {
+    return this.reason === "StatusCode"
+      && (this.status === 429 || this.status >= 500)
+  }
+}
 
 export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/auth-workos/UnexpectedError")(
   "UnexpectedError",
@@ -33,7 +45,9 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/aut
     ),
     message: S.NonEmptyTrimmedString
   }
-) {}
+) {
+  readonly isTransient = false
+}
 
 const WorkOSCommonErrorReason = S.Union(
   HttpRequestError,
@@ -48,6 +62,10 @@ export class WorkOSCommonError extends S.TaggedError<WorkOSCommonError>("@effect
   }
 ) {
   readonly [TypeId] = TypeId
+
+  get isTransient() {
+    return this.reason.isTransient
+  }
 }
 
 // === Specific Errors ===
