@@ -1,10 +1,13 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as Workflow from "@effect/workflow/Workflow"
+import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
+const ID_PREFIX = "@one-kilo/workflow/PushWorkOSUserChangeWorkflow"
+
 export class PushWorkOSUserChangeSuccess extends S.TaggedClass<PushWorkOSUserChangeSuccess>(
-  "@one-kilo/workflow/PushWorkOSUserChange/Success"
+  `${ID_PREFIX}/Success`
 )(
   "PushWorkOSUserChangeSuccess",
   {
@@ -17,7 +20,7 @@ export class PushWorkOSUserChangeSuccess extends S.TaggedClass<PushWorkOSUserCha
 ) {}
 
 export class PushWorkOSUserChangeError extends S.TaggedError<PushWorkOSUserChangeError>(
-  "@one-kilo/workflow/PushWorkOSUserChange/Error"
+  `${ID_PREFIX}/Error`
 )(
   "PushWorkOSUserChangeError",
   {
@@ -29,10 +32,16 @@ export class PushWorkOSUserChangeError extends S.TaggedError<PushWorkOSUserChang
   }
 ) {}
 
-export const PushWorkOSUserChange = Workflow.make({
-  name: "@one-kilo/workflow/PushWorkOSUserChange",
+export const PushWorkOSUserChangeWorkflow = Workflow.make({
+  name: "@one-kilo/workflow/PushWorkOSUserChangeWorkflow",
   payload: {
-    workosUserId: WorkOSIds.UserId,
+    causedByAuditLogId: pipe(
+      AuditLogId,
+      S.annotations({
+        description:
+          "The identifier of the `PersonUpdatedAuditLog` row this sync is reconciling. Used as the idempotency key — one workflow run per audit log."
+      })
+    ),
     expected: pipe(
       S.Struct({
         firstName: S.NonEmptyTrimmedString,
@@ -41,10 +50,11 @@ export const PushWorkOSUserChange = Workflow.make({
       S.annotations({
         description: "The expected state of the WorkOS user before applying changes."
       })
-    )
+    ),
+    workosUserId: WorkOSIds.UserId
   },
   success: PushWorkOSUserChangeSuccess,
   error: PushWorkOSUserChangeError,
-  idempotencyKey: ({ workosUserId }) => workosUserId
+  idempotencyKey: ({ causedByAuditLogId }) => causedByAuditLogId
 })
   .annotate(Workflow.SuspendOnFailure, true)

@@ -48,7 +48,7 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
             context: { fields }
           })
 
-          yield* auditLogsRepository.insert(auditLog.withEncodedContext())
+          return yield* auditLogsRepository.insert(auditLog.withEncodedContext())
         }
       )
 

@@ -2,9 +2,9 @@ import { updateWorkOSUserActivity } from "@one-kilo/core/activities/UpdateWorkOS
 import { UsersQueryModule } from "@one-kilo/core/modules/users/UsersQueryModule"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
 import {
-  PushWorkOSUserChange,
   PushWorkOSUserChangeError,
-  PushWorkOSUserChangeSuccess
+  PushWorkOSUserChangeSuccess,
+  PushWorkOSUserChangeWorkflow
 } from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -12,9 +12,9 @@ import * as Layer from "effect/Layer"
 import * as Match from "effect/Match"
 import * as WorkflowExtensions from "./WorkflowExtensions.ts"
 
-export const PushWorkOSUserChangeLive = pipe(
-  PushWorkOSUserChange.toLayer(
-    Effect.fn("PushWorkOSUserChange.execute")(
+export const PushWorkOSUserChangeWorkflowLive = pipe(
+  PushWorkOSUserChangeWorkflow.toLayer(
+    Effect.fn("PushWorkOSUserChangeWorkflow.execute")(
       function*(payload) {
         const activityOutcome = yield* pipe(
           updateWorkOSUserActivity({
