@@ -1,24 +1,72 @@
 import { updateWorkOSUserActivity } from "@one-kilo/core/activities/UpdateWorkOSUserActivity"
 import { UsersQueryModule } from "@one-kilo/core/modules/users/UsersQueryModule"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
-import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import { PushWorkOSUserChange } from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
+import {
+  PushWorkOSUserChange,
+  PushWorkOSUserChangeError,
+  PushWorkOSUserChangeSuccess
+} from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
+import * as Match from "effect/Match"
 import * as WorkflowExtensions from "./WorkflowExtensions.ts"
 
 export const PushWorkOSUserChangeLive = pipe(
   PushWorkOSUserChange.toLayer(
     Effect.fn("PushWorkOSUserChange.execute")(
       function*(payload) {
-        const _outcome = yield* pipe(
+        const activityOutcome = yield* pipe(
           updateWorkOSUserActivity({
             workosUserId: payload.workosUserId,
             expected: payload.expected
           }),
-          orDieWithUnexpectedError("[TODO] No proper handling yet")
+          Effect.catchTag(
+            "WorkOSUserStateDriftError",
+            /*
+             * Drift means another actor (the WorkOS dashboard, another sync, etc.) mutated the
+             * user since this workflow was scheduled. Abort rather than clobber their change —
+             * the inbound `user.updated` webhook will reconcile our local state back to WorkOS.
+             */
+            () => Effect.succeed({ _tag: "DriftDetected" as const })
+          ),
+          Effect.catchTags({
+            "RetryBudgetExhaustedError": (e) =>
+              PushWorkOSUserChangeError.make({
+                cause: e,
+                reason: "RetryExhausted"
+              }),
+
+            "TargetedUserNotFoundError": (e) =>
+              PushWorkOSUserChangeError.make({
+                cause: e,
+                reason: "Unexpected"
+              }),
+
+            "WorkOSUserNotFoundError": (e) =>
+              PushWorkOSUserChangeError.make({
+                cause: e,
+                reason: "Unexpected"
+              }),
+
+            "WorkOSOperationError": (e) =>
+              PushWorkOSUserChangeError.make({
+                cause: e,
+                reason: "Unexpected"
+              })
+          })
         )
+
+        return PushWorkOSUserChangeSuccess.make({
+          outcome: Match.valueTags(
+            activityOutcome,
+            {
+              "AlreadySyncedOutcome": () => "AlreadySynced" as const,
+              "DriftDetected": () => "DriftDetected" as const,
+              "UpdatedOutcome": () => "Updated" as const
+            }
+          )
+        })
       },
       WorkflowExtensions.withRecordSuspensionOnFailure
     )

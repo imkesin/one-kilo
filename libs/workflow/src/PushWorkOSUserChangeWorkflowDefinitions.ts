@@ -3,6 +3,32 @@ import * as Workflow from "@effect/workflow/Workflow"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
+export class PushWorkOSUserChangeSuccess extends S.TaggedClass<PushWorkOSUserChangeSuccess>(
+  "@one-kilo/workflow/PushWorkOSUserChange/Success"
+)(
+  "PushWorkOSUserChangeSuccess",
+  {
+    outcome: S.Literal(
+      "AlreadySynced",
+      "DriftDetected",
+      "Updated"
+    )
+  }
+) {}
+
+export class PushWorkOSUserChangeError extends S.TaggedError<PushWorkOSUserChangeError>(
+  "@one-kilo/workflow/PushWorkOSUserChange/Error"
+)(
+  "PushWorkOSUserChangeError",
+  {
+    reason: S.Literal(
+      "RetryExhausted",
+      "Unexpected"
+    ),
+    cause: S.Defect
+  }
+) {}
+
 export const PushWorkOSUserChange = Workflow.make({
   name: "@one-kilo/workflow/PushWorkOSUserChange",
   payload: {
@@ -17,6 +43,8 @@ export const PushWorkOSUserChange = Workflow.make({
       })
     )
   },
+  success: PushWorkOSUserChangeSuccess,
+  error: PushWorkOSUserChangeError,
   idempotencyKey: ({ workosUserId }) => workosUserId
 })
   .annotate(Workflow.SuspendOnFailure, true)

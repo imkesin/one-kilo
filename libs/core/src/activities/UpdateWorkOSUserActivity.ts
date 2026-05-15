@@ -9,6 +9,8 @@ import * as S from "effect/Schema"
 import { UsersQueryModule } from "../modules/users/UsersQueryModule.ts"
 import * as ActivityExtensions from "./ActivityExtensions.ts"
 
+const ID_PREFIX = "@one-kilo/core/UpdateWorkOSUserActivity"
+
 type UpdateWorkOSUserActivityParameters = {
   readonly workosUserId: WorkOSIds.UserId
   readonly expected: {
@@ -17,13 +19,17 @@ type UpdateWorkOSUserActivityParameters = {
   }
 }
 
-class AlreadySyncedOutcome extends S.TaggedClass<AlreadySyncedOutcome>()(
-  "UpdateWorkOSUserActivity/AlreadySyncedOutcome",
+class AlreadySyncedOutcome extends S.TaggedClass<AlreadySyncedOutcome>(
+  `${ID_PREFIX}/AlreadySyncedOutcome`
+)(
+  "AlreadySyncedOutcome",
   {}
 ) {}
 
-class UpdatedOutcome extends S.TaggedClass<UpdatedOutcome>()(
-  "UpdateWorkOSUserActivity/UpdatedOutcome",
+class UpdatedOutcome extends S.TaggedClass<UpdatedOutcome>(
+  `${ID_PREFIX}/UpdatedOutcome`
+)(
+  "UpdatedOutcome",
   {}
 ) {}
 
@@ -32,8 +38,10 @@ const UpdateWorkOSUserActivityOutcome = S.Union(
   UpdatedOutcome
 )
 
-class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>()(
-  "UpdateWorkOSUserActivity/TargetedUserNotFoundError",
+class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>(
+  `${ID_PREFIX}/TargetedUserNotFoundError`
+)(
+  "TargetedUserNotFoundError",
   {
     workosUserId: WorkOSIds.UserId
   }
@@ -41,8 +49,10 @@ class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>
   readonly isRetryable = false
 }
 
-class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>()(
-  "UpdateWorkOSUserActivity/WorkOSOperationError",
+class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>(
+  `${ID_PREFIX}/WorkOSOperationError`
+)(
+  "WorkOSOperationError",
   {
     operation: S.Literal("RetrieveUser", "UpdateUser"),
     cause: WorkOSError.WorkOSCommonError
@@ -53,8 +63,10 @@ class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>()(
   }
 }
 
-class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>()(
-  "UpdateWorkOSUserActivity/WorkOSUserNotFoundError",
+class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>(
+  `${ID_PREFIX}/WorkOSUserNotFoundError`
+)(
+  "WorkOSUserNotFoundError",
   {
     cause: S.Defect,
     workosUserId: WorkOSIds.UserId
@@ -63,8 +75,10 @@ class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>()(
   readonly isRetryable = false
 }
 
-class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>()(
-  "UpdateWorkOSUserActivity/WorkOSUserStateDriftError",
+class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>(
+  `${ID_PREFIX}/WorkOSUserStateDriftError`
+)(
+  "WorkOSUserStateDriftError",
   {
     actual: S.Struct({
       firstName: pipe(

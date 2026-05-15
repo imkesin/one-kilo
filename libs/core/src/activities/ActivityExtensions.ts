@@ -16,8 +16,10 @@ const MAX_DURATION = Duration.hours(1)
 
 const MAX_ATTEMPTS = 20
 
-export class RetryBudgetExhausted extends S.TaggedError<RetryBudgetExhausted>()(
-  "@one-kilo/activity/RetryBudgetExhausted",
+export class RetryBudgetExhaustedError extends S.TaggedError<RetryBudgetExhaustedError>(
+  "@one-kilo/core/ActivityExtensions/RetryBudgetExhaustedError"
+)(
+  "RetryBudgetExhaustedError",
   {
     activityName: S.NonEmptyTrimmedString,
     attemptCount: S.Int,
@@ -76,7 +78,7 @@ const retryDurable = <A, E, R>(options: DurableRetryOptions<E>) => (effect: Effe
       }
 
       if (attempt >= MAX_ATTEMPTS) {
-        return yield* RetryBudgetExhausted.make({
+        return yield* RetryBudgetExhaustedError.make({
           activityName: options.name,
           attemptCount: attempt,
           latestError: Option.getOrUndefined(failure)
@@ -113,7 +115,7 @@ export const makeWithDurableRetry = <
   }
 ): Activity.Activity<
   Success,
-  S.Union<[Error, typeof RetryBudgetExhausted]>,
+  S.Union<[Error, typeof RetryBudgetExhaustedError]>,
   Exclude<
     R,
     Activity.CurrentAttempt | WorkflowEngine | WorkflowInstance | Scope.Scope
@@ -122,7 +124,7 @@ export const makeWithDurableRetry = <
   return Activity.make({
     name: options.name,
     success: options.success,
-    error: S.Union(options.error, RetryBudgetExhausted),
+    error: S.Union(options.error, RetryBudgetExhaustedError),
     execute: pipe(
       options.execute,
       retryDurable({

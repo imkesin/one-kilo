@@ -77,14 +77,6 @@ const UsersApi_User = S.Union(
   UsersApi_MachineClientUser
 )
 
-const matchDomainToApi = pipe(
-  Match.type<User>(),
-  Match.tagsExhaustive({
-    "User:MachineClient": (user) => UsersApi_MachineClientUser.fromDomain(user),
-    "User:Person": (user) => UsersApi_PersonUser.fromDomain(user)
-  })
-)
-
 class UsersApi_Me_Success extends S.TaggedClass<UsersApi_Me_Success>("@one-kilo/server-api/Me:Success")(
   "Me:Success",
   {
@@ -92,7 +84,16 @@ class UsersApi_Me_Success extends S.TaggedClass<UsersApi_Me_Success>("@one-kilo/
   },
   HttpApiSchema.annotations({ status: 200 })
 ) {
-  static fromDomain = (user: User) => UsersApi_Me_Success.make({ user: matchDomainToApi(user) })
+  static fromDomain = (user: User) =>
+    UsersApi_Me_Success.make({
+      user: Match.valueTags(
+        user,
+        {
+          "User:MachineClient": (user) => UsersApi_MachineClientUser.fromDomain(user),
+          "User:Person": (user) => UsersApi_PersonUser.fromDomain(user)
+        }
+      )
+    })
 }
 
 export const UsersApi_MeSchemas = {

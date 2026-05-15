@@ -22,4 +22,5 @@ const recordSuspension = Effect.fn(
 /**
  * If the Workflows exits with a failure (includes `die`) + suspends, save a record
  */
-export const withRecordSuspensionOnFailure = Workflow.withCompensation(recordSuspension)
+export const withRecordSuspensionOnFailure = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  Workflow.withCompensation(effect, (_value: A) => recordSuspension())

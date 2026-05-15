@@ -6,27 +6,6 @@ import * as Match from "effect/Match"
 import type * as S from "effect/Schema"
 import * as WorkOSError from "../../domain/Errors.ts"
 
-const matchHttpClientNetworkError = pipe(
-  Match.type<HttpClientError.HttpClientError>(),
-  Match.tagsExhaustive({
-    "RequestError": (e) =>
-      WorkOSError.HttpRequestError.make({
-        reason: e.reason,
-        description: e.description
-      }),
-    /*
-     * `HttpClient.execute` should never surface a `ResponseError` (those originate from response-body decoding
-     * helpers, handled by `decodeExpected` / `unexpectedStatus`). Kept here to satisfy exhaustiveness; reaching this
-     * branch is truly unexpected.
-     */
-    "ResponseError": (e) =>
-      WorkOSError.UnexpectedError.make({
-        cause: e,
-        message: "Encountered an unexpected response error when executing a network request"
-      })
-  })
-)
-
 /**
  * Intended to handle network (and general outbound) errors from `HttpClient.execute`
  */
@@ -38,7 +17,25 @@ export const catchNetworkErrors = <A, E>(
     HttpClientError.isHttpClientError,
     (e) =>
       Effect.fail(
-        WorkOSError.WorkOSCommonError.make({ reason: matchHttpClientNetworkError(e) })
+        WorkOSError.WorkOSCommonError.make({
+          reason: Match.valueTags(e, {
+            "RequestError": (e) =>
+              WorkOSError.HttpRequestError.make({
+                reason: e.reason,
+                description: e.description
+              }),
+            /*
+             * `HttpClient.execute` should never surface a `ResponseError` (those originate from response-body decoding
+             * helpers, handled by `decodeExpected`/`unexpectedStatus`). Kept here to satisfy exhaustiveness; reaching
+             * this branch is truly unexpected.
+             */
+            "ResponseError": (e) =>
+              WorkOSError.UnexpectedError.make({
+                cause: e,
+                message: "Encountered an unexpected response error when executing a network request"
+              })
+          })
+        })
       )
   )
 
