@@ -97,6 +97,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
     name: "@one-kilo/activity/UpdateWorkOSUser",
     success: UpdateWorkOSUserActivityOutcome,
     error: UpdateWorkOSUserActivityError,
+    while: (e) => e.isRetryable,
     execute: Effect.gen(function*() {
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
       const usersQueryModule = yield* UsersQueryModule

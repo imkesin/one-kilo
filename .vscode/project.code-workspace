@@ -172,7 +172,6 @@
     },
     "[javascriptreact]": {
       "editor.defaultFormatter": "dprint.dprint"
-    }
-
+    },
   }
 }
