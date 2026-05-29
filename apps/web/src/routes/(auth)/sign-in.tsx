@@ -1,14 +1,18 @@
 import * as WorkOSPublicApiClient from "@effect/auth-workos/PublicApiClient"
+import { createFileRoute } from "@tanstack/react-router"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
-import type { NextRequest } from "next/server"
+import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
-import { serverRedirect } from "~/lib/serverRedirect"
+import { RedirectError } from "~/lib/RedirectError"
 
-const signInRoute = Effect.gen(function*() {
+const signInEffect = Effect.gen(function*() {
   const workosPublicClient = yield* WorkOSPublicApiClient.PublicApiClient
 
-  const port = yield* Config.number("PORT")
+  const port = yield* pipe(
+    Config.number("PORT"),
+    Config.withDefault(11000)
+  )
 
   const authUrl = yield* workosPublicClient.userManagement.buildAuthorizationUrl({
     screenHint: "sign-in",
@@ -18,14 +22,13 @@ const signInRoute = Effect.gen(function*() {
 
   yield* Effect.log(`Redirecting to Auth URL: ${authUrl}`)
 
-  return yield* serverRedirect({ url: authUrl })
+  return yield* RedirectError.make({ href: authUrl, statusCode: 302 })
 })
 
-export async function GET(request: NextRequest) {
-  console.log("Going to sign-in", request.url)
-
-  return runWithWebServerRuntime(
-    signInRoute,
-    { signal: request.signal }
-  )
-}
+export const Route = createFileRoute("/(auth)/sign-in")({
+  server: {
+    handlers: {
+      GET: (): Promise<Response> => runWithWebServerRuntime(signInEffect)
+    }
+  }
+})

@@ -1,5 +1,3 @@
-"use client"
-
 import { Button as AriaKitButton } from "@ariakit/react"
 import { LoaderCircle } from "lucide-react"
 import { type ComponentPropsWithoutRef, forwardRef, type PropsWithChildren } from "react"

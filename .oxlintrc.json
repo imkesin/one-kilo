@@ -74,7 +74,6 @@
   "ignorePatterns": [
     "**/dist",
     "**/generated",
-    "**/.next",
     "**/.turbo",
     "**/node_modules",
     "**/*.tsbuildinfo"

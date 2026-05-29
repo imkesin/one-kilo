@@ -2,7 +2,7 @@ import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import * as Runtime from "effect/Runtime"
-import { isDynamicServerError, isRedirectError } from "~/lib/errors"
+import { isRedirectError } from "~/lib/RedirectError"
 import { getManagedWebServerRuntime } from "./getManagedServerRuntime"
 import type { WebServerLayerSuccess } from "./webServerLayer"
 
@@ -29,10 +29,7 @@ export async function runWithWebServerRuntime<
     const { error } = cause
 
     if (isRedirectError(error)) {
-      throw error._nextCause
-    }
-    if (isDynamicServerError(error)) {
-      throw error._nextCause
+      throw error.redirect
     }
 
     throw cause.error

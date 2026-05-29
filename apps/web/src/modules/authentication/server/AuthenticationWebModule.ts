@@ -1,11 +1,8 @@
 import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
-import {
-  dieWithUnexpectedError,
-  dieWithUnexpectedErrorCallback,
-  UnexpectedError
-} from "@one-kilo/lib/errors/UnexpectedError"
+import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
+import { getCookie, setCookie } from "@tanstack/react-start/server"
 import * as Cache from "effect/Cache"
 import * as Clock from "effect/Clock"
 import * as Effect from "effect/Effect"
@@ -15,10 +12,7 @@ import * as Predicate from "effect/Predicate"
 import * as RcMap from "effect/RcMap"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
-import { isDynamicServerError as isNextDynamicServerError } from "next/dist/client/components/hooks-server-context"
-import { cookies } from "next/headers"
 import { AuthenticationServerApiClient } from "~/infra/api/server/ServerApiClients"
-import { DynamicServerError } from "~/lib/errors"
 import { Authentication_ContextCookieNotFoundError, Authentication_ContextExpiredError } from "./AuthenticationErrors"
 
 const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
@@ -32,23 +26,8 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
     scoped: Effect.gen(function*() {
       const authenticationClient = yield* AuthenticationServerApiClient
 
-      const cookiesStoreEffect = pipe(
-        Effect.tryPromise({
-          try: () => cookies(),
-          catch: (error) => {
-            if (isNextDynamicServerError(error)) {
-              return DynamicServerError.fromNextDynamicServerError(error)
-            }
-
-            return UnexpectedError.make({ message: "Failed to retrieve cookies", cause: error })
-          }
-        }),
-        Effect.catchTag("UnexpectedError", Effect.die)
-      )
-
       const setAuthenticationContext = Effect.fn(
         function*(authenticationContext: AuthenticationContext) {
-          const cookieStore = yield* cookiesStoreEffect
           const encodedAuthenticationContext = yield* pipe(
             authenticationContext,
             S.encode(AuthenticationContextFromJsonString),
@@ -58,7 +37,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
             )
           )
 
-          cookieStore.set(
+          setCookie(
             HTTP_ONLY_COOKIE_NAME,
             encodedAuthenticationContext,
             {
@@ -73,15 +52,14 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
       )
 
       const rawAuthenticationContextEffect = Effect.gen(function*() {
-        const cookieStore = yield* cookiesStoreEffect
-        const cookie = cookieStore.get(HTTP_ONLY_COOKIE_NAME)
+        const cookie = getCookie(HTTP_ONLY_COOKIE_NAME)
 
         if (Predicate.isUndefined(cookie)) {
           return yield* Authentication_ContextCookieNotFoundError.make()
         }
 
         const decodedAuthenticationContext = yield* pipe(
-          cookie.value,
+          cookie,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
           Effect.mapError(Authentication_ContextCookieNotFoundError.make)

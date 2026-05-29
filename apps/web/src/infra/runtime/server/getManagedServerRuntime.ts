@@ -1,5 +1,3 @@
-import "server-only"
-
 import * as ManagedRuntime from "effect/ManagedRuntime"
 import { type WebServerLayerSuccess, WebServerLive } from "./webServerLayer"
 
@@ -11,7 +9,17 @@ declare global {
 
 export function getManagedWebServerRuntime() {
   if (!global.__STATIC_MANAGED_WEB_SERVER_RUNTIME) {
-    global.__STATIC_MANAGED_WEB_SERVER_RUNTIME = ManagedRuntime.make(WebServerLive)
+    const runtime = ManagedRuntime.make(WebServerLive)
+
+    global.__STATIC_MANAGED_WEB_SERVER_RUNTIME = runtime
+
+    const shutdown = () => {
+      void runtime.dispose()
+    }
+
+    process.on("SIGTERM", shutdown)
+    process.on("SIGINT", shutdown)
   }
+
   return global.__STATIC_MANAGED_WEB_SERVER_RUNTIME
 }

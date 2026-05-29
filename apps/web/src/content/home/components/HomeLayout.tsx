@@ -1,7 +1,7 @@
-import { Children, type PropsWithChildren, type ReactNode } from "react"
+import * as React from "react"
 import { cq, grid, hstack, vstack } from "~/generated/styled-system/patterns"
 
-function HomeHeaderBlueprint({ children }: PropsWithChildren) {
+function HomeHeaderBlueprint({ children }: React.PropsWithChildren) {
   return (
     <header
       className={cq({
@@ -30,7 +30,7 @@ function HomeHeaderBlueprint({ children }: PropsWithChildren) {
   )
 }
 
-function HomeHeroBlueprint({ children }: PropsWithChildren) {
+function HomeHeroBlueprint({ children }: React.PropsWithChildren) {
   return (
     <section
       className={cq({
@@ -60,7 +60,7 @@ function HomeHeroBlueprint({ children }: PropsWithChildren) {
   )
 }
 
-function HomeSectionBlueprint({ children }: PropsWithChildren) {
+function HomeSectionBlueprint({ children }: React.PropsWithChildren) {
   return (
     <section
       className={cq({
@@ -89,7 +89,7 @@ function HomeSectionBlueprint({ children }: PropsWithChildren) {
   )
 }
 
-function HomeFooterBlueprint({ children }: PropsWithChildren) {
+function HomeFooterBlueprint({ children }: React.PropsWithChildren) {
   return (
     <footer
       className={cq({
@@ -119,10 +119,10 @@ function HomeFooterBlueprint({ children }: PropsWithChildren) {
 }
 
 type HomeLayoutProps = {
-  header: ReactNode
-  hero: ReactNode
-  sections: ReadonlyArray<ReactNode>
-  footer: ReactNode
+  header: React.ReactElement
+  hero: React.ReactElement
+  sections: ReadonlyArray<React.ReactElement>
+  footer: React.ReactElement
 }
 
 export function HomeLayout({ header, hero, sections, footer }: HomeLayoutProps) {
@@ -136,9 +136,7 @@ export function HomeLayout({ header, hero, sections, footer }: HomeLayoutProps) 
     >
       <HomeHeaderBlueprint>{header}</HomeHeaderBlueprint>
       <HomeHeroBlueprint>{hero}</HomeHeroBlueprint>
-      {Children.toArray(sections).map((section) => (
-        <HomeSectionBlueprint key={(section as { key: string }).key}>{section}</HomeSectionBlueprint>
-      ))}
+      {sections.map((section) => <HomeSectionBlueprint key={section.key}>{section}</HomeSectionBlueprint>)}
       <HomeFooterBlueprint>{footer}</HomeFooterBlueprint>
     </div>
   )

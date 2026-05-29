@@ -6,8 +6,6 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 FROM base AS build
-ARG WORKOS_CLIENT_ID
-ENV WORKOS_CLIENT_ID=$WORKOS_CLIENT_ID
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --filter=@one-kilo/web... --filter=.
@@ -15,9 +13,13 @@ RUN pnpm turbo build --filter=@one-kilo/web...
 
 FROM base
 ENV NODE_ENV=production
-ENV HOSTNAME="0.0.0.0"
+ENV HOST="0.0.0.0"
+ENV PORT=11000
 WORKDIR /app
-COPY --from=build /usr/src/app/apps/web/.next/standalone ./
-COPY --from=build /usr/src/app/apps/web/.next/static ./apps/web/.next/static
+#
+# TanStack Start's Nitro node-server preset emits a self-contained bundle in
+# .output (server + bundled deps + .output/public assets) — no node_modules at runtime.
+#
+COPY --from=build /usr/src/app/apps/web/.output ./.output
 EXPOSE 11000
-CMD ["node", "apps/web/server.js"]
+CMD ["node", ".output/server/index.mjs"]
