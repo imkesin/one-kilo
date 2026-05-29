@@ -29,14 +29,22 @@ const ActorIdentityRow = S.Struct({
 const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<ActorIdentity> => {
   if (row.userType === "Person" && row.personId) {
     return Effect.succeed({
-      user: { id: row.userId, type: "Person" as const, person: { id: row.personId } },
+      user: {
+        id: row.userId,
+        type: "Person" as const,
+        person: { id: row.personId }
+      },
       workspace: { id: row.workspaceId }
     })
   }
 
   if (row.userType === "MachineClient" && row.machineClientId) {
     return Effect.succeed({
-      user: { id: row.userId, type: "MachineClient" as const, machineClient: { id: row.machineClientId } },
+      user: {
+        id: row.userId,
+        type: "MachineClient" as const,
+        machineClient: { id: row.machineClientId }
+      },
       workspace: { id: row.workspaceId }
     })
   }

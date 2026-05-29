@@ -1,3 +1,4 @@
+import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as ParseResult from "effect/ParseResult"
@@ -51,6 +52,39 @@ const PersonNameFromWorkOSName = pipe(
 )
 const encodeWorkOSName = S.encode(PersonNameFromWorkOSName)
 
+type PersonFieldsPatch = {
+  readonly preferredName?: PreferredName
+  readonly fullName?: FullName
+}
+
+type PersonDiff = Data.TaggedEnum<{
+  Changed: { readonly fields: PersonFieldsPatch }
+  Unchanged: {}
+}>
+const PersonDiff = Data.taggedEnum<PersonDiff>()
+
+const diffPersonFields = (
+  person: {
+    readonly preferredName: PreferredName
+    readonly fullName: FullName
+  },
+  fields: PersonFieldsPatch
+) => {
+  const changed: { -readonly [K in keyof PersonFieldsPatch]: PersonFieldsPatch[K] } = {}
+
+  if (fields.preferredName && fields.preferredName !== person.preferredName) {
+    changed.preferredName = fields.preferredName
+  }
+
+  if (fields.fullName && fields.fullName !== person.fullName) {
+    changed.fullName = fields.fullName
+  }
+
+  return Object.keys(changed).length === 0
+    ? PersonDiff.Unchanged()
+    : PersonDiff.Changed({ fields: changed })
+}
+
 export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/PersonEntity")(
   "PersonEntity",
   {
@@ -67,6 +101,8 @@ export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/
       preferredName: this.preferredName,
       fullName: this.fullName
     })
+
+  diff = (fields: PersonFieldsPatch) => diffPersonFields(this, fields)
 }
 
 export class PersonOnUser extends S.TaggedClass<PersonOnUser>("@one-kilo/domain/PersonOnUser")(

@@ -14,13 +14,25 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
 
   ...ModelAuditFields
 }) {
+  static asJsonBBuildObject({ alias = "p" } = {}) {
+    return `
+      JSONB_BUILD_OBJECT(
+        'id', ${alias}.id,
+        'preferred_name', ${alias}.preferred_name,
+        'full_name', ${alias}.full_name,
+        'created_at', ${alias}.created_at,
+        'created_by_user_id', ${alias}.created_by_user_id,
+        'updated_at', ${alias}.updated_at,
+        'updated_by_user_id', ${alias}.updated_by_user_id,
+        'archived_at', ${alias}.archived_at
+      )
+    `
+  }
+
   static asJsonBBuildObjectWithRelations({
-    alias,
-    emailAddressAlias
-  } = {
-    alias: "p",
-    emailAddressAlias: "ea"
-  }) {
+    alias = "p",
+    emailAddressAlias = "ea"
+  } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

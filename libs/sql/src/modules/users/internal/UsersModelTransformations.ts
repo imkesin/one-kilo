@@ -18,6 +18,36 @@ import type { MachineClientsModel } from "../../machine-clients/MachineClientsMo
 import type { PersonsModel } from "../../persons/PersonsModel.ts"
 import type { UsersModel } from "../UsersModel.ts"
 
+export const toPersonUserEntity = ({
+  id,
+  type,
+  personId,
+  workosUserId,
+  createdAt,
+  updatedAt,
+  archivedAt
+}: typeof UsersModel.select.Type): Effect.Effect<PersonUserEntity> => {
+  if (
+    type === "Person"
+    && personId
+    && workosUserId
+  ) {
+    return Effect.succeed(
+      PersonUserEntity.make({
+        id,
+        type: "Person",
+        personId,
+        workosUserId,
+        createdAt,
+        updatedAt,
+        archivedAt
+      })
+    )
+  }
+
+  return dieWithUnexpectedError("A user model could not be transformed into a person user entity.")
+}
+
 export const toUserEntity = ({
   id,
   type,

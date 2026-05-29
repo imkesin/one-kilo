@@ -1,4 +1,5 @@
 import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
+import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
@@ -6,6 +7,7 @@ import { Actor } from "@one-kilo/domain/tags/Actor"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
+import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 
 type UpdatePersonFields = {
@@ -19,10 +21,16 @@ type RecordPersonUpdatedParameters = {
   readonly personId: PersonId
 }
 
-type UpdatePersonParameters = {
-  readonly personId: PersonId
-  readonly fields: UpdatePersonFields
-}
+type UpdatePersonOutcome = Data.TaggedEnum<{
+  Unchanged: {
+    readonly person: PersonEntity
+  }
+  Updated: {
+    readonly auditLog: PersonUpdatedAuditLog
+    readonly person: PersonEntity
+  }
+}>
+const UpdatePersonOutcome = Data.taggedEnum<UpdatePersonOutcome>()
 
 export class PersonsManagementModule extends Effect.Service<PersonsManagementModule>()(
   "@one-kilo/core/PersonsManagementModule",
@@ -48,25 +56,41 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
             context: { fields }
           })
 
-          return yield* auditLogsRepository.insert(auditLog.withEncodedContext())
+          yield* auditLogsRepository.insert(auditLog.withEncodedContext())
+
+          return auditLog
         }
       )
 
       const updatePerson = Effect.fn("PersonsManagementModule.updatePerson")(
-        function*({ personId, fields }: UpdatePersonParameters) {
+        function*(person: PersonEntity, fields: UpdatePersonFields) {
+          const diffOutcome = person.diff(fields)
+
+          if (diffOutcome._tag === "Unchanged") {
+            return UpdatePersonOutcome.Unchanged({ person })
+          }
+
+          const changedFields = diffOutcome.fields
           const performedByUserId = yield* Effect.map(Actor, ({ user }) => user.id)
 
-          const person = yield* personsRepository.update(
-            personId,
+          const updatedPerson = yield* personsRepository.update(
+            person.id,
             {
-              fields,
+              fields: changedFields,
               performedByUserId
             }
           )
 
-          yield* recordPersonUpdated({ fields, performedByUserId, personId })
+          const auditLog = yield* recordPersonUpdated({
+            fields: changedFields,
+            performedByUserId,
+            personId: person.id
+          })
 
-          return person
+          return UpdatePersonOutcome.Updated({
+            auditLog,
+            person: updatedPerson
+          })
         }
       )
 

@@ -146,7 +146,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           const workspaceId = yield* idGenerator.workspaceId
           const workspaceMembershipId = yield* idGenerator.workspaceMembershipId
 
-          // Special suffix is intended to support debugging through the WorkOS console.
+          /*
+           * Special suffix is intended to support debugging through the WorkOS console.
+           */
           const workosPersonalOrganizationName = `Personal ${workspaceId.slice(-6).toUpperCase()}`
 
           const { preferredName, fullName, workosName } = yield* derivePersonNamesFromWorkosUser(workosUser)
@@ -181,7 +183,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             { concurrency: "unbounded" }
           )
 
-          // If there is any failure, attempt to clean up the dangling organization
+          /*
+           * If there is any failure, attempt to clean up the dangling organization
+           */
           yield* Effect.addFinalizer((exit) => {
             if (Exit.isFailure(exit)) {
               return pipe(

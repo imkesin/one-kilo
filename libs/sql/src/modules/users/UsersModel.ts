@@ -19,4 +19,22 @@ export class UsersModel extends Model.Class<UsersModel>("UsersModel")({
   workosClientId: S.NullOr(WorkOSIds.ApplicationClientId),
 
   ...ModelAuditFields
-}) {}
+}) {
+  static asJsonBBuildObject({ alias = "u" } = {}) {
+    return `
+      JSONB_BUILD_OBJECT(
+        'id', ${alias}.id,
+        'type', ${alias}.type,
+        'person_id', ${alias}.person_id,
+        'workos_user_id', ${alias}.workos_user_id,
+        'machine_client_id', ${alias}.machine_client_id,
+        'workos_client_id', ${alias}.workos_client_id,
+        'created_at', ${alias}.created_at,
+        'created_by_user_id', ${alias}.created_by_user_id,
+        'updated_at', ${alias}.updated_at,
+        'updated_by_user_id', ${alias}.updated_by_user_id,
+        'archived_at', ${alias}.archived_at
+      )
+    `
+  }
+}
