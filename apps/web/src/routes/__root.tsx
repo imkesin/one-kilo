@@ -1,5 +1,15 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import type { PropsWithChildren } from "react"
+
+import "@fontsource/fira-sans/latin-300.css"
+import "@fontsource/fira-sans/latin-400.css"
+import "@fontsource/fira-sans/latin-500.css"
+import "@fontsource/fira-sans/latin-600.css"
+import "@fontsource/fira-sans/latin-700.css"
+
+import "@fontsource/fira-mono/latin-400.css"
+import "@fontsource/fira-mono/latin-500.css"
+
 import appCss from "~/styles/globals.css?url"
 import { Body } from "~/ui/components/root/Body"
 
@@ -35,20 +45,6 @@ export const Route = createRootRoute({
       {
         rel: "stylesheet",
         href: appCss
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com"
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous"
-      },
-      {
-        rel: "stylesheet",
-        href:
-          "https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
       }
     ]
   }),
