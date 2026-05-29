@@ -10,7 +10,7 @@ export default defineConfig({
   preflight: true,
 
   include: [
-    "./src/app/**/*.{ts,tsx}",
+    "./src/routes/**/*.{ts,tsx}",
     "./src/content/**/*.{ts,tsx}",
     "./src/ui/**/*.{ts,tsx}"
   ],
@@ -19,6 +19,8 @@ export default defineConfig({
 
   globalCss: {
     html: {
+      "--font-fira-sans": "'Fira Sans', sans-serif",
+      "--font-fira-mono": "'Fira Mono', monospace",
       "--global-font-body": "var(--font-fira-sans)",
       "--global-font-mono": "var(--font-fira-mono)"
     }

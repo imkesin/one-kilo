@@ -6,8 +6,7 @@
         "^build"
       ],
       "outputs": [
-        ".next/**",
-        "!.next/cache/**",
+        ".output/**",
         "dist/**"
       ]
     },
@@ -17,7 +16,7 @@
         "^clean"
       ],
       "outputs": [
-        ".next/**",
+        ".output/**",
         "dist/**",
         ".turbo/**",
         "node_modules/.cache/**"

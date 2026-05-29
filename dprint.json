@@ -16,12 +16,12 @@
   "excludes": [
     "**/dist",
     "**/build",
-    "**/.next",
     "**/.turbo",
     "**/generated",
     "**/node_modules",
     "**/*.tsbuildinfo",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "routeTree.gen.ts"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.93.4.wasm",

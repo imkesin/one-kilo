@@ -7,6 +7,7 @@ import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
+import * as Predicate from "effect/Predicate"
 import * as S from "effect/Schema"
 import type * as Scope from "effect/Scope"
 
@@ -63,7 +64,7 @@ const retryDurable = <A, E, R>(options: DurableRetryOptions<E>) => (effect: Effe
         failure,
         {
           onSome: (error) => {
-            if (options.while === undefined) {
+            if (Predicate.isUndefined(options.while)) {
               return true
             }
 

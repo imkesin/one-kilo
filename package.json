@@ -1,12 +1,12 @@
 {
   "devDependencies": {
     "@effect/language-service": "latest",
-    "@effect/vitest": "latest",
     "@effect/oxc": "workspace:*",
+    "@effect/vitest": "latest",
     "@types/node": "^24.0.0",
     "dprint": "^0.54.0",
     "oxlint": "1.42.0",
-    "turbo": "^2.8.5",
+    "turbo": "^2.9.14",
     "typescript": "^6.0.0",
     "vite": "^7.3.1",
     "vitest": "^3.2.4"

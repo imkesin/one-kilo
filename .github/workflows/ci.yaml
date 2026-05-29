@@ -70,7 +70,5 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ matrix.app }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ matrix.app }}:latest
-          build-args: |
-            WORKOS_CLIENT_ID=${{ vars.WORKOS_CLIENT_ID }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}

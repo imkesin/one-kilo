@@ -1,8 +1,8 @@
-# next.js
-/.next/
-
-# typescript
-next-env.d.ts
+# build output
+/.output
+/.tanstack
+/dist
+*.tsbuildinfo
 
 ## Panda
 **/styled-system

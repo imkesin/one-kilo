@@ -5,21 +5,17 @@
   ],
   "plugins": [
     "react",
-    "jsx-a11y",
-    "nextjs"
+    "jsx-a11y"
   ],
   "rules": {
-    "nextjs/no-html-link-for-pages": "error",
-    "nextjs/no-img-element": "error",
-    "nextjs/no-sync-scripts": "error",
-    "nextjs/no-page-custom-font": "error",
-    "nextjs/google-font-display": "error",
-    "nextjs/google-font-preconnect": "error",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "react/no-unescaped-entities": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-key": "error",
     "react/jsx-no-target-blank": "error"
-  }
+  },
+  "ignorePatterns": [
+    "routeTree.gen.ts"
+  ]
 }

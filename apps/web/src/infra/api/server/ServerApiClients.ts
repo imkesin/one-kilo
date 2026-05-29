@@ -1,5 +1,3 @@
-import "server-only"
-
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as HttpApiClient from "@effect/platform/HttpApiClient"
 import { ApplicationApi, AuthenticationApi } from "@one-kilo/server-api/ServerApi"

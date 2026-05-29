@@ -10,28 +10,33 @@
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/server-api": "workspace:*",
+    "@tanstack/react-router": "1.170.8",
+    "@tanstack/react-start": "1.168.14",
     "babel-plugin-react-compiler": "1.0.0",
     "effect": "^3.21.2",
     "jose": "^6.2.2",
     "lucide-react": "0.564.0",
-    "next": "16.2.2",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "server-only": "0.0.1"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@pandacss/dev": "1.9.1",
+    "@types/node": "^24",
     "@types/react": "^19",
-    "@types/react-dom": "^19"
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.2.0",
+    "nitro": "3.0.260522-beta",
+    "vite": "^7.3.1"
   },
   "private": true,
   "scripts": {
-    "build": "next build",
-    "clean": "rm -rf .next .turbo dist",
-    "dev": "next dev --port 11000",
+    "build": "vite build",
+    "clean": "rm -rf .output .turbo .tanstack",
+    "dev": "vite dev --port 11000",
     "docker:build": "docker build --file Dockerfile --tag one-kilo-web ../..",
     "prepare": "panda codegen",
-    "start": "next start --port 11000",
-    "typecheck": "tsc --noEmit --outDir dist"
-  }
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module"
 }
