@@ -7,6 +7,8 @@
     "@effect/auth-workos": "workspace:*",
     "@effect/platform": "^0.96.0",
     "@effect/platform-node": "^0.106.0",
+    "@fontsource/fira-mono": "^5.2.7",
+    "@fontsource/fira-sans": "^5.2.7",
     "@one-kilo/domain": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/server-api": "workspace:*",
