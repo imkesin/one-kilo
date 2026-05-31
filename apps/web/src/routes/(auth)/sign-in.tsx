@@ -6,18 +6,19 @@ import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { RedirectError } from "~/lib/RedirectError"
 
-const signInEffect = Effect.gen(function*() {
+const handleSignInRedirect = Effect.fn(function*() {
   const workosPublicClient = yield* WorkOSPublicApiClient.PublicApiClient
 
-  const port = yield* pipe(
-    Config.number("PORT"),
-    Config.withDefault(11000)
+  const baseUrl = yield* pipe(
+    Config.url("WEB_PUBLIC_BASE_URL"),
+    Config.withDefault(new URL("http://localhost:11000"))
   )
+  const redirectUri = new URL("/sign-in/callback", baseUrl).toString()
 
   const authUrl = yield* workosPublicClient.userManagement.buildAuthorizationUrl({
     screenHint: "sign-in",
     provider: "authkit",
-    redirectUri: `http://localhost:${port}/sign-in/callback`
+    redirectUri
   })
 
   yield* Effect.log(`Redirecting to Auth URL: ${authUrl}`)
@@ -28,7 +29,7 @@ const signInEffect = Effect.gen(function*() {
 export const Route = createFileRoute("/(auth)/sign-in")({
   server: {
     handlers: {
-      GET: (): Promise<Response> => runWithWebServerRuntime(signInEffect)
+      GET: () => runWithWebServerRuntime(handleSignInRedirect())
     }
   }
 })

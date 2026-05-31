@@ -46,6 +46,6 @@ jobs:
           command: up
           stack-name: dev
           work-dir: infra/pulumi
-          config-map: '{"imageTag":{"value":"${{ inputs.image-tag || github.sha }}"}}'
+          config-map: '{"image-tag":{"value":"${{ inputs.image-tag || github.sha }}"}}'
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

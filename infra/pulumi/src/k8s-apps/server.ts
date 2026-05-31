@@ -62,7 +62,7 @@ export function createServer({
     { provider: k8sProvider, dependsOn: [k8sNamespace] }
   )
 
-  const _service = new K8s.core.v1.Service(
+  const service = new K8s.core.v1.Service(
     "server",
     {
       metadata: { name: "server", namespace: k8sNamespace.metadata.name },
@@ -74,4 +74,6 @@ export function createServer({
     },
     { provider: k8sProvider, dependsOn: [k8sNamespace] }
   )
+
+  return { service }
 }

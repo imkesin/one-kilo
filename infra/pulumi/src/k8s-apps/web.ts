@@ -8,6 +8,8 @@ export type CreateWebParameters = {
   readonly imageBase: Pulumi.Output<string>
   readonly imageTag: string
   readonly sharedConfig: SharedConfig
+  readonly serverService: K8s.core.v1.Service
+  readonly webPublicBaseUrl: Pulumi.Input<string>
 }
 
 const WEB_PORT = 11000
@@ -19,7 +21,9 @@ export function createWeb({
   k8sNamespace,
   imageBase,
   imageTag,
-  sharedConfig
+  sharedConfig,
+  serverService,
+  webPublicBaseUrl
 }: CreateWebParameters) {
   const _deployment = new K8s.apps.v1.Deployment(
     "web",
@@ -37,6 +41,13 @@ export function createWeb({
               ports: [{ containerPort: WEB_PORT }],
               envFrom: [
                 { configMapRef: { name: sharedConfig.workosConfigMap.metadata.name } }
+              ],
+              env: [
+                {
+                  name: "SERVER_INTERNAL_BASE_URL",
+                  value: Pulumi.interpolate`http://${serverService.metadata.name}`
+                },
+                { name: "WEB_PUBLIC_BASE_URL", value: webPublicBaseUrl }
               ],
               resources: {
                 requests: { cpu: "500m", memory: "2Gi" },

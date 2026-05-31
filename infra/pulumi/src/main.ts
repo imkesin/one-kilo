@@ -7,7 +7,7 @@ import { createAppDeployments } from "./k8s-apps.js"
 
 const config = new Pulumi.Config()
 const gcpConfig = new Pulumi.Config("gcp")
-const imageTag = config.get("imageTag") ?? "latest"
+const imageTag = config.get("image-tag") ?? "latest"
 
 const cluster = new GCP.container.Cluster(
   "one-kilo-cluster",

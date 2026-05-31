@@ -23,6 +23,9 @@ export function createAppDeployments({
 }: CreateAppDeploymentsParameters) {
   const imageBase = Pulumi.interpolate`${repository.location}-docker.pkg.dev/${projectName}/${repository.repositoryId}`
 
+  const config = new Pulumi.Config()
+  const webPublicBaseUrl = config.require("web-public-base-url")
+
   const sharedConfig = createSharedConfig({ k8sProvider, k8sNamespace })
 
   const workloadParameters = {
@@ -33,7 +36,7 @@ export function createAppDeployments({
     sharedConfig
   }
 
-  createServer(workloadParameters)
-  createWeb(workloadParameters)
+  const { service: serverService } = createServer(workloadParameters)
+  createWeb({ ...workloadParameters, serverService, webPublicBaseUrl })
   createRunner(workloadParameters)
 }

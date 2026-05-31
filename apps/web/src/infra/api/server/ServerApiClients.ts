@@ -5,15 +5,18 @@ import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 
+const ServerInternalBaseUrlConfig = pipe(
+  Config.url("SERVER_INTERNAL_BASE_URL"),
+  Config.withDefault(new URL("http://localhost:10000")),
+  Config.map((url) => url.origin)
+)
+
 export class AuthenticationServerApiClient extends Effect.Service<AuthenticationServerApiClient>()(
   "@one-kilo/web/ServerApiClient:Authentication",
   {
     dependencies: [NodeHttpClient.layerUndici],
     effect: Effect.gen(function*() {
-      const serverBaseUrl = yield* pipe(
-        Config.string("SERVER_BASE_URL"),
-        Config.withDefault("http://localhost:10000")
-      )
+      const serverBaseUrl = yield* ServerInternalBaseUrlConfig
 
       return yield* HttpApiClient.make(AuthenticationApi, { baseUrl: serverBaseUrl })
     })
@@ -25,10 +28,7 @@ export class ApplicationServerApiClient extends Effect.Service<ApplicationServer
   {
     dependencies: [NodeHttpClient.layerUndici],
     effect: Effect.gen(function*() {
-      const serverBaseUrl = yield* pipe(
-        Config.string("SERVER_BASE_URL"),
-        Config.withDefault("http://localhost:10000")
-      )
+      const serverBaseUrl = yield* ServerInternalBaseUrlConfig
 
       return yield* HttpApiClient.make(ApplicationApi, { baseUrl: serverBaseUrl })
     })

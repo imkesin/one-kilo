@@ -4,3 +4,29 @@ runtime:
   options:
     packagemanager: pnpm
 main: dist/src/main.js
+config:
+  cloudflare-tunnel-token:
+    type: string
+    secret: true
+    description: Token for the cloudflared tunnel that fronts the cluster's public ingress.
+  postgres-host:
+    type: string
+  postgres-port:
+    type: string
+  postgres-user:
+    type: string
+  postgres-db:
+    type: string
+  postgres-password:
+    type: string
+    secret: true
+  web-public-base-url:
+    type: string
+    description: Public origin (scheme://host) browsers and WorkOS use to reach the web app. Per-stack — must match the Cloudflare tunnel hostname AND a registered WorkOS redirect URI.
+  workos-client-id:
+    type: string
+    description: WorkOS environment client id.
+  workos-api-key:
+    type: string
+    secret: true
+    description: WorkOS API key.
