@@ -7,6 +7,7 @@
 - `libs/` - Internal shared libraries (consumed by `apps/`, not published)
 - `packages/` - Publishable standalone packages (e.g., `@effect/auth-workos`)
 - `scripts/` - Developer tooling and local environment scripts (e.g., `local-dev`)
+- `specs/` - Additional context
 
 ## Tooling
 

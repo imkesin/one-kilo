@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ErrorRouteImport } from './routes/error'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
@@ -18,6 +19,11 @@ import { Route as AppWsWorkspaceIdRouteImport } from './routes/_app/ws/$workspac
 import { Route as AppUUserIdRouteImport } from './routes/_app/u/$userId'
 import { Route as authSignInCallbackRouteImport } from './routes/(auth)/sign-in.callback'
 
+const ErrorRoute = ErrorRouteImport.update({
+  id: '/error',
+  path: '/error',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -60,6 +66,7 @@ const authSignInCallbackRoute = authSignInCallbackRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/error': typeof ErrorRoute
   '/sign-in': typeof authSignInRouteWithChildren
   '/livez': typeof healthLivezRoute
   '/api/$': typeof ApiSplatRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/error': typeof ErrorRoute
   '/sign-in': typeof authSignInRouteWithChildren
   '/livez': typeof healthLivezRoute
   '/api/$': typeof ApiSplatRoute
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteRouteWithChildren
+  '/error': typeof ErrorRoute
   '/(auth)/sign-in': typeof authSignInRouteWithChildren
   '/(health)/livez': typeof healthLivezRoute
   '/api/$': typeof ApiSplatRoute
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/error'
     | '/sign-in'
     | '/livez'
     | '/api/$'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/error'
     | '/sign-in'
     | '/livez'
     | '/api/$'
@@ -110,6 +121,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/error'
     | '/(auth)/sign-in'
     | '/(health)/livez'
     | '/api/$'
@@ -121,6 +133,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  ErrorRoute: typeof ErrorRoute
   authSignInRoute: typeof authSignInRouteWithChildren
   healthLivezRoute: typeof healthLivezRoute
   ApiSplatRoute: typeof ApiSplatRoute
@@ -128,6 +141,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/error': {
+      id: '/error'
+      path: '/error'
+      fullPath: '/error'
+      preLoaderRoute: typeof ErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -216,6 +236,7 @@ const authSignInRouteWithChildren = authSignInRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRouteRoute: AppRouteRouteWithChildren,
+  ErrorRoute: ErrorRoute,
   authSignInRoute: authSignInRouteWithChildren,
   healthLivezRoute: healthLivezRoute,
   ApiSplatRoute: ApiSplatRoute,

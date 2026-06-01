@@ -2,9 +2,10 @@
 
 Effect-based WorkOS API wrapper, published as `@effect/auth-workos`.
 
-## Key Patterns
+## Key Exports
 
-- **Clients**: `ApiClient` (REST, requires `apiKey`) and `OAuth2Client` (auth flows, requires `authKitDomain`). Each has a `layerConfig()` for env-driven setup.
+- **Clients**: `ApiClient` (REST, requires `apiKey`) and `OAuth2Client` (auth flows, requires
+  `authKitDomain`). Each has a `layerConfig()` for env-driven setup.
 - **Gateways**: `ApiGateway` / `OAuth2Gateway` wrapped clients for easier testing.
 
 ## Commands
