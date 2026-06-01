@@ -23,7 +23,7 @@ const handleSignInRedirect = Effect.fn(function*() {
 
   yield* Effect.log(`Redirecting to Auth URL: ${authUrl}`)
 
-  return yield* RedirectError.make({ href: authUrl, statusCode: 302 })
+  return yield* RedirectError.make({ href: authUrl, statusCode: 303 })
 })
 
 export const Route = createFileRoute("/(auth)/sign-in")({

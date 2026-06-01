@@ -38,11 +38,6 @@ export async function runWithWebServerRuntime<
     throw Cause.squash(cause)
   }
 
-  /*
-   * Log before redirecting — the redirect is the only signal that escapes, so
-   * an unlogged cause is lost. 303 (not 302/307) forces the follow-up to GET,
-   * so a fatal POST doesn't re-POST to `/error`.
-   */
   Runtime.runSync(runtime, Effect.logError("Unhandled fatal server error", cause))
 
   throw redirect({ href: "/error", statusCode: 303 })
