@@ -1,11 +1,13 @@
 # Lib
 
-Shared utilities: error handling and UUID v7 generation.
+Cross-cutting utilities shared across apps and libs.
 
-## Key Patterns
+## Structure (`/src`)
 
-- **UnexpectedError**: `TaggedError` with `message`, optional `cause` and `context`. Use
-  `orDieWithUnexpectedError(msg)` to convert Effect failures.
+- `errors/` — shared tagged errors (e.g. `UnexpectedError`).
+- `uuid/` — UUID v7 generation.
+- `telemetry/` — tracing helpers.
+- `k8s/` — Kubernetes helpers.
 
 ## Commands
 

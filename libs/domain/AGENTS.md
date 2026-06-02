@@ -1,14 +1,18 @@
 # Domain
 
-Core domain entities, branded IDs, and context tags.
+The core domain model: entities, IDs, values, and the rules over them.
 
-## Key Patterns
+## Structure (`/src`)
 
-- **Entities**: Effect Schema `TaggedClass` in `src/entities/`. Fields use branded domain IDs.
-- **IDs**: Branded UUIDs in `src/ids/` via `Schema.brand()`. Each has a prefixed variant (`u_`,
-  `w_`) and a bidirectional `{Id}FromPrefixed` transform for APIs.
+- `audit-logs/` — audit log definitions per aggregate.
+- `authorization/` — policies, permissions, and roles.
+- `entities/` — domain entities (Effect Schema).
+- `errors/` — domain errors, grouped per aggregate.
+- `ids/` — branded UUID IDs with prefixed variants.
+- `tags/` — Effect context tags (e.g. `Actor`).
+- `values/` — value objects and derived values.
 
-## Key Commands
+## Commands
 
 ```bash
 pnpm build       # build `src/` to `dist/`

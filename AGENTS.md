@@ -1,4 +1,4 @@
-# One Kilo - Monorepo Guide
+# Monorepo Root
 
 ## Structure
 
@@ -7,7 +7,13 @@
 - `libs/` - Internal shared libraries (consumed by `apps/`, not published)
 - `packages/` - Publishable standalone packages (e.g., `@effect/auth-workos`)
 - `scripts/` - Developer tooling and local environment scripts (e.g., `local-dev`)
-- `specs/` - Additional context
+- `specs/` - Additional guidelines (see Specs index below)
+
+## Specs
+
+`specs/` holds detailed guidelines for the entire repo, organized by topic (e.g.
+`specs/code-style/`). Before starting a task, list `specs/` and read any file whose path looks
+relevant to the work. Treat these as authoritative.
 
 ## Tooling
 

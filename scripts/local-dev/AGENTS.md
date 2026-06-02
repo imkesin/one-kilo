@@ -2,7 +2,7 @@
 
 Local development environment scripts. Uses Effect + `@effect/platform` for shell commands.
 
-## Scripts
+## Commands
 
 ```bash
 pnpm pg:setup   # Create/start a local Postgres container (postgres:18.2 on port 5432)
