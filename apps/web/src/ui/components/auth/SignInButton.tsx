@@ -5,14 +5,6 @@ import { Button } from "~/ui/components/button/Button"
 
 type SignInButtonProps = Omit<ComponentProps<typeof Button>, "render" | "children">
 
-/*
- * Entry point into the server-driven sign-in flow.
- *
- * `/sign-in` is a server-only route (no client component) whose GET handler
- * builds the WorkOS authorization URL and returns a 303. Reaching it requires a
- * full-document request — a plain client-side `<Link>` would attempt an SPA
- * transition, find no component to render, and 404.
- */
 export function SignInButton(props: SignInButtonProps) {
   return (
     <Button
@@ -21,6 +13,9 @@ export function SignInButton(props: SignInButtonProps) {
         <Link
           {...buttonProps}
           to="/sign-in"
+          /*
+           * [Required] This may result in a redirect to WorkOS Authkit; not always an in-app navigation.
+           */
           reloadDocument
           title="Sign in"
         />

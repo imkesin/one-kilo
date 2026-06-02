@@ -5,8 +5,9 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { RedirectError } from "~/lib/RedirectError"
+import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 
-const handleSignInRedirect = Effect.fn(function*() {
+const handleAuthkitRedirect = Effect.fn(function*() {
   const workosPublicClient = yield* WorkOSPublicApiClient.PublicApiClient
 
   const baseUrl = yield* pipe(
@@ -24,6 +25,20 @@ const handleSignInRedirect = Effect.fn(function*() {
   yield* Effect.log(`Redirecting to Auth URL: ${authUrl}`)
 
   return yield* RedirectError.make({ href: authUrl, statusCode: 303 })
+})
+
+const handleSignInRedirect = Effect.fn(function*() {
+  const authenticationWebModule = yield* AuthenticationWebModule
+
+  const { workspaceId } = yield* pipe(
+    authenticationWebModule.currentAuthenticationContext,
+    Effect.catchTags({
+      "Authentication:ContextCookieNotFoundError": handleAuthkitRedirect,
+      "Authentication:ContextExpiredError": handleAuthkitRedirect
+    })
+  )
+
+  return yield* RedirectError.make({ to: "/ws/$workspaceId", params: { workspaceId } })
 })
 
 export const Route = createFileRoute("/(auth)/sign-in")({

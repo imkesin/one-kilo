@@ -62,7 +62,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           cookie,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
-          Effect.mapError(Authentication_ContextCookieNotFoundError.make)
+          Effect.mapError(() => Authentication_ContextCookieNotFoundError.make())
         )
 
         return decodedAuthenticationContext
