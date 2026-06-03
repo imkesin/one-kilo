@@ -13,6 +13,7 @@ export function getManagedWebServerRuntime() {
 
     global.__STATIC_MANAGED_WEB_SERVER_RUNTIME = runtime
 
+    // TODO: Is this the correct place to dispose? What about in `api.$.tsx`?
     const shutdown = () => {
       void runtime.dispose()
     }

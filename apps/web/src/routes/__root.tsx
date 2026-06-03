@@ -1,6 +1,3 @@
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
-import type { PropsWithChildren } from "react"
-
 import "@fontsource/fira-sans/latin-300.css"
 import "@fontsource/fira-sans/latin-400.css"
 import "@fontsource/fira-sans/latin-500.css"
@@ -10,6 +7,9 @@ import "@fontsource/fira-sans/latin-700.css"
 import "@fontsource/fira-mono/latin-400.css"
 import "@fontsource/fira-mono/latin-500.css"
 
+import { RegistryProvider } from "@effect-atom/atom-react"
+import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
+import type { PropsWithChildren } from "react"
 import appCss from "~/styles/globals.css?url"
 import { Body } from "~/ui/components/root/Body"
 
@@ -20,7 +20,9 @@ function RootDocument({ children }: PropsWithChildren) {
         <HeadContent />
       </head>
       <Body>
-        {children}
+        <RegistryProvider>
+          {children}
+        </RegistryProvider>
         <Scripts />
       </Body>
     </html>

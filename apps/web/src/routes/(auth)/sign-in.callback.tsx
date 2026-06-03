@@ -12,10 +12,10 @@ const SignInCallbackSearchParams = S.Struct({
   code: WorkOSValues.AuthenticationCode
 })
 
-const signInCallbackEffect = Effect.fn(
-  function*(request: Request) {
+const handleSignInCallback = Effect.fn(
+  function*(url: string) {
     const { code } = yield* pipe(
-      new URL(request.url).searchParams,
+      new URL(url).searchParams,
       UrlParams.fromInput,
       UrlParams.schemaStruct(SignInCallbackSearchParams)
     )
@@ -34,7 +34,7 @@ const signInCallbackEffect = Effect.fn(
 export const Route = createFileRoute("/(auth)/sign-in/callback")({
   server: {
     handlers: {
-      GET: ({ request }) => runWithWebServerRuntime(signInCallbackEffect(request))
+      GET: ({ request: { url, signal } }) => runWithWebServerRuntime(handleSignInCallback(url), { signal })
     }
   }
 })

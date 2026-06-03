@@ -31,7 +31,7 @@ export const withDeferredConstraints =
     )
 
 export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(self: Effect.Effect<A, E, R>) => {
-  const transactionEffect = pipe(
+  const serializableTransaction = pipe(
     pg`SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;`,
     Effect.andThen(self),
     pg.withTransaction
@@ -39,7 +39,7 @@ export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(
 
   return pipe(
     Effect.retry(
-      transactionEffect,
+      serializableTransaction,
       {
         while: S.is(SqlErrorWithRetryableCause),
         times: 3,

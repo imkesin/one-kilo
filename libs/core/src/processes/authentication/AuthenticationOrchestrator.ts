@@ -44,7 +44,7 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             )
           )
 
-          const registerHumanUserEffect = pipe(
+          const handleRegisterHumanUser = pipe(
             registrationProcesses.registerHumanUser({ workosUser }),
             Effect.flatMap(({ userId, workspaceId, workosOrganizationId }) =>
               pipe(
@@ -75,7 +75,7 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             return yield* Effect.andThen(
               authenticationQueryModule.retrieveDefaultAuthenticationIdentity({ workosUserId: workosUser.id }),
               Option.match({
-                onNone: () => registerHumanUserEffect,
+                onNone: () => handleRegisterHumanUser,
                 onSome: ({
                   userId,
                   workspaceId,
@@ -108,7 +108,7 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
               workosOrganizationId
             }),
             Option.match({
-              onNone: () => registerHumanUserEffect,
+              onNone: () => handleRegisterHumanUser,
               onSome: ({ userId, workspaceId }) =>
                 Effect.succeed(
                   CodeExchangeOutcome.ReturningUser({

@@ -20,7 +20,7 @@ const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
 const HTTP_ONLY_COOKIE_NAME = "one-kilo/web/AuthenticationContext"
 
 export class AuthenticationWebModule extends Effect.Service<AuthenticationWebModule>()(
-  "AuthenticationWebModule",
+  "@one-kilo/web/AuthenticationWebModule",
   {
     dependencies: [AuthenticationServerApiClient.Default],
     scoped: Effect.gen(function*() {
@@ -33,7 +33,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
             S.encode(AuthenticationContextFromJsonString),
             Effect.catchTag(
               "ParseError",
-              dieWithUnexpectedErrorCallback("Failed to set authentication context cookie")
+              dieWithUnexpectedErrorCallback("Failed to encode authentication context cookie")
             )
           )
 
@@ -51,7 +51,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         }
       )
 
-      const rawAuthenticationContextEffect = Effect.gen(function*() {
+      const rawAuthenticationContext = Effect.gen(function*() {
         const cookie = getCookie(HTTP_ONLY_COOKIE_NAME)
 
         if (Predicate.isUndefined(cookie)) {
@@ -72,7 +72,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         onExpired: (invalidAuthenticationContextEffect: AuthenticationContext) => Effect.Effect<A, E, R>
       ) =>
         Effect.gen(function*() {
-          const authenticationContext = yield* rawAuthenticationContextEffect
+          const authenticationContext = yield* rawAuthenticationContext
 
           const { exp } = Jose.decodeJwt(authenticationContext.workosAccessToken)
           if (Predicate.isUndefined(exp)) {
@@ -89,8 +89,8 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           return yield* onExpired(authenticationContext)
         })
 
-      const currentAuthenticationContextEffect = withValidAuthenticationContextOr(
-        () => Effect.fail(Authentication_ContextExpiredError.make())
+      const currentAuthenticationContext = withValidAuthenticationContextOr(
+        () => Authentication_ContextExpiredError.make()
       )
 
       const refreshedAuthenticationContextCache = yield* Cache.makeWith({
@@ -156,7 +156,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           Effect.scoped
         )
 
-      const refreshedAuthenticationContextEffect = withValidAuthenticationContextOr(({ userId, workosRefreshToken }) =>
+      const refreshedAuthenticationContext = withValidAuthenticationContextOr(({ userId, workosRefreshToken }) =>
         pipe(
           refreshAndSetAuthenticationContext(workosRefreshToken),
           withUserIdLock(userId)
@@ -177,8 +177,8 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
       )
 
       return {
-        currentAuthenticationContext: currentAuthenticationContextEffect,
-        refreshedAuthenticationContext: refreshedAuthenticationContextEffect,
+        currentAuthenticationContext,
+        refreshedAuthenticationContext,
 
         handleExchangeCode
       }
