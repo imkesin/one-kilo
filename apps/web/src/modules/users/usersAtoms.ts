@@ -1,41 +1,41 @@
 import { Atom, Result } from "@effect-atom/atom-react"
+import { orFailWithUnexpectedError, UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { UsersApi_MeSchemas } from "@one-kilo/server-api/modules/users/UsersApiSchemas"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { WebApiClient } from "~/infra/api/WebApiClient"
 import { makeAtomRuntime } from "~/infra/runtime/client/atomRuntime"
-import { Users_UnauthenticatedError } from "./api/UsersWebApiErrors"
 
 const runtime = makeAtomRuntime(WebApiClient.Default)
 
-export const meAtom = pipe(
+const meAtomSource = pipe(
   runtime.atom(
-    pipe(
-      WebApiClient,
-      Effect.flatMap(({ client }) => client.users.me()),
-      /*
-       * TODO - This could be better
-       */
-      Effect.catchAll((error) =>
-        error instanceof Users_UnauthenticatedError
-          ? Effect.fail(error)
-          : Effect.die(error)
+    Effect.fn(function*() {
+      const webApiClient = yield* WebApiClient
+
+      return yield* pipe(
+        webApiClient.users.me(),
+        orFailWithUnexpectedError("Failed to load GET /users/me")
       )
-    )
+    })
   ),
-  Atom.refreshOnWindowFocus,
   Atom.serializable({
     key: "/users/me",
     schema: Result.Schema({
       success: UsersApi_MeSchemas.Success,
-      error: Users_UnauthenticatedError
+      error: UnexpectedError
     })
-  }),
-  Atom.withServerValueInitial
+  })
 )
 
 export const meAtomInitialValue = (success: typeof UsersApi_MeSchemas.Success.Type) =>
   Atom.initialValue(
-    meAtom,
+    meAtomSource,
     Result.success(success)
   )
+
+/*
+ * `Atom.refreshOnWindowFocus` is a transformation that install a listener inside the
+ * read; it must wrap a separate, non-serialized node.
+ */
+export const meAtom = Atom.refreshOnWindowFocus(meAtomSource)

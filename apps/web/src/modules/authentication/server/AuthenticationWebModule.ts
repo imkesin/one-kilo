@@ -13,7 +13,7 @@ import * as RcMap from "effect/RcMap"
 import * as S from "effect/Schema"
 import * as Jose from "jose"
 import { AuthenticationServerApiClient } from "~/infra/api/server/ServerApiClients"
-import { Authentication_ContextCookieNotFoundError, Authentication_ContextExpiredError } from "./AuthenticationErrors"
+import { AuthenticationContextCookieNotFoundError, AuthenticationContextExpiredError } from "./AuthenticationErrors"
 
 const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
 
@@ -55,14 +55,14 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         const cookie = getCookie(HTTP_ONLY_COOKIE_NAME)
 
         if (Predicate.isUndefined(cookie)) {
-          return yield* Authentication_ContextCookieNotFoundError.make()
+          return yield* AuthenticationContextCookieNotFoundError.make()
         }
 
         const decodedAuthenticationContext = yield* pipe(
           cookie,
           S.decode(AuthenticationContextFromJsonString),
           Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
-          Effect.mapError(() => Authentication_ContextCookieNotFoundError.make())
+          Effect.mapError(() => AuthenticationContextCookieNotFoundError.make())
         )
 
         return decodedAuthenticationContext
@@ -90,7 +90,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         })
 
       const currentAuthenticationContext = withValidAuthenticationContextOr(
-        () => Authentication_ContextExpiredError.make()
+        () => AuthenticationContextExpiredError.make()
       )
 
       const refreshedAuthenticationContextCache = yield* Cache.makeWith({

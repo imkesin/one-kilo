@@ -11,14 +11,11 @@ import { AuthenticationWebModule } from "~/modules/authentication/server/Authent
 import { UsersWebProxy } from "~/modules/users/server/UsersWebProxy"
 import { meAtomInitialValue } from "~/modules/users/usersAtoms"
 
-/*
- * TODO: Better error handling
- */
 const handleBeforeLoadAppRoute = pipe(
   Effect.flatMap(AuthenticationWebModule, ({ currentAuthenticationContext }) => currentAuthenticationContext),
   Effect.catchTags({
-    "Authentication:ContextCookieNotFoundError": () => Effect.fail(RedirectError.make({ href: "/sign-in" })),
-    "Authentication:ContextExpiredError": () => Effect.fail(RedirectError.make({ href: "/sign-in" }))
+    "AuthenticationContextCookieNotFoundError": () => RedirectError.make({ href: "/sign-in" }),
+    "AuthenticationContextExpiredError": () => RedirectError.make({ href: "/sign-in" })
   }),
   Effect.asVoid
 )

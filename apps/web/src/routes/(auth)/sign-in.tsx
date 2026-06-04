@@ -28,13 +28,13 @@ const handleAuthkitRedirect = Effect.fn(function*() {
 })
 
 const handleSignInRedirect = Effect.fn(function*() {
-  const authenticationWebModule = yield* AuthenticationWebModule
+  const authentication = yield* AuthenticationWebModule
 
   const { workspaceId } = yield* pipe(
-    authenticationWebModule.currentAuthenticationContext,
+    authentication.currentAuthenticationContext,
     Effect.catchTags({
-      "Authentication:ContextCookieNotFoundError": handleAuthkitRedirect,
-      "Authentication:ContextExpiredError": handleAuthkitRedirect
+      "AuthenticationContextCookieNotFoundError": handleAuthkitRedirect,
+      "AuthenticationContextExpiredError": handleAuthkitRedirect
     })
   )
 

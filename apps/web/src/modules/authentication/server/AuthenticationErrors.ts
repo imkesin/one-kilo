@@ -1,19 +1,19 @@
 import * as S from "effect/Schema"
 
-export class Authentication_ContextCookieNotFoundError extends S.TaggedError<Authentication_ContextCookieNotFoundError>(
-  "@one-kilo/web/Authentication:ContextCookieNotFoundError"
+export class AuthenticationContextCookieNotFoundError extends S.TaggedError<AuthenticationContextCookieNotFoundError>(
+  "@one-kilo/web/AuthenticationContextCookieNotFoundError"
 )(
-  "Authentication:ContextCookieNotFoundError",
+  "AuthenticationContextCookieNotFoundError",
   {},
   {
     description: "The authentication context cookie was not found"
   }
 ) {}
 
-export class Authentication_ContextExpiredError extends S.TaggedError<Authentication_ContextExpiredError>(
-  "@one-kilo/web/Authentication:ContextExpiredError"
+export class AuthenticationContextExpiredError extends S.TaggedError<AuthenticationContextExpiredError>(
+  "@one-kilo/web/AuthenticationContextExpiredError"
 )(
-  "Authentication:ContextExpiredError",
+  "AuthenticationContextExpiredError",
   {},
   {
     description: "The authentication context cookie is expired"

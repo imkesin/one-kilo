@@ -55,3 +55,17 @@ export const orDieWithUnexpectedError = <A, E, R>(message: string) => (self: Eff
       return UnexpectedError.make({ message, cause: error })
     })
   )
+
+export const orFailWithUnexpectedError =
+  <A, E, R>(message: string) => (self: Effect.Effect<A, E, R>): Effect.Effect<A, UnexpectedError, R> =>
+    pipe(
+      self,
+      Effect.tapErrorCause((cause) => Effect.logError(message, cause)),
+      Effect.mapError((error) => {
+        if (error instanceof UnexpectedError) {
+          return error
+        }
+
+        return UnexpectedError.make({ message, cause: error })
+      })
+    )

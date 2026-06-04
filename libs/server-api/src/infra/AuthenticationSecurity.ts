@@ -7,7 +7,7 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
 export class AuthenticationHeaders extends S.Class<AuthenticationHeaders>(
-  "@one-kilo/ServerApi/AuthenticationHeaders"
+  "@one-kilo/server-api/AuthenticationHeaders"
 )({
   authorization: S.NonEmptyTrimmedString
 }) {

@@ -8,9 +8,9 @@ export class WebApiClient extends Effect.Service<WebApiClient>()(
   {
     dependencies: [FetchHttpClient.layer],
     effect: Effect.gen(function*() {
-      const client = yield* HttpApiClient.make(WebApi)
+      const webApiClient = yield* HttpApiClient.make(WebApi)
 
-      return { client }
+      return webApiClient
     })
   }
 ) {}

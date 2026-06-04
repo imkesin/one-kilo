@@ -20,9 +20,8 @@ const handleSignInCallback = Effect.fn(
       UrlParams.schemaStruct(SignInCallbackSearchParams)
     )
 
-    const { handleExchangeCode } = yield* AuthenticationWebModule
-
-    const { workspaceId } = yield* handleExchangeCode(code)
+    const authentication = yield* AuthenticationWebModule
+    const { workspaceId } = yield* authentication.handleExchangeCode(code)
 
     return yield* RedirectError.make({
       to: "/ws/$workspaceId",
