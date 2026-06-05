@@ -48,11 +48,13 @@ export function AppNav({ config }: AppNavProps) {
           lightDarkBorderColor: "grey.6"
         })}
       >
-        {/*
-         * Header: topbar height (IconButton `height: 10` + `paddingBlock: 3`); border continues the
-         * topbar's bottom border. +1px because the topbar is auto-height (its border adds below 4rem)
-         * while this fixed-height border-box would otherwise absorb its own border.
-         */}
+        {
+          /*
+           * Header: topbar height (IconButton `height: 10` + `paddingBlock: 3`); border continues the
+           * topbar's bottom border. +1px because the topbar is auto-height (its border adds below 4rem)
+           * while this fixed-height border-box would otherwise absorb its own border.
+           */
+        }
         <div
           className={css({
             height: "calc(token(spacing.10) + token(spacing.3) * 2 + 1px)",

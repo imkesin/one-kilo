@@ -8,12 +8,12 @@ observed? The audit columns follow from the answer.
 Someone decided to do this (Person, Workspace, EmailAddress creations).
 
 - `created_by_user_id`, `updated_by_user_id`, `created_at` — all `NOT NULL`.
-- System actors that genuinely write the table are modeled as real users (e.g. a MachineClient
-  user) so the FK stays `NOT NULL`.
+- System actors that genuinely write the table are modeled as real users (e.g. a MachineClient user)
+  so the FK stays `NOT NULL`.
 
 ## Event records
 
-The runner *observed* the event; it didn't *decide* it (WorkflowSuspension, webhooks-received,
+The runner _observed_ the event; it didn't _decide_ it (WorkflowSuspension, webhooks-received,
 retries-exhausted, rate-limit-hits, deadletter-arrivals).
 
 - `occurred_at` only. No `created_by`.
