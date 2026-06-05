@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react"
-import { grid } from "~/generated/styled-system/patterns"
+import { grid } from "~/ui/generated/styled-system/patterns"
 import { FormInput } from "./FormInput"
 import { FormLabel } from "./FormLabel"
 

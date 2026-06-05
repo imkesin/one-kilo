@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cq, grid, hstack, vstack } from "~/generated/styled-system/patterns"
+import { cq, grid, hstack, vstack } from "~/ui/generated/styled-system/patterns"
 
 function HomeHeaderBlueprint({ children }: React.PropsWithChildren) {
   return (

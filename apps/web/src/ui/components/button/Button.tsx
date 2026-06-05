@@ -1,9 +1,9 @@
 import { Button as AriaKitButton } from "@ariakit/react"
 import { LoaderCircle } from "lucide-react"
 import { type ComponentPropsWithoutRef, forwardRef, type PropsWithChildren } from "react"
-import { styled } from "~/generated/styled-system/jsx"
-import { gridItem } from "~/generated/styled-system/patterns"
-import { button as buttonRecipe, type ButtonVariantProps } from "~/generated/styled-system/recipes"
+import { styled } from "~/ui/generated/styled-system/jsx"
+import { gridItem } from "~/ui/generated/styled-system/patterns"
+import { button as buttonRecipe, type ButtonVariantProps } from "~/ui/generated/styled-system/recipes"
 
 const StyledButton = styled(AriaKitButton, buttonRecipe)
 

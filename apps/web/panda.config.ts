@@ -11,7 +11,6 @@ export default defineConfig({
 
   include: [
     "./src/routes/**/*.{ts,tsx}",
-    "./src/content/**/*.{ts,tsx}",
     "./src/ui/**/*.{ts,tsx}"
   ],
 
@@ -54,5 +53,5 @@ export default defineConfig({
 
   jsxFramework: "react",
 
-  outdir: "./src/generated/styled-system"
+  outdir: "./src/ui/generated/styled-system"
 })

@@ -10,6 +10,8 @@ import { RedirectError } from "~/lib/RedirectError"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 import { UsersWebProxy } from "~/modules/users/server/UsersWebProxy"
 import { meAtomInitialValue } from "~/modules/users/usersAtoms"
+import { AppShell } from "~/ui/features/shell/AppShell"
+import { useAppNav } from "~/ui/features/shell/useAppNav"
 
 const handleBeforeLoadAppRoute = pipe(
   Effect.flatMap(AuthenticationWebModule, ({ currentAuthenticationContext }) => currentAuthenticationContext),
@@ -43,10 +45,13 @@ const loadAppRouteDataServerFn = createServerFn({ method: "GET" })
 
 function AuthedLayout() {
   const dehydratedState = Route.useLoaderData()
+  const nav = useAppNav()
 
   return (
     <ReactHydration.HydrationBoundary state={dehydratedState}>
-      <Outlet />
+      <AppShell nav={nav}>
+        <Outlet />
+      </AppShell>
     </ReactHydration.HydrationBoundary>
   )
 }

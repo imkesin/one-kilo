@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
-import { css } from "~/generated/styled-system/css"
-import { vstack } from "~/generated/styled-system/patterns"
 import { Button } from "~/ui/components/button/Button"
+import { css } from "~/ui/generated/styled-system/css"
+import { vstack } from "~/ui/generated/styled-system/patterns"
 
 type FatalErrorScreenVariant = "terminal" | "boundary" | "notFound"
 

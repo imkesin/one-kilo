@@ -14,7 +14,8 @@ export function SignInButton(props: SignInButtonProps) {
           {...buttonProps}
           to="/sign-in"
           /*
-           * [Required] This may result in a redirect to WorkOS Authkit; not always an in-app navigation.
+           * `reloadDocument` is required b/c this may result in a redirect to WorkOS Authkit; it's not always
+           * an in-app navigation.
            */
           reloadDocument
           title="Sign in"

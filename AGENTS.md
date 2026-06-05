@@ -11,9 +11,8 @@
 
 ## Specs
 
-`specs/` holds detailed guidelines for the entire repo, organized by topic (e.g.
-`specs/code-style/`). Before starting a task, list `specs/` and read any file whose path looks
-relevant to the work. Treat these as authoritative.
+`specs/` holds detailed guidelines for the entire repo, organized by topic. Before starting a task,
+list `specs/` and read any file whose path looks relevant to the work. Treat these as authoritative.
 
 ## Tooling
 

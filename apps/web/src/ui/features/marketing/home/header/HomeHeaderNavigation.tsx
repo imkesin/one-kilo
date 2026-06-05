@@ -1,5 +1,5 @@
-import { hstack } from "~/generated/styled-system/patterns"
-import { SignInButton } from "~/ui/components/auth/SignInButton"
+import { SignInButton } from "~/ui/features/auth/SignInButton"
+import { hstack } from "~/ui/generated/styled-system/patterns"
 
 export function HomeHeaderNavigation() {
   return (

@@ -1,5 +1,5 @@
-import { css } from "~/generated/styled-system/css"
-import { HStack } from "~/generated/styled-system/jsx"
+import { css } from "~/ui/generated/styled-system/css"
+import { HStack } from "~/ui/generated/styled-system/jsx"
 import { HomeHeaderNavigation } from "./HomeHeaderNavigation"
 
 export function HomeHeaderContent() {
@@ -12,7 +12,7 @@ export function HomeHeaderContent() {
           lightDarkColor: "grey.12"
         })}
       >
-        WorkOS + Effect
+        One Kilo
       </span>
       <HomeHeaderNavigation />
     </HStack>

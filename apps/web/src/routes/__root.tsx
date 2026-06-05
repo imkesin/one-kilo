@@ -34,8 +34,11 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       {
+        /*
+         * viewport-fit=cover exposes env(safe-area-inset-*) so the shell can pad around the notch and home indicator.
+         */
         name: "viewport",
-        content: "width=device-width, initial-scale=1"
+        content: "width=device-width, initial-scale=1, viewport-fit=cover"
       },
       { title: "One Kilo" },
       {

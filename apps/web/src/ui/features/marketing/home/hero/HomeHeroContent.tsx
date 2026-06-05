@@ -1,4 +1,4 @@
-import { css } from "~/generated/styled-system/css"
+import { css } from "~/ui/generated/styled-system/css"
 
 export function HomeHeroContent() {
   return (

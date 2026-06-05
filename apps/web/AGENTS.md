@@ -5,13 +5,17 @@ server/business logic, Panda CSS for styling, Ariakit primitives, WorkOS AuthKit
 
 ## Structure (`/src`)
 
-- `routes/` — file-based routes (see Routing).
+- `routes/` — file-based routes (see Routing). Thin: routing, loaders, server fns, composition. No
+  UI defined here.
 - `infra/` — app wiring: HTTP APIs, clients, and Effect runtimes.
-- `modules/` — server-side feature logic.
+- `modules/` — server-side feature logic (the client-UI counterpart is `ui/features/`).
 - `lib/` — app utilities.
-- `ui/` — components and theme (Ariakit + Panda).
-- `content/` — marketing content.
-- `generated/` — Panda codegen; do not edit.
+- `ui/` — all UI + theme (Ariakit + Panda). Two tiers by coupling:
+  - `ui/components/` — pure, portable primitives. Pure by convention: no router, no atoms, no
+    feature data. A piece earns its way down here only once reused and proven generic.
+  - `ui/features/<area>/` — app-wired, feature-scoped UI. May import the router/atoms; composes
+    primitives; colocates its own sub-components and route/data wiring. Reusable across routes.
+  - `ui/generated/` — Panda codegen (styled-system); do not edit.
 - `styles/` — global CSS.
 
 ## Routing
@@ -29,7 +33,7 @@ File-based under `src/routes`:
 Two runtimes, never mix:
 
 - **Server** — `getManagedWebServerRuntime()` (`~/infra/runtime/server/`); run effects via
-  `runWithWebServerRuntime()`. Add server deps to `WebServerLive`.
+  `runWithWebServerRuntime()`.
 - **Client** — `makeAtomRuntime` (`~/infra/runtime/client/`) for browser effects.
 
 ## Commands

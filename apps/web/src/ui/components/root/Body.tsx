@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react"
-import { css } from "~/generated/styled-system/css"
+import { css } from "~/ui/generated/styled-system/css"
 
 export function Body({ children }: PropsWithChildren) {
   return (
