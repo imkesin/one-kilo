@@ -10,22 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ErrorRouteImport } from './routes/error'
-import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
+import { Route as AuthedOnboardingRouteImport } from './routes/_authed/onboarding'
 import { Route as healthLivezRouteImport } from './routes/(health)/livez'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
-import { Route as AppWsWorkspaceIdRouteImport } from './routes/_app/ws/$workspaceId'
-import { Route as AppUUserIdRouteImport } from './routes/_app/u/$userId'
+import { Route as AuthedAdminRouteRouteImport } from './routes/_authed/admin/route'
+import { Route as AuthedAppRouteRouteImport } from './routes/_authed/_app/route'
 import { Route as authSignInCallbackRouteImport } from './routes/(auth)/sign-in.callback'
+import { Route as AuthedAdminFramedRouteRouteImport } from './routes/_authed/admin/_framed/route'
+import { Route as AuthedAppFramedRouteRouteImport } from './routes/_authed/_app/_framed/route'
+import { Route as AuthedAdminFramedIndexRouteImport } from './routes/_authed/admin/_framed/index'
+import { Route as AuthedAppFramedWsWorkspaceIdRouteImport } from './routes/_authed/_app/_framed/ws/$workspaceId'
+import { Route as AuthedAppFramedUUserIdRouteImport } from './routes/_authed/_app/_framed/u/$userId'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
   path: '/error',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRouteRoute = AppRouteRouteImport.update({
-  id: '/_app',
+const AuthedRouteRoute = AuthedRouteRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +44,11 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedOnboardingRoute = AuthedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
 const healthLivezRoute = healthLivezRouteImport.update({
   id: '/(health)/livez',
   path: '/livez',
@@ -48,71 +59,110 @@ const authSignInRoute = authSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppWsWorkspaceIdRoute = AppWsWorkspaceIdRouteImport.update({
-  id: '/ws/$workspaceId',
-  path: '/ws/$workspaceId',
-  getParentRoute: () => AppRouteRoute,
+const AuthedAdminRouteRoute = AuthedAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
-const AppUUserIdRoute = AppUUserIdRouteImport.update({
-  id: '/u/$userId',
-  path: '/u/$userId',
-  getParentRoute: () => AppRouteRoute,
+const AuthedAppRouteRoute = AuthedAppRouteRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
 const authSignInCallbackRoute = authSignInCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => authSignInRoute,
 } as any)
+const AuthedAdminFramedRouteRoute = AuthedAdminFramedRouteRouteImport.update({
+  id: '/_framed',
+  getParentRoute: () => AuthedAdminRouteRoute,
+} as any)
+const AuthedAppFramedRouteRoute = AuthedAppFramedRouteRouteImport.update({
+  id: '/_framed',
+  getParentRoute: () => AuthedAppRouteRoute,
+} as any)
+const AuthedAdminFramedIndexRoute = AuthedAdminFramedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthedAdminFramedRouteRoute,
+} as any)
+const AuthedAppFramedWsWorkspaceIdRoute =
+  AuthedAppFramedWsWorkspaceIdRouteImport.update({
+    id: '/ws/$workspaceId',
+    path: '/ws/$workspaceId',
+    getParentRoute: () => AuthedAppFramedRouteRoute,
+  } as any)
+const AuthedAppFramedUUserIdRoute = AuthedAppFramedUUserIdRouteImport.update({
+  id: '/u/$userId',
+  path: '/u/$userId',
+  getParentRoute: () => AuthedAppFramedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
+  '/admin': typeof AuthedAdminRouteRouteWithChildren
   '/sign-in': typeof authSignInRouteWithChildren
   '/livez': typeof healthLivezRoute
+  '/onboarding': typeof AuthedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
   '/sign-in/callback': typeof authSignInCallbackRoute
-  '/u/$userId': typeof AppUUserIdRoute
-  '/ws/$workspaceId': typeof AppWsWorkspaceIdRoute
+  '/admin/': typeof AuthedAdminFramedIndexRoute
+  '/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
+  '/admin': typeof AuthedAdminFramedIndexRoute
   '/sign-in': typeof authSignInRouteWithChildren
   '/livez': typeof healthLivezRoute
+  '/onboarding': typeof AuthedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
   '/sign-in/callback': typeof authSignInCallbackRoute
-  '/u/$userId': typeof AppUUserIdRoute
-  '/ws/$workspaceId': typeof AppWsWorkspaceIdRoute
+  '/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_app': typeof AppRouteRouteWithChildren
+  '/_authed': typeof AuthedRouteRouteWithChildren
   '/error': typeof ErrorRoute
+  '/_authed/_app': typeof AuthedAppRouteRouteWithChildren
+  '/_authed/admin': typeof AuthedAdminRouteRouteWithChildren
   '/(auth)/sign-in': typeof authSignInRouteWithChildren
   '/(health)/livez': typeof healthLivezRoute
+  '/_authed/onboarding': typeof AuthedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
+  '/_authed/_app/_framed': typeof AuthedAppFramedRouteRouteWithChildren
+  '/_authed/admin/_framed': typeof AuthedAdminFramedRouteRouteWithChildren
   '/(auth)/sign-in/callback': typeof authSignInCallbackRoute
-  '/_app/u/$userId': typeof AppUUserIdRoute
-  '/_app/ws/$workspaceId': typeof AppWsWorkspaceIdRoute
+  '/_authed/admin/_framed/': typeof AuthedAdminFramedIndexRoute
+  '/_authed/_app/_framed/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/_authed/_app/_framed/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/error'
+    | '/admin'
     | '/sign-in'
     | '/livez'
+    | '/onboarding'
     | '/api/$'
     | '/sign-in/callback'
+    | '/admin/'
     | '/u/$userId'
     | '/ws/$workspaceId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/error'
+    | '/admin'
     | '/sign-in'
     | '/livez'
+    | '/onboarding'
     | '/api/$'
     | '/sign-in/callback'
     | '/u/$userId'
@@ -120,19 +170,25 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_app'
+    | '/_authed'
     | '/error'
+    | '/_authed/_app'
+    | '/_authed/admin'
     | '/(auth)/sign-in'
     | '/(health)/livez'
+    | '/_authed/onboarding'
     | '/api/$'
+    | '/_authed/_app/_framed'
+    | '/_authed/admin/_framed'
     | '/(auth)/sign-in/callback'
-    | '/_app/u/$userId'
-    | '/_app/ws/$workspaceId'
+    | '/_authed/admin/_framed/'
+    | '/_authed/_app/_framed/u/$userId'
+    | '/_authed/_app/_framed/ws/$workspaceId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRouteRoute: typeof AppRouteRouteWithChildren
+  AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
   ErrorRoute: typeof ErrorRoute
   authSignInRoute: typeof authSignInRouteWithChildren
   healthLivezRoute: typeof healthLivezRoute
@@ -148,11 +204,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app': {
-      id: '/_app'
+    '/_authed': {
+      id: '/_authed'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AppRouteRouteImport
+      preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -169,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/onboarding': {
+      id: '/_authed/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthedOnboardingRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/(health)/livez': {
       id: '/(health)/livez'
       path: '/livez'
@@ -183,19 +246,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/ws/$workspaceId': {
-      id: '/_app/ws/$workspaceId'
-      path: '/ws/$workspaceId'
-      fullPath: '/ws/$workspaceId'
-      preLoaderRoute: typeof AppWsWorkspaceIdRouteImport
-      parentRoute: typeof AppRouteRoute
+    '/_authed/admin': {
+      id: '/_authed/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthedAdminRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
-    '/_app/u/$userId': {
-      id: '/_app/u/$userId'
-      path: '/u/$userId'
-      fullPath: '/u/$userId'
-      preLoaderRoute: typeof AppUUserIdRouteImport
-      parentRoute: typeof AppRouteRoute
+    '/_authed/_app': {
+      id: '/_authed/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedAppRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
     '/(auth)/sign-in/callback': {
       id: '/(auth)/sign-in/callback'
@@ -204,21 +267,108 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignInCallbackRouteImport
       parentRoute: typeof authSignInRoute
     }
+    '/_authed/admin/_framed': {
+      id: '/_authed/admin/_framed'
+      path: ''
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthedAdminFramedRouteRouteImport
+      parentRoute: typeof AuthedAdminRouteRoute
+    }
+    '/_authed/_app/_framed': {
+      id: '/_authed/_app/_framed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedAppFramedRouteRouteImport
+      parentRoute: typeof AuthedAppRouteRoute
+    }
+    '/_authed/admin/_framed/': {
+      id: '/_authed/admin/_framed/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthedAdminFramedIndexRouteImport
+      parentRoute: typeof AuthedAdminFramedRouteRoute
+    }
+    '/_authed/_app/_framed/ws/$workspaceId': {
+      id: '/_authed/_app/_framed/ws/$workspaceId'
+      path: '/ws/$workspaceId'
+      fullPath: '/ws/$workspaceId'
+      preLoaderRoute: typeof AuthedAppFramedWsWorkspaceIdRouteImport
+      parentRoute: typeof AuthedAppFramedRouteRoute
+    }
+    '/_authed/_app/_framed/u/$userId': {
+      id: '/_authed/_app/_framed/u/$userId'
+      path: '/u/$userId'
+      fullPath: '/u/$userId'
+      preLoaderRoute: typeof AuthedAppFramedUUserIdRouteImport
+      parentRoute: typeof AuthedAppFramedRouteRoute
+    }
   }
 }
 
-interface AppRouteRouteChildren {
-  AppUUserIdRoute: typeof AppUUserIdRoute
-  AppWsWorkspaceIdRoute: typeof AppWsWorkspaceIdRoute
+interface AuthedAppFramedRouteRouteChildren {
+  AuthedAppFramedUUserIdRoute: typeof AuthedAppFramedUUserIdRoute
+  AuthedAppFramedWsWorkspaceIdRoute: typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 
-const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppUUserIdRoute: AppUUserIdRoute,
-  AppWsWorkspaceIdRoute: AppWsWorkspaceIdRoute,
+const AuthedAppFramedRouteRouteChildren: AuthedAppFramedRouteRouteChildren = {
+  AuthedAppFramedUUserIdRoute: AuthedAppFramedUUserIdRoute,
+  AuthedAppFramedWsWorkspaceIdRoute: AuthedAppFramedWsWorkspaceIdRoute,
 }
 
-const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
-  AppRouteRouteChildren,
+const AuthedAppFramedRouteRouteWithChildren =
+  AuthedAppFramedRouteRoute._addFileChildren(AuthedAppFramedRouteRouteChildren)
+
+interface AuthedAppRouteRouteChildren {
+  AuthedAppFramedRouteRoute: typeof AuthedAppFramedRouteRouteWithChildren
+}
+
+const AuthedAppRouteRouteChildren: AuthedAppRouteRouteChildren = {
+  AuthedAppFramedRouteRoute: AuthedAppFramedRouteRouteWithChildren,
+}
+
+const AuthedAppRouteRouteWithChildren = AuthedAppRouteRoute._addFileChildren(
+  AuthedAppRouteRouteChildren,
+)
+
+interface AuthedAdminFramedRouteRouteChildren {
+  AuthedAdminFramedIndexRoute: typeof AuthedAdminFramedIndexRoute
+}
+
+const AuthedAdminFramedRouteRouteChildren: AuthedAdminFramedRouteRouteChildren =
+  {
+    AuthedAdminFramedIndexRoute: AuthedAdminFramedIndexRoute,
+  }
+
+const AuthedAdminFramedRouteRouteWithChildren =
+  AuthedAdminFramedRouteRoute._addFileChildren(
+    AuthedAdminFramedRouteRouteChildren,
+  )
+
+interface AuthedAdminRouteRouteChildren {
+  AuthedAdminFramedRouteRoute: typeof AuthedAdminFramedRouteRouteWithChildren
+}
+
+const AuthedAdminRouteRouteChildren: AuthedAdminRouteRouteChildren = {
+  AuthedAdminFramedRouteRoute: AuthedAdminFramedRouteRouteWithChildren,
+}
+
+const AuthedAdminRouteRouteWithChildren =
+  AuthedAdminRouteRoute._addFileChildren(AuthedAdminRouteRouteChildren)
+
+interface AuthedRouteRouteChildren {
+  AuthedAppRouteRoute: typeof AuthedAppRouteRouteWithChildren
+  AuthedAdminRouteRoute: typeof AuthedAdminRouteRouteWithChildren
+  AuthedOnboardingRoute: typeof AuthedOnboardingRoute
+}
+
+const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
+  AuthedAppRouteRoute: AuthedAppRouteRouteWithChildren,
+  AuthedAdminRouteRoute: AuthedAdminRouteRouteWithChildren,
+  AuthedOnboardingRoute: AuthedOnboardingRoute,
+}
+
+const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
+  AuthedRouteRouteChildren,
 )
 
 interface authSignInRouteChildren {
@@ -235,7 +385,7 @@ const authSignInRouteWithChildren = authSignInRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRouteRoute: AppRouteRouteWithChildren,
+  AuthedRouteRoute: AuthedRouteRouteWithChildren,
   ErrorRoute: ErrorRoute,
   authSignInRoute: authSignInRouteWithChildren,
   healthLivezRoute: healthLivezRoute,

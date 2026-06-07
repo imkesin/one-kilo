@@ -10,10 +10,9 @@ import { RedirectError } from "~/lib/RedirectError"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 import { UsersWebProxy } from "~/modules/users/server/UsersWebProxy"
 import { meAtomInitialValue } from "~/modules/users/usersAtoms"
-import { AppShell } from "~/ui/features/shell/AppShell"
-import { useAppNav } from "~/ui/features/shell/useAppNav"
+import { Viewport } from "~/ui/components/root/Viewport"
 
-const handleBeforeLoadAppRoute = pipe(
+const handleBeforeLoadAuthed = pipe(
   Effect.flatMap(AuthenticationWebModule, ({ currentAuthenticationContext }) => currentAuthenticationContext),
   Effect.catchTags({
     "AuthenticationContextCookieNotFoundError": () => RedirectError.make({ href: "/sign-in" }),
@@ -21,14 +20,14 @@ const handleBeforeLoadAppRoute = pipe(
   }),
   Effect.asVoid
 )
-const beforeLoadAppRouteServerFn = createServerFn({ method: "GET" })
+const beforeLoadAuthedServerFn = createServerFn({ method: "GET" })
   .handler(() => {
     const { signal } = getRequest()
 
-    return runWithWebServerRuntime(handleBeforeLoadAppRoute, { signal })
+    return runWithWebServerRuntime(handleBeforeLoadAuthed, { signal })
   })
 
-const handleLoadAppRouteData = Effect.gen(function*() {
+const handleLoadAuthedData = Effect.gen(function*() {
   const usersWebProxy = yield* UsersWebProxy
   const me = yield* usersWebProxy.me()
 
@@ -36,30 +35,29 @@ const handleLoadAppRouteData = Effect.gen(function*() {
 
   return Hydration.dehydrate(registry)
 })
-const loadAppRouteDataServerFn = createServerFn({ method: "GET" })
+const loadAuthedDataServerFn = createServerFn({ method: "GET" })
   .handler(() => {
     const { signal } = getRequest()
 
-    return runWithWebServerRuntime(handleLoadAppRouteData, { signal })
+    return runWithWebServerRuntime(handleLoadAuthedData, { signal })
   })
 
 function AuthedLayout() {
   const dehydratedState = Route.useLoaderData()
-  const nav = useAppNav()
 
   return (
     <ReactHydration.HydrationBoundary state={dehydratedState}>
-      <AppShell nav={nav}>
+      <Viewport>
         <Outlet />
-      </AppShell>
+      </Viewport>
     </ReactHydration.HydrationBoundary>
   )
 }
 
-export const Route = createFileRoute("/_app")({
+export const Route = createFileRoute("/_authed")({
   ssr: "data-only",
-  beforeLoad: ({ abortController: { signal } }) => beforeLoadAppRouteServerFn({ signal }),
-  loader: ({ abortController: { signal } }) => loadAppRouteDataServerFn({ signal }),
+  beforeLoad: ({ abortController: { signal } }) => beforeLoadAuthedServerFn({ signal }),
+  loader: ({ abortController: { signal } }) => loadAuthedDataServerFn({ signal }),
   staleTime: Infinity,
   component: AuthedLayout
 })

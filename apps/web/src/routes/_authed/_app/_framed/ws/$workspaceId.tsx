@@ -8,6 +8,6 @@ function WorkspacePage() {
   )
 }
 
-export const Route = createFileRoute("/_app/ws/$workspaceId")({
+export const Route = createFileRoute("/_authed/_app/_framed/ws/$workspaceId")({
   component: WorkspacePage
 })

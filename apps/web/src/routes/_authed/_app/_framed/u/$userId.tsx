@@ -36,6 +36,6 @@ function UserPage() {
   )
 }
 
-export const Route = createFileRoute("/_app/u/$userId")({
+export const Route = createFileRoute("/_authed/_app/_framed/u/$userId")({
   component: UserPage
 })
