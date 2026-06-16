@@ -12,7 +12,7 @@
     "module": "NodeNext",
     "outDir": "dist",
     "sourceMap": true,
-    "lib": ["ES2024"]
+    "lib": ["ESNext"]
   },
   "include": [],
   "references": [

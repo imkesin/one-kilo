@@ -19,7 +19,7 @@
     "sourceMap": true,
 
     /* If your code doesn't run in the DOM: */
-    "lib": ["ES2024"]
+    "lib": ["ESNext"]
   },
   "include": [],
   "references": [

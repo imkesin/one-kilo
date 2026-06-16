@@ -117,6 +117,7 @@
       "cloudflared",
       "codegen",
       "crockford",
+      "daterange",
       "hstack",
       "millis",
       "overrideable",

@@ -1,6 +1,9 @@
 import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
 import * as Effect from "effect/Effect"
+import { AthleteId } from "./AthleteId.js"
 import { AuditLogId } from "./AuditLogId.js"
+import { CoachId } from "./CoachId.js"
+import { CoachingRelationshipId } from "./CoachingRelationshipId.js"
 import { EmailAddressId } from "./EmailAddressId.js"
 import { MachineClientId } from "./MachineClientId.js"
 import { PersonId } from "./PersonId.js"
@@ -16,7 +19,10 @@ export class DomainIdGenerator extends Effect.Service<DomainIdGenerator>()(
     effect: Effect.gen(function*() {
       const uuidGenerator = yield* UUIDGenerator.UUIDGenerator
       return {
+        athleteId: Effect.map(uuidGenerator.v7, AthleteId.make),
         auditLogId: Effect.map(uuidGenerator.v7, AuditLogId.make),
+        coachId: Effect.map(uuidGenerator.v7, CoachId.make),
+        coachingRelationshipId: Effect.map(uuidGenerator.v7, CoachingRelationshipId.make),
         emailAddressId: Effect.map(uuidGenerator.v7, EmailAddressId.make),
         machineClientId: Effect.map(uuidGenerator.v7, MachineClientId.make),
         personId: Effect.map(uuidGenerator.v7, PersonId.make),
