@@ -61,7 +61,10 @@ export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(
     Effect.flatMap(
       Option.match({
         onNone: () => retriedTransaction,
-        onSome: () => pg.withTransaction(self)
+        /*
+         * Already in a transaction; join it directly
+         */
+        onSome: () => self
       })
     )
   )
