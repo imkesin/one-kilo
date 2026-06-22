@@ -75,5 +75,76 @@ describe("`withSerializableTransaction`", () => {
         const attempts = yield* Ref.get(bAttempts)
         expect(attempts).toBeGreaterThan(1)
       }))
+
+    it.effect("nests inside an existing transaction without re-setting the isolation level", () =>
+      Effect.gen(function*() {
+        const sql = yield* SqlClient.SqlClient
+        const pg = yield* PgClient.PgClient
+
+        yield* sql`CREATE TABLE IF NOT EXISTS _test_nested_tx (id INT PRIMARY KEY)`
+        yield* sql`TRUNCATE _test_nested_tx`
+
+        const inner = pipe(
+          Effect.gen(function*() {
+            const sql = yield* SqlClient.SqlClient
+            yield* sql`INSERT INTO _test_nested_tx (id) VALUES (2)`
+          }),
+          withSerializableTransaction(pg)
+        )
+
+        const outer = pipe(
+          Effect.gen(function*() {
+            const sql = yield* SqlClient.SqlClient
+            /*
+             * A statement runs in the outer transaction *before* the nested call. This is exactly
+             * the condition under which a second `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`
+             * would fail with Postgres `25001` ("must be called before any query"). The nested call
+             * detects the active `TransactionConnection` and opens a savepoint instead.
+             */
+            yield* sql`INSERT INTO _test_nested_tx (id) VALUES (1)`
+            yield* inner
+          }),
+          withSerializableTransaction(pg)
+        )
+
+        yield* outer
+
+        const rows = yield* sql`SELECT id FROM _test_nested_tx ORDER BY id`
+        expect(rows.map((row) => row.id)).toEqual([1, 2])
+      }))
+
+    it.effect("ties a nested transaction to the outer one, so it rolls back with it", () =>
+      Effect.gen(function*() {
+        const sql = yield* SqlClient.SqlClient
+        const pg = yield* PgClient.PgClient
+
+        yield* sql`CREATE TABLE IF NOT EXISTS _test_nested_tx_rollback (id INT PRIMARY KEY)`
+        yield* sql`TRUNCATE _test_nested_tx_rollback`
+
+        const inner = pipe(
+          Effect.gen(function*() {
+            const sql = yield* SqlClient.SqlClient
+            yield* sql`INSERT INTO _test_nested_tx_rollback (id) VALUES (2)`
+          }),
+          withSerializableTransaction(pg)
+        )
+
+        const outer = pipe(
+          Effect.gen(function*() {
+            const sql = yield* SqlClient.SqlClient
+            yield* sql`INSERT INTO _test_nested_tx_rollback (id) VALUES (1)`
+            yield* inner
+            // Fail the outer transaction *after* the nested one completed successfully.
+            return yield* Effect.fail("rollback" as const)
+          }),
+          withSerializableTransaction(pg)
+        )
+
+        yield* Effect.either(outer)
+
+        // The nested insert was not an independent commit: rolling back the outer discards both.
+        const rows = yield* sql`SELECT id FROM _test_nested_tx_rollback`
+        expect(rows.length).toBe(0)
+      }))
   })
 })
