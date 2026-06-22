@@ -99,7 +99,7 @@ describe("`withSerializableTransaction`", () => {
              * A statement runs in the outer transaction *before* the nested call. This is exactly
              * the condition under which a second `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`
              * would fail with Postgres `25001` ("must be called before any query"). The nested call
-             * detects the active `TransactionConnection` and opens a savepoint instead.
+             * detects the active `TransactionConnection` and joins it instead of re-issuing the SET.
              */
             yield* sql`INSERT INTO _test_nested_tx (id) VALUES (1)`
             yield* inner
@@ -145,6 +145,70 @@ describe("`withSerializableTransaction`", () => {
         // The nested insert was not an independent commit: rolling back the outer discards both.
         const rows = yield* sql`SELECT id FROM _test_nested_tx_rollback`
         expect(rows.length).toBe(0)
+      }))
+
+    it.effect("bubbles a nested serialization conflict up to the outermost retry", () =>
+      Effect.gen(function*() {
+        const sql = yield* SqlClient.SqlClient
+        const pg = yield* PgClient.PgClient
+
+        yield* sql`CREATE TABLE IF NOT EXISTS _test_nested_conflict (id INT PRIMARY KEY, value INT NOT NULL)`
+        yield* sql`TRUNCATE _test_nested_conflict`
+        yield* sql`INSERT INTO _test_nested_conflict (id, value) VALUES (1, 0)`
+
+        const aHasRead = yield* Deferred.make<void>()
+        const bHasRead = yield* Deferred.make<void>()
+        const aDone = yield* Deferred.make<void>()
+
+        // How many times B's *outer* body runs — proves a conflict raised inside the nested call
+        // replayed the entire outer transaction.
+        const bOuterAttempts = yield* Ref.make(0)
+
+        const txA = pipe(
+          Effect.gen(function*() {
+            const sql = yield* SqlClient.SqlClient
+            yield* sql`SELECT value FROM _test_nested_conflict WHERE id = 1`
+            yield* Deferred.succeed(aHasRead, void 0)
+            yield* Deferred.await(bHasRead)
+            yield* sql`UPDATE _test_nested_conflict SET value = value + 1 WHERE id = 1`
+          }),
+          withSerializableTransaction(pg),
+          Effect.tap(() => Deferred.succeed(aDone, void 0))
+        )
+
+        // B's conflicting read+write live inside a nested transaction. On the first attempt the
+        // write hits a 40001 that must bubble out to B's outermost retry.
+        const txB = pipe(
+          Effect.gen(function*() {
+            yield* Ref.update(bOuterAttempts, (n) => n + 1)
+
+            yield* pipe(
+              Effect.gen(function*() {
+                const sql = yield* SqlClient.SqlClient
+                yield* Deferred.await(aHasRead)
+                yield* sql`SELECT value FROM _test_nested_conflict WHERE id = 1`
+                yield* Deferred.succeed(bHasRead, void 0)
+                yield* Deferred.await(aDone)
+                yield* sql`UPDATE _test_nested_conflict SET value = value + 1 WHERE id = 1`
+              }),
+              withSerializableTransaction(pg)
+            )
+          }),
+          withSerializableTransaction(pg)
+        )
+
+        const fiberA = yield* Effect.fork(txA)
+        const fiberB = yield* Effect.fork(txB)
+        yield* Fiber.join(fiberA)
+        yield* Fiber.join(fiberB)
+
+        // Both increments applied — the replayed outer transaction re-read and succeeded.
+        const [result] = yield* sql`SELECT value FROM _test_nested_conflict WHERE id = 1`
+        expect(result.value).toBe(2)
+
+        // The whole outer transaction replayed in response to the nested conflict.
+        const attempts = yield* Ref.get(bOuterAttempts)
+        expect(attempts).toBeGreaterThan(1)
       }))
   })
 })
