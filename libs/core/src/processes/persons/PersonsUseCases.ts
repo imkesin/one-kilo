@@ -1,4 +1,6 @@
 import * as PgClient from "@effect/sql-pg/PgClient"
+import * as PersonPolicies from "@one-kilo/domain/authorization/PersonPolicies"
+import * as Policy from "@one-kilo/domain/authorization/Policy"
 import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import { PersonNotFoundError } from "@one-kilo/domain/errors/PersonErrors"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
@@ -48,7 +50,7 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
             person: beforePerson,
             maybeUser
           } = yield* pipe(
-            personsQueryModule.retrievePersonWithUser({ personId }),
+            personsQueryModule.retrievePersonEntityWithUser({ personId }),
             Effect.flatMap(
               Option.match({
                 onNone: () => PersonNotFoundError.make({ personId }),
@@ -88,7 +90,12 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
 
           return UpdatePersonOutcome.Updated({ person: updatedPerson })
         },
-        PgClientExtensions.withSerializableTransaction(pg)
+        PgClientExtensions.withSerializableTransaction(pg),
+        (effect, { personId }) =>
+          pipe(
+            effect,
+            Policy.withPolicy(PersonPolicies.canManage(personId))
+          )
       )
 
       return { update }

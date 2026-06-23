@@ -20,7 +20,7 @@ const EntityBaseFields = {
 const PersonNameFromWorkOSName = pipe(
   S.Struct({
     firstName: S.NonEmptyTrimmedString,
-    lastName: S.NonEmptyTrimmedString
+    lastName: S.NullOr(S.NonEmptyTrimmedString)
   }),
   S.transformOrFail(
     S.Struct({
@@ -31,19 +31,19 @@ const PersonNameFromWorkOSName = pipe(
       decode: ({ firstName, lastName }) =>
         Effect.succeed({
           preferredName: firstName,
-          fullName: `${firstName} ${lastName}`
+          fullName: lastName === null ? firstName : `${firstName} ${lastName}`
         }),
       encode: ({ fullName }, _, ast) => {
         const [firstName, ...rest] = fullName.split(/\s+/)
         const lastName = rest.join(" ")
 
-        return firstName && lastName.length > 0
-          ? Effect.succeed({ firstName, lastName })
+        return firstName
+          ? Effect.succeed({ firstName, lastName: lastName.length > 0 ? lastName : null })
           : Effect.fail(
             new ParseResult.Type(
               ast,
               fullName,
-              "`fullName` must contain at least two whitespace-separated parts"
+              "`fullName` must contain at least one non-whitespace part"
             )
           )
       }
@@ -104,6 +104,20 @@ export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/
 
   diff = (fields: PersonFieldsPatch) => diffPersonFields(this, fields)
 }
+
+export class Person extends S.TaggedClass<Person>("@one-kilo/domain/Person")(
+  "Person",
+  {
+    ...EntityBaseFields,
+
+    emailAddresses: S.Array(EmailAddressOnPerson)
+  },
+  {
+    identifier: "Person",
+    title: "Person",
+    description: "A person"
+  }
+) {}
 
 export class PersonOnUser extends S.TaggedClass<PersonOnUser>("@one-kilo/domain/PersonOnUser")(
   "PersonOnUser",

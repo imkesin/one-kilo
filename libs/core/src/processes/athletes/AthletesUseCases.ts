@@ -6,14 +6,14 @@ import { PersonNotFoundError } from "@one-kilo/domain/errors/PersonErrors"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
-import { AthletesQueryRepository } from "@one-kilo/sql/modules/athletes/AthletesQueryRepository"
-import { PersonsQueryRepository } from "@one-kilo/sql/modules/persons/PersonsQueryRepository"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import { AthletesCreationModule } from "../../modules/athletes/AthletesCreationModule.ts"
+import { AthletesQueryModule } from "../../modules/athletes/AthletesQueryModule.ts"
+import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
 
 type RegisterAthleteParameters = {
   personId: PersonId
@@ -35,24 +35,24 @@ export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
   {
     dependencies: [
       AthletesCreationModule.Default,
-      AthletesQueryRepository.Default,
-      PersonsQueryRepository.Default
+      AthletesQueryModule.Default,
+      PersonsQueryModule.Default
     ],
     effect: Effect.gen(function*() {
       const pg = yield* PgClient.PgClient
 
       const athletesCreationModule = yield* AthletesCreationModule
-      const athletesQueryRepository = yield* AthletesQueryRepository
-      const personsQueryRepository = yield* PersonsQueryRepository
+      const athletesQueryModule = yield* AthletesQueryModule
+      const personsQueryModule = yield* PersonsQueryModule
 
       const ensureAthlete = Effect.fn("AthletesUseCases.ensureAthlete")(
         function*({ personId, performedByUserId }: EnsureAthleteParameters) {
-          const maybePerson = yield* personsQueryRepository.findPersonWithUser({ personId })
+          const maybePerson = yield* personsQueryModule.retrievePersonEntity({ personId })
           if (Option.isNone(maybePerson)) {
             return yield* Effect.fail(new PersonNotFoundError({ personId }))
           }
 
-          const maybeExistingAthlete = yield* athletesQueryRepository.findAthleteEntityByPersonId({ personId })
+          const maybeExistingAthlete = yield* athletesQueryModule.retrieveAthleteEntityByPersonId({ personId })
           if (Option.isSome(maybeExistingAthlete)) {
             return RegisterAthleteOutcome.AlreadyRegistered({ athlete: maybeExistingAthlete.value })
           }

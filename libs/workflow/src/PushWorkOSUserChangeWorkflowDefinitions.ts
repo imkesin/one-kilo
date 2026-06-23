@@ -45,7 +45,10 @@ export const PushWorkOSUserChangeWorkflow = Workflow.make({
     expected: pipe(
       S.Struct({
         firstName: S.NonEmptyTrimmedString,
-        lastName: S.NonEmptyTrimmedString
+        lastName: pipe(
+          S.NonEmptyTrimmedString,
+          S.NullOr
+        )
       }),
       S.annotations({
         description: "The expected state of the WorkOS user before applying changes."

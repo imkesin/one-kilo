@@ -405,7 +405,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
             const updated = UsersModel.make({
               ...existing,
               firstName: parameters.firstName ?? existing.firstName,
-              lastName: parameters.lastName ?? existing.lastName,
+              lastName: parameters.lastName === undefined ? existing.lastName : parameters.lastName,
               email: parameters.email ? EmailAddress.make(parameters.email) : existing.email,
               emailVerified: parameters.emailVerified ?? existing.emailVerified,
               externalId: parameters.externalId ?? existing.externalId,

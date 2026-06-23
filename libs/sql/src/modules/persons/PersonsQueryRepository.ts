@@ -8,10 +8,15 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 import { toPersonUserEntity } from "../users/internal/UsersModelTransformations.ts"
 import { UsersModel } from "../users/UsersModel.ts"
-import { toPersonEntity } from "./internal/PersonsModelTransformations.ts"
+import { PersonRow, toPerson, toPersonEntity } from "./internal/PersonsModelTransformations.ts"
 import { PersonsModel } from "./PersonsModel.ts"
+
+type FindPersonByIdParameters = {
+  readonly personId: PersonId
+}
 
 type FindPersonWithUserParameters = {
   readonly personId: PersonId
@@ -29,7 +34,57 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
     effect: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findPersonWithUserSchema = SqlSchema.findOne({
+      const findPersonByIdSchema = SqlSchema.findOne({
+        Request: PersonId,
+        Result: PersonRow,
+        execute: (personId) =>
+          sql`
+            SELECT
+              p.*,
+              ${
+            sql.unsafe(EmailAddressesModel.asJsonBAggForPerson({ alias: "ea", personAlias: "p" }))
+          } AS "emailAddresses"
+            FROM persons p
+            WHERE
+              p.id = ${personId}
+              AND p.archived_at IS NULL
+            LIMIT 1
+          `
+      })
+      const findPersonById = Effect.fn("PersonsQueryRepository.findPersonById")(
+        function*({ personId }: FindPersonByIdParameters) {
+          return yield* Effect.map(
+            findPersonByIdSchema(personId),
+            Option.map(toPerson)
+          )
+        },
+        orDieWithUnexpectedError("An unexpected error occurred while finding a person")
+      )
+
+      const findPersonEntitySchema = SqlSchema.findOne({
+        Request: PersonId,
+        Result: PersonsModel.select,
+        execute: (personId) =>
+          sql`
+            SELECT *
+            FROM persons p
+            WHERE
+              p.id = ${personId}
+              AND p.archived_at IS NULL
+            LIMIT 1
+          `
+      })
+      const findPersonEntity = Effect.fn("PersonsQueryRepository.findPersonEntity")(
+        function*({ personId }: FindPersonByIdParameters) {
+          return yield* Effect.map(
+            findPersonEntitySchema(personId),
+            Option.map(toPersonEntity)
+          )
+        },
+        orDieWithUnexpectedError("An unexpected error occurred while finding a person")
+      )
+
+      const findPersonEntityWithUserSchema = SqlSchema.findOne({
         Request: PersonId,
         Result: S.Struct({
           person: PersonsModel.select,
@@ -54,9 +109,9 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
           `
       })
 
-      const findPersonWithUser = Effect.fn("PersonsQueryRepository.findPersonWithUser")(
+      const findPersonEntityWithUser = Effect.fn("PersonsQueryRepository.findPersonEntityWithUser")(
         function*({ personId }: FindPersonWithUserParameters) {
-          const maybeRow = yield* findPersonWithUserSchema(personId)
+          const maybeRow = yield* findPersonEntityWithUserSchema(personId)
 
           if (Option.isNone(maybeRow)) {
             return Option.none<PersonWithUser>()
@@ -82,7 +137,11 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         orDieWithUnexpectedError("An unexpected error occurred while finding a person with attached user")
       )
 
-      return { findPersonWithUser }
+      return {
+        findPersonById,
+        findPersonEntity,
+        findPersonEntityWithUser
+      }
     })
   }
 ) {}

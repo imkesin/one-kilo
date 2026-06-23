@@ -9,7 +9,8 @@ export class AthletesQueryModule extends Effect.Service<AthletesQueryModule>()(
       const athletesQueryRepository = yield* AthletesQueryRepository
 
       return {
-        retrieveAthlete: athletesQueryRepository.findAthleteById
+        retrieveAthlete: athletesQueryRepository.findAthleteById,
+        retrieveAthleteEntityByPersonId: athletesQueryRepository.findAthleteEntityByPersonId
       }
     })
   }

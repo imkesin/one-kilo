@@ -4,6 +4,7 @@ import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import type * as HttpApp from "@effect/platform/HttpApp"
 import * as HttpMiddleware from "@effect/platform/HttpMiddleware"
 import * as HttpServer from "@effect/platform/HttpServer"
+import * as WorkflowEngine from "@effect/workflow/WorkflowEngine"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
@@ -16,6 +17,7 @@ import { WorkOSLive } from "./infra/WorkOS.ts"
 import { AthletesHttp } from "./modules/athletes/AthletesHttp.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
+import { PersonsHttp } from "./modules/persons/PersonsHttp.ts"
 import { UsersHttp } from "./modules/users/UsersHttp.ts"
 
 const ServerApiLive = pipe(
@@ -24,6 +26,7 @@ const ServerApiLive = pipe(
     AthletesHttp,
     AuthenticationHttp,
     HealthHttp,
+    PersonsHttp,
     UsersHttp
   ]),
   Layer.provide(AuthenticationMiddlewareLive)
@@ -45,6 +48,7 @@ const middleware = (httpApp: HttpApp.Default) =>
 export const HttpTestWithoutInfra = pipe(
   HttpApiBuilder.serve(middleware),
   Layer.provide(ServerApiLive),
+  Layer.provide(WorkflowEngine.layerMemory),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 

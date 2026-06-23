@@ -4,10 +4,12 @@ import { AuthenticationMiddleware } from "./infra/AuthenticationSecurity.ts"
 import { AthletesApi } from "./modules/athletes/AthletesApi.ts"
 import { AuthenticationApi as AuthenticationApiGroup } from "./modules/authentication/AuthenticationApi.ts"
 import { HealthApi } from "./modules/health/HealthApi.ts"
+import { PersonsApi } from "./modules/persons/PersonsApi.ts"
 import { UsersApi } from "./modules/users/UsersApi.ts"
 
 export const ApplicationApi = HttpApi.make("@one-kilo/ApplicationApi")
   .add(AthletesApi)
+  .add(PersonsApi)
   .add(UsersApi)
   .middleware(AuthenticationMiddleware)
   .addError(HttpApiError.InternalServerError)

@@ -9,7 +9,9 @@ export class PersonsQueryModule extends Effect.Service<PersonsQueryModule>()(
       const personsQueryRepository = yield* PersonsQueryRepository
 
       return {
-        retrievePersonWithUser: personsQueryRepository.findPersonWithUser
+        retrievePerson: personsQueryRepository.findPersonById,
+        retrievePersonEntity: personsQueryRepository.findPersonEntity,
+        retrievePersonEntityWithUser: personsQueryRepository.findPersonEntityWithUser
       }
     })
   }

@@ -186,6 +186,7 @@ export class UpdateUserParameters extends S.Class<UpdateUserParameters>("UpdateU
   ),
   lastName: pipe(
     S.NonEmptyTrimmedString,
+    S.NullOr,
     S.optional,
     S.fromKey("last_name")
   ),

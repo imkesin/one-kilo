@@ -15,7 +15,7 @@ type UpdateWorkOSUserActivityParameters = {
   readonly workosUserId: WorkOSIds.UserId
   readonly expected: {
     firstName: string
-    lastName: string
+    lastName: string | null
   }
 }
 
@@ -92,7 +92,10 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
     }),
     expected: S.Struct({
       firstName: S.NonEmptyTrimmedString,
-      lastName: S.NonEmptyTrimmedString
+      lastName: pipe(
+        S.NonEmptyTrimmedString,
+        S.NullOr
+      )
     })
   }
 ) {
