@@ -13,6 +13,7 @@ import { AuthenticationMiddlewareLive } from "./infra/AuthenticationMiddleware.t
 import { WorkflowEngineLive } from "./infra/Cluster.ts"
 import { SqlLive } from "./infra/Sql.ts"
 import { WorkOSLive } from "./infra/WorkOS.ts"
+import { AthletesHttp } from "./modules/athletes/AthletesHttp.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
 import { UsersHttp } from "./modules/users/UsersHttp.ts"
@@ -20,6 +21,7 @@ import { UsersHttp } from "./modules/users/UsersHttp.ts"
 const ServerApiLive = pipe(
   HttpApiBuilder.api(ServerApi),
   Layer.provide([
+    AthletesHttp,
     AuthenticationHttp,
     HealthHttp,
     UsersHttp

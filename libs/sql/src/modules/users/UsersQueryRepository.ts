@@ -46,21 +46,15 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
             SELECT
               u.*,
               NULL AS machine_client,
-              ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())} AS person,
+              ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())} AS person
             FROM users u
             LEFT JOIN persons p
               ON p.id = u.person_id
               AND p.archived_at IS NULL
-            LEFT JOIN email_addresses ea
-              ON ea.person_id = p.id
-              AND ea.archived_at IS NULL
             WHERE
               u.workos_user_id = ${workosUserId}
               AND u.type = 'Person'
               AND u.archived_at IS NULL
-            GROUP BY
-              u.id,
-              p.id
             LIMIT 1
           `
       })
@@ -120,16 +114,9 @@ export class UsersQueryRepository extends Effect.Service<UsersQueryRepository>()
             LEFT JOIN persons p
               ON p.id = u.person_id
               AND p.archived_at IS NULL
-            LEFT JOIN email_addresses ea
-              ON ea.person_id = p.id
-              AND ea.archived_at IS NULL
             WHERE
               u.id = ${userId}
               AND u.archived_at IS NULL
-            GROUP BY
-              u.id,
-              mc.id,
-              p.id
             LIMIT 1
           `
       })

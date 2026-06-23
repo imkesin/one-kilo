@@ -26,4 +26,17 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
       )
     `
   }
+
+  static asJsonBAggForPerson({ alias = "ea", personAlias = "p" } = {}) {
+    return `
+      COALESCE(
+        (
+          SELECT JSONB_AGG(${EmailAddressesModel.asJsonBBuildObject({ alias })})
+          FROM email_addresses ${alias}
+          WHERE ${alias}.person_id = ${personAlias}.id AND ${alias}.archived_at IS NULL
+        ),
+        '[]'::jsonb
+      )
+    `
+  }
 }

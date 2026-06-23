@@ -34,22 +34,9 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
     emailAddressAlias = "ea"
   } = {}) {
     return `
-      JSONB_BUILD_OBJECT(
-        'id', ${alias}.id,
-        'preferred_name', ${alias}.preferred_name,
-        'full_name', ${alias}.full_name,
-        'email_addresses',
-          COALESCE(
-            JSONB_AGG(${EmailAddressesModel.asJsonBBuildObject({ alias: emailAddressAlias })})
-            FILTER (WHERE ${emailAddressAlias}.id IS NOT NULL
-          ),
-          '[]'::jsonb
-        ),
-        'created_at', ${alias}.created_at,
-        'created_by_user_id', ${alias}.created_by_user_id,
-        'updated_at', ${alias}.updated_at,
-        'updated_by_user_id', ${alias}.updated_by_user_id,
-        'archived_at', ${alias}.archived_at
+      ${PersonsModel.asJsonBBuildObject({ alias })}
+      || JSONB_BUILD_OBJECT(
+        'email_addresses', ${EmailAddressesModel.asJsonBAggForPerson({ alias: emailAddressAlias, personAlias: alias })}
       )
     `
   }

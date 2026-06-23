@@ -27,3 +27,21 @@ export class CoachingRelationship extends S.TaggedClass<CoachingRelationship>("@
     description: "An association between a coach and an athlete over a period of time"
   }
 ) {}
+
+export class CoachingRelationshipOnAthlete
+  extends S.TaggedClass<CoachingRelationshipOnAthlete>("@one-kilo/domain/CoachingRelationshipOnAthlete")(
+    "CoachingRelationshipOnAthlete",
+    {
+      id: CoachingRelationshipId,
+
+      period: LocalDateRange,
+
+      ...EntityRelationAuditFields
+    },
+    {
+      identifier: "CoachingRelationshipOnAthlete",
+      title: "Coaching Relationship (on Athlete)",
+      description: "A coach's relationship to an athlete — its period and lifecycle (coach/athlete implied)"
+    }
+  )
+{}
