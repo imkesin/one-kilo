@@ -18,18 +18,23 @@ export const makeIdFromPrefixed = <
   }
 ) =>
   S.transformOrFail(
-    prefixedSchema,
+    S.Union(prefixedSchema, UUIDv7.ShortenedUUIDv7),
     S.typeSchema(idSchema),
     {
-      decode: (fromA, _, ast) =>
-        pipe(
-          fromA.slice(options.prefix.length),
+      decode: (fromA, _, ast) => {
+        const unprefixedInput = fromA.startsWith(options.prefix)
+          ? fromA.slice(options.prefix.length)
+          : fromA
+
+        return pipe(
+          unprefixedInput,
           S.decodeUnknown(UUIDv7.UUIDv7FromShortened),
           ParseResult.mapBoth({
             onFailure: (error) => new ParseResult.Type(ast, fromA, error.message),
             onSuccess: (decoded) => options.makeId(decoded)
           })
-        ),
+        )
+      },
       encode: (toI, _, ast) =>
         pipe(
           S.encodeUnknown(UUIDv7.UUIDv7FromShortened)(toI),
