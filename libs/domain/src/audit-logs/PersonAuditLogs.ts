@@ -5,7 +5,8 @@ import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
-import { FullName, PreferredName } from "../values/PersonValues.ts"
+import { LocalDate } from "../values/LocalDate.ts"
+import { FullName, PreferredName, Sex, Timezone } from "../values/PersonValues.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const PersonAuditLogBuilder = AuditBuilder.make({
@@ -19,7 +20,10 @@ export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-
     context: S.Struct({
       fields: S.Struct({
         preferredName: S.optionalWith(PreferredName, { exact: true }),
-        fullName: S.optionalWith(FullName, { exact: true })
+        fullName: S.optionalWith(FullName, { exact: true }),
+        sex: S.optionalWith(Sex, { exact: true }),
+        dateOfBirth: S.optionalWith(LocalDate, { exact: true }),
+        timezone: S.optionalWith(Timezone, { exact: true })
       })
     })
   }),

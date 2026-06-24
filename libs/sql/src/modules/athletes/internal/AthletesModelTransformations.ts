@@ -31,6 +31,9 @@ export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
       id: row.person.id,
       preferredName: row.person.preferredName,
       fullName: row.person.fullName,
+      sex: row.person.sex,
+      dateOfBirth: row.person.dateOfBirth,
+      timezone: row.person.timezone,
       createdAt: row.person.createdAt,
       updatedAt: row.person.updatedAt,
       archivedAt: row.person.archivedAt
@@ -42,6 +45,9 @@ export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
           id: coach.person.id,
           preferredName: coach.person.preferredName,
           fullName: coach.person.fullName,
+          sex: coach.person.sex,
+          dateOfBirth: coach.person.dateOfBirth,
+          timezone: coach.person.timezone,
           createdAt: coach.person.createdAt,
           updatedAt: coach.person.updatedAt,
           archivedAt: coach.person.archivedAt

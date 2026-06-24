@@ -142,6 +142,9 @@ export const toUser = ({
           id: person.id,
           preferredName: person.preferredName,
           fullName: person.fullName,
+          sex: person.sex,
+          dateOfBirth: person.dateOfBirth,
+          timezone: person.timezone,
           emailAddresses: [
             EmailAddressOnPerson.make({
               id: onlyEmailAddress.id,

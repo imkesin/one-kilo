@@ -3,7 +3,8 @@ import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
-import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
+import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Effect from "effect/Effect"
@@ -25,6 +26,9 @@ type UpdatePersonParameters = {
   readonly fields: {
     readonly preferredName?: PreferredName
     readonly fullName?: FullName
+    readonly sex?: Sex
+    readonly dateOfBirth?: LocalDate
+    readonly timezone?: Timezone
   }
   readonly performedByUserId: UserId
 }
@@ -60,6 +64,8 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
                 id: personId,
                 preferredName,
                 fullName,
+                sex: null,
+                dateOfBirth: null,
                 createdAt: undefined,
                 createdByUserId: performedByUserId,
                 updatedAt: undefined,

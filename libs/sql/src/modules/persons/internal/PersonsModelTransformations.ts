@@ -8,6 +8,9 @@ export const toPersonEntity = ({
   id,
   preferredName,
   fullName,
+  sex,
+  dateOfBirth,
+  timezone,
   createdAt,
   updatedAt,
   archivedAt
@@ -16,6 +19,9 @@ export const toPersonEntity = ({
     id,
     preferredName,
     fullName,
+    sex,
+    dateOfBirth,
+    timezone,
     createdAt,
     updatedAt,
     archivedAt
@@ -33,6 +39,9 @@ export const toPerson = (row: typeof PersonRow.Type): Person =>
     id: row.id,
     preferredName: row.preferredName,
     fullName: row.fullName,
+    sex: row.sex,
+    dateOfBirth: row.dateOfBirth,
+    timezone: row.timezone,
     emailAddresses: row.emailAddresses.map((emailAddress) =>
       EmailAddressOnPerson.make({
         id: emailAddress.id,

@@ -4,7 +4,8 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
-import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
+import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import * as Data from "effect/Data"
@@ -13,6 +14,9 @@ import * as Effect from "effect/Effect"
 type UpdatePersonFields = {
   readonly preferredName?: PreferredName
   readonly fullName?: FullName
+  readonly sex?: Sex
+  readonly dateOfBirth?: LocalDate
+  readonly timezone?: Timezone
 }
 
 type RecordPersonUpdatedParameters = {
@@ -27,6 +31,7 @@ type UpdatePersonOutcome = Data.TaggedEnum<{
   }
   Updated: {
     readonly auditLog: PersonUpdatedAuditLog
+    readonly changedFields: ReadonlyArray<keyof UpdatePersonFields>
     readonly person: PersonEntity
   }
 }>
@@ -70,25 +75,26 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
             return UpdatePersonOutcome.Unchanged({ person })
           }
 
-          const changedFields = diffOutcome.fields
+          const { keys: changedFields, patch } = diffOutcome
           const performedByUserId = yield* Effect.map(Actor, ({ user }) => user.id)
 
           const updatedPerson = yield* personsRepository.update(
             person.id,
             {
-              fields: changedFields,
+              fields: patch,
               performedByUserId
             }
           )
 
           const auditLog = yield* recordPersonUpdated({
-            fields: changedFields,
+            fields: patch,
             performedByUserId,
             personId: person.id
           })
 
           return UpdatePersonOutcome.Updated({
             auditLog,
+            changedFields,
             person: updatedPerson
           })
         }

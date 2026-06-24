@@ -16,7 +16,12 @@ export default Effect.gen(function*() {
       archived_at TIMESTAMPTZ,
 
       preferred_name TEXT NOT NULL,
-      full_name TEXT NOT NULL
+      full_name TEXT NOT NULL,
+
+      sex TEXT CHECK (sex IN ('Male', 'Female')),
+      date_of_birth DATE,
+
+      timezone TEXT NOT NULL DEFAULT 'UTC'
     )
   `
 })

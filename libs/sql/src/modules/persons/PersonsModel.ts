@@ -1,8 +1,9 @@
 import * as Model from "@effect/sql/Model"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
-import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import { LocalDateFromPgDate } from "../../utils/DateFields.ts"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 
@@ -12,6 +13,16 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
   preferredName: PreferredName,
   fullName: FullName,
 
+  sex: S.NullOr(Sex),
+  dateOfBirth: S.NullOr(LocalDateFromPgDate),
+
+  timezone: Model.Field({
+    select: Timezone,
+    insert: S.optionalWith(Timezone, { exact: true }),
+    update: S.optionalWith(Timezone, { exact: true }),
+    json: Timezone
+  }),
+
   ...ModelAuditFields
 }) {
   static asJsonBBuildObject({ alias = "p" } = {}) {
@@ -20,6 +31,9 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
         'id', ${alias}.id,
         'preferred_name', ${alias}.preferred_name,
         'full_name', ${alias}.full_name,
+        'sex', ${alias}.sex,
+        'date_of_birth', ${alias}.date_of_birth,
+        'timezone', ${alias}.timezone,
         'created_at', ${alias}.created_at,
         'created_by_user_id', ${alias}.created_by_user_id,
         'updated_at', ${alias}.updated_at,
@@ -50,6 +64,19 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
     ),
     fullName: pipe(
       FullName,
+      S.optionalWith({ exact: true })
+    ),
+
+    sex: pipe(
+      Sex,
+      S.optionalWith({ exact: true })
+    ),
+    dateOfBirth: pipe(
+      LocalDateFromPgDate,
+      S.optionalWith({ exact: true })
+    ),
+    timezone: pipe(
+      Timezone,
       S.optionalWith({ exact: true })
     ),
 

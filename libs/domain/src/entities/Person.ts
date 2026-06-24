@@ -4,7 +4,8 @@ import { pipe } from "effect/Function"
 import * as ParseResult from "effect/ParseResult"
 import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
-import { FullName, PreferredName } from "../values/PersonValues.ts"
+import { LocalDate } from "../values/LocalDate.ts"
+import { FullName, PreferredName, Sex, Timezone } from "../values/PersonValues.ts"
 import { EmailAddressOnPerson } from "./EmailAddress.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
@@ -13,6 +14,10 @@ const EntityBaseFields = {
 
   preferredName: PreferredName,
   fullName: FullName,
+
+  sex: S.NullOr(Sex),
+  dateOfBirth: S.NullOr(LocalDate),
+  timezone: Timezone,
 
   ...EntityAuditFields
 } as const
@@ -55,10 +60,16 @@ const encodeWorkOSName = S.encode(PersonNameFromWorkOSName)
 type PersonFieldsPatch = {
   readonly preferredName?: PreferredName
   readonly fullName?: FullName
+  readonly sex?: Sex
+  readonly dateOfBirth?: LocalDate
+  readonly timezone?: Timezone
 }
 
 type PersonDiff = Data.TaggedEnum<{
-  Changed: { readonly fields: PersonFieldsPatch }
+  Changed: {
+    readonly patch: PersonFieldsPatch
+    readonly keys: ReadonlyArray<keyof PersonFieldsPatch>
+  }
   Unchanged: {}
 }>
 const PersonDiff = Data.taggedEnum<PersonDiff>()
@@ -67,6 +78,9 @@ const diffPersonFields = (
   person: {
     readonly preferredName: PreferredName
     readonly fullName: FullName
+    readonly sex: Sex | null
+    readonly dateOfBirth: LocalDate | null
+    readonly timezone: Timezone
   },
   fields: PersonFieldsPatch
 ) => {
@@ -80,9 +94,26 @@ const diffPersonFields = (
     changed.fullName = fields.fullName
   }
 
-  return Object.keys(changed).length === 0
+  if (fields.sex && fields.sex !== person.sex) {
+    changed.sex = fields.sex
+  }
+
+  if (
+    fields.dateOfBirth
+    && (person.dateOfBirth === null || !fields.dateOfBirth.equals(person.dateOfBirth))
+  ) {
+    changed.dateOfBirth = fields.dateOfBirth
+  }
+
+  if (fields.timezone && fields.timezone !== person.timezone) {
+    changed.timezone = fields.timezone
+  }
+
+  const changedKeys = Object.keys(changed) as ReadonlyArray<keyof PersonFieldsPatch>
+
+  return changedKeys.length === 0
     ? PersonDiff.Unchanged()
-    : PersonDiff.Changed({ fields: changed })
+    : PersonDiff.Changed({ patch: changed, keys: changedKeys })
 }
 
 export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/PersonEntity")(
