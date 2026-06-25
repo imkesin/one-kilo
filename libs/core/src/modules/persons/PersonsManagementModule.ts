@@ -8,6 +8,7 @@ import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
 import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
+import type * as Arr from "effect/Array"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 
@@ -31,7 +32,7 @@ type UpdatePersonOutcome = Data.TaggedEnum<{
   }
   Updated: {
     readonly auditLog: PersonUpdatedAuditLog
-    readonly changedFields: ReadonlyArray<keyof UpdatePersonFields>
+    readonly changedFields: Arr.NonEmptyReadonlyArray<keyof UpdatePersonFields>
     readonly person: PersonEntity
   }
 }>

@@ -1,3 +1,4 @@
+import * as Arr from "effect/Array"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -64,11 +65,12 @@ type PersonFieldsPatch = {
   readonly dateOfBirth?: LocalDate
   readonly timezone?: Timezone
 }
+export type PersonMutableFieldKey = keyof PersonFieldsPatch
 
 type PersonDiff = Data.TaggedEnum<{
   Changed: {
     readonly patch: PersonFieldsPatch
-    readonly keys: ReadonlyArray<keyof PersonFieldsPatch>
+    readonly keys: Arr.NonEmptyReadonlyArray<keyof PersonFieldsPatch>
   }
   Unchanged: {}
 }>
@@ -111,9 +113,9 @@ const diffPersonFields = (
 
   const changedKeys = Object.keys(changed) as ReadonlyArray<keyof PersonFieldsPatch>
 
-  return changedKeys.length === 0
-    ? PersonDiff.Unchanged()
-    : PersonDiff.Changed({ patch: changed, keys: changedKeys })
+  return Arr.isNonEmptyReadonlyArray(changedKeys)
+    ? PersonDiff.Changed({ keys: changedKeys, patch: changed })
+    : PersonDiff.Unchanged()
 }
 
 export class PersonEntity extends S.TaggedClass<PersonEntity>("@one-kilo/domain/PersonEntity")(

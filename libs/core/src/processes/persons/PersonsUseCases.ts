@@ -5,15 +5,14 @@ import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import { PersonNotFoundError } from "@one-kilo/domain/errors/PersonErrors"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
-import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
-import { PushWorkOSUserChangeWorkflow } from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import { PersonsManagementModule } from "../../modules/persons/PersonsManagementModule.ts"
 import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
+import * as PersonWorkOSSync from "./internal/PersonWorkOSSync.ts"
 
 type UpdatePersonFields = {
   readonly preferredName?: PreferredName
@@ -65,28 +64,14 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
             return UpdatePersonOutcome.Unchanged({ person: updatePersonOutcome.person })
           }
 
-          const { person: updatedPerson, auditLog } = updatePersonOutcome
+          const { auditLog, changedFields, person: updatedPerson } = updatePersonOutcome
 
-          if (Option.isSome(maybeUser)) {
-            const user = maybeUser.value
-
-            const beforeWorkOsName = yield* pipe(
-              beforePerson.deriveWorkOSName(),
-              orDieWithUnexpectedError("Failed to derive a WorkOS name from the before-state person")
-            )
-
-            yield* PushWorkOSUserChangeWorkflow.execute(
-              {
-                causedByAuditLogId: auditLog.id,
-                expected: {
-                  firstName: beforeWorkOsName.firstName,
-                  lastName: beforeWorkOsName.lastName
-                },
-                workosUserId: user.workosUserId
-              },
-              { discard: true }
-            )
-          }
+          yield* PersonWorkOSSync.enqueueIfNeeded({
+            auditLog,
+            beforePerson,
+            changedFields,
+            maybeUser
+          })
 
           return UpdatePersonOutcome.Updated({ person: updatedPerson })
         },
