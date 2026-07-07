@@ -69,7 +69,7 @@ describe("`withSerializableTransaction`", () => {
 
         // Both increments should have been applied
         const [result] = yield* sql`SELECT value FROM _test_serializable_counter WHERE id = 1`
-        expect(result.value).toBe(2)
+        expect(result?.value).toBe(2)
 
         // Transaction B should have retried at least once
         const attempts = yield* Ref.get(bAttempts)
@@ -204,7 +204,7 @@ describe("`withSerializableTransaction`", () => {
 
         // Both increments applied — the replayed outer transaction re-read and succeeded.
         const [result] = yield* sql`SELECT value FROM _test_nested_conflict WHERE id = 1`
-        expect(result.value).toBe(2)
+        expect(result?.value).toBe(2)
 
         // The whole outer transaction replayed in response to the nested conflict.
         const attempts = yield* Ref.get(bOuterAttempts)
