@@ -25,8 +25,8 @@ export const PushWorkOSUserChangeWorkflowLive = pipe(
             "WorkOSUserStateDriftError",
             /*
              * Drift means another actor (the WorkOS dashboard, another sync, etc.) mutated the
-             * account since this workflow was scheduled. Abort rather than clobber their change —
-             * the inbound `account.updated` webhook will reconcile our local state back to WorkOS.
+             * user since this workflow was scheduled. Abort rather than clobber their change —
+             * the inbound `user.updated` webhook will reconcile our local state back to WorkOS.
              */
             () => Effect.succeed({ _tag: "DriftDetected" as const })
           ),

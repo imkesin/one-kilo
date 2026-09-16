@@ -10,7 +10,7 @@ import * as Option from "effect/Option"
 
 /**
  * WorkOS mirrors a person's name, so a change to either name field must be propagated to the
- * linked WorkOS account.
+ * linked WorkOS user.
  */
 const WORKOS_MIRRORED_PERSON_FIELDS = ["preferredName", "fullName"] as const satisfies Arr.NonEmptyReadonlyArray<
   PersonMutableFieldKey
@@ -27,7 +27,7 @@ type EnqueueIfNeededParameters = {
 }
 
 /**
- * Enqueues a WorkOS account-change workflow when a person update both touches a WorkOS-mirrored field
+ * Enqueues a WorkOS user-change workflow when a person update both touches a WorkOS-mirrored field
  * and belongs to a linked account. A no-op otherwise.
  */
 export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
