@@ -104,7 +104,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               }),
               Effect.tapErrorCause((cause) =>
                 pipe(
-                  Effect.logWarning("Failed to decode person names from a WorkOS account", cause),
+                  Effect.logWarning("Failed to decode person names from a WorkOS user", cause),
                   Effect.annotateLogs({
                     workosUser: {
                       id,
@@ -125,7 +125,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             }
           }
 
-          yield* Effect.logWarning("Failed to derive person names from WorkOS account, using fallback names")
+          yield* Effect.logWarning("Failed to derive person names from WorkOS user, using fallback names")
 
           return yield* Effect.map(
             fallbackNameGenerator.generate,
@@ -157,7 +157,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             workosUser.email,
             S.decode(EmailAddress),
             orDieWithUnexpectedError(
-              "The `email` on the WorkOS account does not conform to our email address standards"
+              "The `email` on the WorkOS user does not conform to our email address standards"
             )
           )
 
@@ -179,7 +179,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                     lastName: workosName.lastName
                   }
                 ),
-                orDieWithUnexpectedError("Failed to update WorkOS account during registration.")
+                orDieWithUnexpectedError("Failed to update WorkOS user during registration.")
               )
             ],
             { concurrency: "unbounded" }

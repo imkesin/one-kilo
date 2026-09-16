@@ -54,7 +54,7 @@ class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>(
 )(
   "WorkOSOperationError",
   {
-    operation: S.Literal("RetrieveAccount", "UpdateAccount"),
+    operation: S.Literal("RetrieveUser", "UpdateUser"),
     cause: WorkOSError.WorkOSCommonError
   }
 ) {
@@ -141,7 +141,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
               "WorkOSCommonError": (e) =>
                 WorkOSOperationError.make({
                   cause: e,
-                  operation: "RetrieveAccount"
+                  operation: "RetrieveUser"
                 })
             })
           )
@@ -191,7 +191,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
           "WorkOSCommonError": (e) =>
             WorkOSOperationError.make({
               cause: e,
-              operation: "UpdateAccount"
+              operation: "UpdateUser"
             })
         })
       )
