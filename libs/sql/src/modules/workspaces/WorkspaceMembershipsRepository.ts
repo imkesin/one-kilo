@@ -1,8 +1,8 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import type { WorkspaceMembershipRole } from "@one-kilo/domain/values/WorkspaceMembershipValues"
@@ -11,13 +11,13 @@ import * as Effect from "effect/Effect"
 import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 
 type InsertWorkspaceMembershipParameters = {
-  userId: UserId
+  accountId: AccountId
   workspaceId: WorkspaceId
   role: WorkspaceMembershipRole
   workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
 
   id?: WorkspaceMembershipId
-  performedByUserId?: UserId
+  performedByAccountId?: AccountId
 }
 
 export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMembershipsRepository>()(
@@ -35,12 +35,12 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
       })
       const insert = Effect.fn("WorkspaceMembershipsRepository.insert")(
         function*({
-          userId,
+          accountId,
           workspaceId,
           role,
           workosOrganizationMembershipId,
           id,
-          performedByUserId
+          performedByAccountId
         }: InsertWorkspaceMembershipParameters) {
           const membershipIdEffect = id
             ? Effect.succeed(id)
@@ -51,14 +51,14 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
             (membershipId) =>
               insertSchema({
                 id: membershipId,
-                userId,
+                accountId,
                 workspaceId,
                 role,
                 workosOrganizationMembershipId,
                 createdAt: undefined,
-                createdByUserId: performedByUserId ?? userId,
+                createdByAccountId: performedByAccountId ?? accountId,
                 updatedAt: undefined,
-                updatedByUserId: performedByUserId ?? userId,
+                updatedByAccountId: performedByAccountId ?? accountId,
                 archivedAt: undefined
               })
           )

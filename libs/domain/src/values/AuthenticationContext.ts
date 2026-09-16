@@ -1,16 +1,16 @@
 import * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { UserId } from "../ids/UserId.ts"
+import { AccountId } from "../ids/AccountId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 
 export const AuthenticationIdentity = pipe(
   S.Struct({
-    userId: UserId,
+    accountId: AccountId,
     workspaceId: WorkspaceId
   }),
   S.annotations({
-    description: "The unique combination of user and workspace that scopes an authentication",
+    description: "The unique combination of account and workspace that scopes an authentication",
     identifier: "AuthenticationIdentity",
     title: "Authentication Identity"
   })
@@ -23,7 +23,7 @@ export const AuthenticationTokens = pipe(
     workosRefreshToken: WorkOSValues.RefreshToken
   }),
   S.annotations({
-    description: "The tokens associated with an authenticated user",
+    description: "The tokens associated with an authenticated account",
     identifier: "AuthenticationTokens",
     title: "Authentication Tokens"
   })
@@ -35,7 +35,7 @@ export const AuthenticationContext = pipe(
     AuthenticationTokens
   ),
   S.annotations({
-    description: "The base context for an authenticated user",
+    description: "The base context for an authenticated account",
     identifier: "AuthenticationContext",
     title: "Authentication Context"
   })

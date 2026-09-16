@@ -1,8 +1,8 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import * as S from "effect/Schema"
+import { AccountId } from "../ids/AccountId.ts"
 import { AuditLogId } from "../ids/AuditLogId.ts"
-import { UserId } from "../ids/UserId.ts"
 
 const TypeId = "~@one-kilo/domain/AuditBuilder" as const
 type TypeId = typeof TypeId
@@ -12,7 +12,7 @@ type Version = 1 | 2 | 3
 type AuditMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
   // Inputs
   readonly id: typeof AuditLogId
-  readonly performedByUserId: typeof UserId
+  readonly performedByAccountId: typeof AccountId
   readonly targets: Targets
 
   // Derived
@@ -135,7 +135,7 @@ export function make(
       }
     ) => ({
       id: AuditLogId,
-      performedByUserId: UserId,
+      performedByAccountId: AccountId,
       targets,
 
       timestamp: S.DateTimeUtc,
@@ -152,7 +152,7 @@ export function make(
       }
     ) => ({
       id: AuditLogId,
-      performedByUserId: UserId,
+      performedByAccountId: AccountId,
       context: parameters.context,
       targets,
 

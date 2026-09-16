@@ -8,7 +8,7 @@ export default Effect.gen(function*() {
     CREATE TABLE audit_logs (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
 
-      performed_by_user_id UUID NOT NULL,
+      performed_by_account_id UUID NOT NULL,
       timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       version INTEGER NOT NULL,
 
@@ -18,10 +18,10 @@ export default Effect.gen(function*() {
 
       context JSONB,
 
-      CONSTRAINT fk_al_performed_by FOREIGN KEY (performed_by_user_id) REFERENCES users (id)
+      CONSTRAINT fk_al_performed_by FOREIGN KEY (performed_by_account_id) REFERENCES accounts (id)
     )
   `
 
-  yield* sql`CREATE INDEX idx_al_performed_by ON audit_logs (performed_by_user_id)`
+  yield* sql`CREATE INDEX idx_al_performed_by ON audit_logs (performed_by_account_id)`
   yield* sql`CREATE INDEX idx_al_targets ON audit_logs USING GIN (targets jsonb_path_ops)`
 })

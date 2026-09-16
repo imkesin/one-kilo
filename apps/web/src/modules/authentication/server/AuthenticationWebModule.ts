@@ -1,5 +1,5 @@
 import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import { getCookie, setCookie } from "@tanstack/react-start/server"
@@ -139,14 +139,14 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           )
       )
 
-      const userIdLocks = yield* RcMap.make({
-        lookup: (_userId: UserId) => Effect.makeSemaphore(1),
+      const accountIdLocks = yield* RcMap.make({
+        lookup: (_accountId: AccountId) => Effect.makeSemaphore(1),
         idleTimeToLive: "1 minute"
       })
-      const withUserIdLock = (userId: UserId) => <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+      const withAccountIdLock = (accountId: AccountId) => <A, E, R>(effect: Effect.Effect<A, E, R>) =>
         pipe(
-          userIdLocks,
-          RcMap.get(userId),
+          accountIdLocks,
+          RcMap.get(accountId),
           Effect.flatMap((semaphore) =>
             pipe(
               effect,
@@ -156,10 +156,10 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
           Effect.scoped
         )
 
-      const refreshedAuthenticationContext = withValidAuthenticationContextOr(({ userId, workosRefreshToken }) =>
+      const refreshedAuthenticationContext = withValidAuthenticationContextOr(({ accountId, workosRefreshToken }) =>
         pipe(
           refreshAndSetAuthenticationContext(workosRefreshToken),
-          withUserIdLock(userId)
+          withAccountIdLock(accountId)
         )
       )
 

@@ -10,11 +10,11 @@ export default Effect.gen(function*() {
   const sql = yield* SqlClient.SqlClient
 
   yield* sql`
-    CREATE TABLE users (
+    CREATE TABLE accounts (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
 
-      created_by_user_id UUID NOT NULL,
-      updated_by_user_id UUID NOT NULL,
+      created_by_account_id UUID NOT NULL,
+      updated_by_account_id UUID NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -27,12 +27,12 @@ export default Effect.gen(function*() {
       workos_user_id TEXT,
       workos_client_id TEXT,
 
-      CONSTRAINT fk_u_person FOREIGN KEY (person_id) REFERENCES persons (id),
-      CONSTRAINT fk_u_machine_client FOREIGN KEY (machine_client_id) REFERENCES machine_clients (id),
-      CONSTRAINT fk_u_created_by FOREIGN KEY (created_by_user_id) REFERENCES users (id),
-      CONSTRAINT fk_u_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES users (id),
+      CONSTRAINT fk_account_person FOREIGN KEY (person_id) REFERENCES persons (id),
+      CONSTRAINT fk_account_machine_client FOREIGN KEY (machine_client_id) REFERENCES machine_clients (id),
+      CONSTRAINT fk_account_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_account_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id),
 
-      CONSTRAINT check_u_type_consistency CHECK (
+      CONSTRAINT check_account_type_consistency CHECK (
         (
           type = 'Person'
           AND person_id IS NOT NULL
@@ -50,34 +50,34 @@ export default Effect.gen(function*() {
     )
   `
 
-  yield* sql`CREATE INDEX idx_u_person ON users (person_id)`
-  yield* sql`CREATE INDEX idx_u_machine_client ON users (machine_client_id)`
-  yield* sql`CREATE UNIQUE INDEX idx_u_workos_user ON users (workos_user_id)`
-  yield* sql`CREATE UNIQUE INDEX idx_u_workos_client ON users (workos_client_id)`
+  yield* sql`CREATE INDEX idx_account_person ON accounts (person_id)`
+  yield* sql`CREATE INDEX idx_account_machine_client ON accounts (machine_client_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_account_workos_user ON accounts (workos_user_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_account_workos_client ON accounts (workos_client_id)`
 
   yield* sql`
     ALTER TABLE persons
       ADD CONSTRAINT ${sql.unsafe(PersonsCreatedByForeignKey)}
-      FOREIGN KEY (created_by_user_id)
-      REFERENCES users (id)
+      FOREIGN KEY (created_by_account_id)
+      REFERENCES accounts (id)
       DEFERRABLE INITIALLY IMMEDIATE,
 
       ADD CONSTRAINT ${sql.unsafe(PersonsUpdatedByForeignKey)}
-      FOREIGN KEY (updated_by_user_id)
-      REFERENCES users (id)
+      FOREIGN KEY (updated_by_account_id)
+      REFERENCES accounts (id)
       DEFERRABLE INITIALLY IMMEDIATE
   `
 
   yield* sql`
     ALTER TABLE machine_clients
       ADD CONSTRAINT ${sql.unsafe(MachineClientsCreatedByForeignKey)}
-      FOREIGN KEY (created_by_user_id)
-      REFERENCES users (id)
+      FOREIGN KEY (created_by_account_id)
+      REFERENCES accounts (id)
       DEFERRABLE INITIALLY IMMEDIATE,
 
       ADD CONSTRAINT ${sql.unsafe(MachineClientsUpdatedByForeignKey)}
-      FOREIGN KEY (updated_by_user_id)
-      REFERENCES users (id)
+      FOREIGN KEY (updated_by_account_id)
+      REFERENCES accounts (id)
       DEFERRABLE INITIALLY IMMEDIATE
   `
 })

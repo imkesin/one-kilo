@@ -1,8 +1,8 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
 import { WorkspaceMembershipCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceMembershipAuditLogs"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
@@ -19,7 +19,7 @@ type CreatePersonalWorkspaceParameters = {
   id: WorkspaceId
   workosOrganizationId: WorkOSIds.OrganizationId
 
-  userId: UserId
+  accountId: AccountId
   workspaceMembershipParameters: {
     id: WorkspaceMembershipId
     workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
@@ -44,12 +44,12 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
       const workspacesRepository = yield* WorkspacesRepository
 
       const recordWorkspaceCreated = Effect.fn("WorkspacesCreationModule.recordWorkspaceCreated")(
-        function*(workspace: { id: WorkspaceId }, performedByUserId: UserId) {
+        function*(workspace: { id: WorkspaceId }, performedByAccountId: AccountId) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* WorkspaceCreatedAuditLog.build({
             id,
-            performedByUserId,
+            performedByAccountId,
             targets: [{ id: workspace.id, type: "Workspace" as const }]
           })
 
@@ -64,16 +64,16 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
         "WorkspacesCreationModule.recordWorkspaceMembershipCreated"
       )(
         function*(
-          workspaceMembership: { id: WorkspaceMembershipId; userId: UserId; workspaceId: WorkspaceId },
-          performedByUserId: UserId
+          workspaceMembership: { id: WorkspaceMembershipId; accountId: AccountId; workspaceId: WorkspaceId },
+          performedByAccountId: AccountId
         ) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* WorkspaceMembershipCreatedAuditLog.build({
             id,
-            performedByUserId,
+            performedByAccountId,
             targets: [
-              { id: workspaceMembership.userId, type: "User" as const },
+              { id: workspaceMembership.accountId, type: "Account" as const },
               { id: workspaceMembership.workspaceId, type: "Workspace" as const },
               { id: workspaceMembership.id, type: "WorkspaceMembership" as const }
             ]
@@ -90,15 +90,15 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
         function*({
           id,
           workosOrganizationId,
-          userId,
+          accountId,
           workspaceMembershipParameters
         }: CreatePersonalWorkspaceParameters) {
           yield* pipe(
-            workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByUserId({ userId }),
+            workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByAccountId({ accountId }),
             Effect.andThen(
               Option.match({
                 onNone: () => Effect.ignore,
-                onSome: () => dieWithUnexpectedError("A personal workspace already exists for this user")
+                onSome: () => dieWithUnexpectedError("A personal workspace already exists for this account")
               })
             )
           )
@@ -108,20 +108,20 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             name: WorkspaceName.make("Personal"),
             type: "Personal",
             workosOrganizationId,
-            performedByUserId: userId
+            performedByAccountId: accountId
           })
 
           const workspaceMembership = yield* workspaceMembershipsRepository.insert({
             id: workspaceMembershipParameters.id,
-            userId,
+            accountId,
             workspaceId: workspace.id,
             role: "Owner",
             workosOrganizationMembershipId: workspaceMembershipParameters.workosOrganizationMembershipId
           })
 
           yield* Effect.all([
-            recordWorkspaceCreated(workspace, userId),
-            recordWorkspaceMembershipCreated(workspaceMembership, userId)
+            recordWorkspaceCreated(workspace, accountId),
+            recordWorkspaceMembershipCreated(workspaceMembership, accountId)
           ], { concurrency: "unbounded" })
 
           return { workspace, workspaceMembership }

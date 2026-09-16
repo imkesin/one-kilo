@@ -35,9 +35,9 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
         'date_of_birth', ${alias}.date_of_birth,
         'timezone', ${alias}.timezone,
         'created_at', ${alias}.created_at,
-        'created_by_user_id', ${alias}.created_by_user_id,
+        'created_by_account_id', ${alias}.created_by_account_id,
         'updated_at', ${alias}.updated_at,
-        'updated_by_user_id', ${alias}.updated_by_user_id,
+        'updated_by_account_id', ${alias}.updated_by_account_id,
         'archived_at', ${alias}.archived_at
       )
     `
@@ -81,6 +81,6 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
     ),
 
     updatedAt: PersonsModel.update.fields.updatedAt,
-    updatedByUserId: PersonsModel.update.fields.updatedByUserId
+    updatedByAccountId: PersonsModel.update.fields.updatedByAccountId
   })
 }

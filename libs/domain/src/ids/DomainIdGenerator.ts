@@ -1,5 +1,6 @@
 import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
 import * as Effect from "effect/Effect"
+import { AccountId } from "./AccountId.js"
 import { AthleteId } from "./AthleteId.js"
 import { AuditLogId } from "./AuditLogId.js"
 import { CoachId } from "./CoachId.js"
@@ -7,7 +8,6 @@ import { CoachingRelationshipId } from "./CoachingRelationshipId.js"
 import { EmailAddressId } from "./EmailAddressId.js"
 import { MachineClientId } from "./MachineClientId.js"
 import { PersonId } from "./PersonId.js"
-import { UserId } from "./UserId.js"
 import { WorkflowSuspensionId } from "./WorkflowSuspensionId.js"
 import { WorkspaceId } from "./WorkspaceId.js"
 import { WorkspaceMembershipId } from "./WorkspaceMembershipId.js"
@@ -26,7 +26,7 @@ export class DomainIdGenerator extends Effect.Service<DomainIdGenerator>()(
         emailAddressId: Effect.map(uuidGenerator.v7, EmailAddressId.make),
         machineClientId: Effect.map(uuidGenerator.v7, MachineClientId.make),
         personId: Effect.map(uuidGenerator.v7, PersonId.make),
-        userId: Effect.map(uuidGenerator.v7, UserId.make),
+        accountId: Effect.map(uuidGenerator.v7, AccountId.make),
         workflowSuspensionId: Effect.map(uuidGenerator.v7, WorkflowSuspensionId.make),
         workspaceId: Effect.map(uuidGenerator.v7, WorkspaceId.make),
         workspaceMembershipId: Effect.map(uuidGenerator.v7, WorkspaceMembershipId.make)

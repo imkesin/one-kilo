@@ -1,5 +1,5 @@
 import { updateWorkOSUserActivity } from "@one-kilo/core/activities/UpdateWorkOSUserActivity"
-import { UsersQueryModule } from "@one-kilo/core/modules/users/UsersQueryModule"
+import { AccountsQueryModule } from "@one-kilo/core/modules/accounts/AccountsQueryModule"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
 import {
   PushWorkOSUserChangeError,
@@ -25,8 +25,8 @@ export const PushWorkOSUserChangeWorkflowLive = pipe(
             "WorkOSUserStateDriftError",
             /*
              * Drift means another actor (the WorkOS dashboard, another sync, etc.) mutated the
-             * user since this workflow was scheduled. Abort rather than clobber their change —
-             * the inbound `user.updated` webhook will reconcile our local state back to WorkOS.
+             * account since this workflow was scheduled. Abort rather than clobber their change —
+             * the inbound `account.updated` webhook will reconcile our local state back to WorkOS.
              */
             () => Effect.succeed({ _tag: "DriftDetected" as const })
           ),
@@ -37,7 +37,7 @@ export const PushWorkOSUserChangeWorkflowLive = pipe(
                 reason: "RetryExhausted"
               }),
 
-            "TargetedUserNotFoundError": (e) =>
+            "TargetedAccountNotFoundError": (e) =>
               PushWorkOSUserChangeError.make({
                 cause: e,
                 reason: "Unexpected"
@@ -72,7 +72,7 @@ export const PushWorkOSUserChangeWorkflowLive = pipe(
     )
   ),
   Layer.provide([
-    UsersQueryModule.Default,
+    AccountsQueryModule.Default,
     WorkflowSuspensionsCreationModule.Default
   ])
 )

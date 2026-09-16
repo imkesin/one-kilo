@@ -1,9 +1,9 @@
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { EmailAddressEntity } from "@one-kilo/domain/entities/EmailAddress"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
@@ -12,7 +12,7 @@ import { EmailAddressesModel } from "./EmailAddressesModel.ts"
 type InsertEmailAddressParameters = {
   personId: PersonId
   value: EmailAddress
-  performedByUserId: UserId
+  performedByAccountId: AccountId
 }
 
 export class EmailAddressesRepository extends Effect.Service<EmailAddressesRepository>()(
@@ -33,7 +33,7 @@ export class EmailAddressesRepository extends Effect.Service<EmailAddressesRepos
         function*({
           personId,
           value,
-          performedByUserId
+          performedByAccountId
         }: InsertEmailAddressParameters) {
           const emailAddressId = yield* idGenerator.emailAddressId
 
@@ -42,9 +42,9 @@ export class EmailAddressesRepository extends Effect.Service<EmailAddressesRepos
             personId,
             value,
             createdAt: undefined,
-            createdByUserId: performedByUserId,
+            createdByAccountId: performedByAccountId,
             updatedAt: undefined,
-            updatedByUserId: performedByUserId,
+            updatedByAccountId: performedByAccountId,
             archivedAt: undefined
           })
 

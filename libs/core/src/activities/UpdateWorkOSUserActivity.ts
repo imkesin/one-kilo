@@ -6,7 +6,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { UsersQueryModule } from "../modules/users/UsersQueryModule.ts"
+import { AccountsQueryModule } from "../modules/accounts/AccountsQueryModule.ts"
 import * as ActivityExtensions from "./ActivityExtensions.ts"
 
 const ID_PREFIX = "@one-kilo/core/UpdateWorkOSUserActivity"
@@ -38,10 +38,10 @@ const UpdateWorkOSUserActivityOutcome = S.Union(
   UpdatedOutcome
 )
 
-class TargetedUserNotFoundError extends S.TaggedError<TargetedUserNotFoundError>(
-  `${ID_PREFIX}/TargetedUserNotFoundError`
+class TargetedAccountNotFoundError extends S.TaggedError<TargetedAccountNotFoundError>(
+  `${ID_PREFIX}/TargetedAccountNotFoundError`
 )(
-  "TargetedUserNotFoundError",
+  "TargetedAccountNotFoundError",
   {
     workosUserId: WorkOSIds.UserId
   }
@@ -54,7 +54,7 @@ class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>(
 )(
   "WorkOSOperationError",
   {
-    operation: S.Literal("RetrieveUser", "UpdateUser"),
+    operation: S.Literal("RetrieveAccount", "UpdateAccount"),
     cause: WorkOSError.WorkOSCommonError
   }
 ) {
@@ -103,7 +103,7 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
 }
 
 const UpdateWorkOSUserActivityError = S.Union(
-  TargetedUserNotFoundError,
+  TargetedAccountNotFoundError,
   WorkOSOperationError,
   WorkOSUserNotFoundError,
   WorkOSUserStateDriftError
@@ -117,16 +117,16 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
     while: (e) => e.isRetryable,
     execute: Effect.gen(function*() {
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
-      const usersQueryModule = yield* UsersQueryModule
+      const accountsQueryModule = yield* AccountsQueryModule
 
-      const [user, workosUser] = yield* Effect.all(
+      const [account, workosUser] = yield* Effect.all(
         [
           pipe(
-            usersQueryModule.retrieveUserByWorkOSUserId({ workosUserId: parameters.workosUserId }),
+            accountsQueryModule.retrieveAccountByWorkOSUserId({ workosUserId: parameters.workosUserId }),
             Effect.andThen(
               Option.match({
                 onSome: Effect.succeed,
-                onNone: () => TargetedUserNotFoundError.make({ workosUserId: parameters.workosUserId })
+                onNone: () => TargetedAccountNotFoundError.make({ workosUserId: parameters.workosUserId })
               })
             )
           ),
@@ -141,7 +141,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
               "WorkOSCommonError": (e) =>
                 WorkOSOperationError.make({
                   cause: e,
-                  operation: "RetrieveUser"
+                  operation: "RetrieveAccount"
                 })
             })
           )
@@ -150,7 +150,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
       )
 
       const derivedWorkOSName = yield* pipe(
-        user.person.deriveWorkOSName(),
+        account.person.deriveWorkOSName(),
         orDieWithUnexpectedError("Failed to derive a WorkOS name from the person")
       )
 
@@ -191,7 +191,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
           "WorkOSCommonError": (e) =>
             WorkOSOperationError.make({
               cause: e,
-              operation: "UpdateUser"
+              operation: "UpdateAccount"
             })
         })
       )

@@ -1,12 +1,12 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
-import { UserId } from "@one-kilo/domain/ids/UserId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
+import { AccountType } from "@one-kilo/domain/values/AccountValues"
 import type { ActorIdentity } from "@one-kilo/domain/values/ActorValues"
-import { UserType } from "@one-kilo/domain/values/UserValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -19,18 +19,18 @@ type FindActorIdentityParameters = {
 }
 
 const ActorIdentityRow = S.Struct({
-  userId: UserId,
-  userType: UserType,
+  accountId: AccountId,
+  accountType: AccountType,
   machineClientId: S.NullOr(MachineClientId),
   personId: S.NullOr(PersonId),
   workspaceId: WorkspaceId
 })
 
 const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<ActorIdentity> => {
-  if (row.userType === "Person" && row.personId) {
+  if (row.accountType === "Person" && row.personId) {
     return Effect.succeed({
-      user: {
-        id: row.userId,
+      account: {
+        id: row.accountId,
         type: "Person" as const,
         person: { id: row.personId }
       },
@@ -38,10 +38,10 @@ const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<Actor
     })
   }
 
-  if (row.userType === "MachineClient" && row.machineClientId) {
+  if (row.accountType === "MachineClient" && row.machineClientId) {
     return Effect.succeed({
-      user: {
-        id: row.userId,
+      account: {
+        id: row.accountId,
         type: "MachineClient" as const,
         machineClient: { id: row.machineClientId }
       },
@@ -51,7 +51,7 @@ const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<Actor
 
   return pipe(
     dieWithUnexpectedError("An actor identity row could not be converted to a domain value"),
-    Effect.annotateLogs({ user: { id: row.userId, type: row.userType } })
+    Effect.annotateLogs({ account: { id: row.accountId, type: row.accountType } })
   )
 }
 
@@ -71,13 +71,13 @@ export class ActorQueryRepository extends Effect.Service<ActorQueryRepository>()
         execute: ({ workosUserId, workosOrganizationId }) =>
           sql`
             SELECT
-              u.id AS user_id,
-              u.type AS user_type,
+              u.id AS account_id,
+              u.type AS account_type,
               u.machine_client_id AS machine_client_id,
               u.person_id AS person_id,
               ws.id AS workspace_id
-            FROM users u
-            JOIN workspace_memberships wsm ON wsm.user_id = u.id
+            FROM accounts u
+            JOIN workspace_memberships wsm ON wsm.account_id = u.id
             JOIN workspaces ws ON ws.id = wsm.workspace_id
             WHERE
               u.workos_user_id = ${workosUserId}

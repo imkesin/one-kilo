@@ -4,12 +4,12 @@ import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Logger from "effect/Logger"
+import { AccountsWebProxy } from "~/modules/accounts/server/AccountsWebProxy"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
-import { UsersWebProxy } from "~/modules/users/server/UsersWebProxy"
 
 const WebModulesLive = Layer.mergeAll(
   AuthenticationWebModule.Default,
-  UsersWebProxy.Default
+  AccountsWebProxy.Default
 )
 
 const WorkOSPublicApiClientLive = WorkOSPublicApiClient.layerConfig({

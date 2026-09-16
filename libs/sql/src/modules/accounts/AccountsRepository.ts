@@ -1,22 +1,22 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import { toUserEntity } from "./internal/UsersModelTransformations.ts"
-import { UsersModel } from "./UsersModel.ts"
+import { AccountsModel } from "./AccountsModel.ts"
+import { toAccountEntity } from "./internal/AccountsModelTransformations.ts"
 
-type BaseInsertUserParameters = {
-  id?: UserId
-  performedByUserId?: UserId
+type BaseInsertAccountParameters = {
+  id?: AccountId
+  performedByAccountId?: AccountId
 }
-type InsertUserParameters =
-  & BaseInsertUserParameters
+type InsertAccountParameters =
+  & BaseInsertAccountParameters
   & ({
     type: "Person"
     personId: PersonId
@@ -31,8 +31,8 @@ type InsertUserParameters =
     workosUserId?: never
   })
 
-export class UsersRepository extends Effect.Service<UsersRepository>()(
-  "@one-kilo/sql/UsersRepository",
+export class AccountsRepository extends Effect.Service<AccountsRepository>()(
+  "@one-kilo/sql/AccountsRepository",
   {
     dependencies: [DomainIdGenerator.Default],
     effect: Effect.gen(function*() {
@@ -40,11 +40,11 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
       const idGenerator = yield* DomainIdGenerator
 
       const insertSchema = SqlSchema.single({
-        Request: UsersModel.insert,
-        Result: UsersModel.select,
-        execute: (request) => sql`INSERT INTO users ${sql.insert(request).returning("*")}`
+        Request: AccountsModel.insert,
+        Result: AccountsModel.select,
+        execute: (request) => sql`INSERT INTO accounts ${sql.insert(request).returning("*")}`
       })
-      const insert = Effect.fn("UsersRepository.insert")(
+      const insert = Effect.fn("AccountsRepository.insert")(
         function*({
           type,
           personId,
@@ -52,33 +52,33 @@ export class UsersRepository extends Effect.Service<UsersRepository>()(
           machineClientId,
           workosClientId,
           id,
-          performedByUserId
-        }: InsertUserParameters) {
-          const userIdEffect = id
+          performedByAccountId
+        }: InsertAccountParameters) {
+          const accountIdEffect = id
             ? Effect.succeed(id)
-            : idGenerator.userId
+            : idGenerator.accountId
 
           return yield* pipe(
-            userIdEffect,
-            Effect.flatMap((userId) =>
+            accountIdEffect,
+            Effect.flatMap((accountId) =>
               insertSchema({
-                id: userId,
+                id: accountId,
                 type,
                 personId: personId ?? null,
                 workosUserId: workosUserId ?? null,
                 machineClientId: machineClientId ?? null,
                 workosClientId: workosClientId ?? null,
                 createdAt: undefined,
-                createdByUserId: performedByUserId ?? userId,
+                createdByAccountId: performedByAccountId ?? accountId,
                 updatedAt: undefined,
-                updatedByUserId: performedByUserId ?? userId,
+                updatedByAccountId: performedByAccountId ?? accountId,
                 archivedAt: undefined
               })
             ),
-            Effect.andThen(toUserEntity)
+            Effect.andThen(toAccountEntity)
           )
         },
-        orDieWithUnexpectedError("Failed to insert user")
+        orDieWithUnexpectedError("Failed to insert account")
       )
 
       return { insert }

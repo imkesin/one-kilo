@@ -11,7 +11,7 @@ export class PersonsQueryModule extends Effect.Service<PersonsQueryModule>()(
       return {
         retrievePerson: personsQueryRepository.findPersonById,
         retrievePersonEntity: personsQueryRepository.findPersonEntity,
-        retrievePersonEntityWithUser: personsQueryRepository.findPersonEntityWithUser
+        retrievePersonEntityWithAccount: personsQueryRepository.findPersonEntityWithAccount
       }
     })
   }

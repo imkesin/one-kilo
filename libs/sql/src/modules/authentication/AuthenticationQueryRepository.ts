@@ -30,10 +30,10 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
         execute: ({ workosUserId, workosOrganizationId }) =>
           sql`
             SELECT
-              u.id AS user_id,
+              u.id AS account_id,
               ws.id AS workspace_id
-            FROM users u
-            JOIN workspace_memberships wsm ON wsm.user_id = u.id
+            FROM accounts u
+            JOIN workspace_memberships wsm ON wsm.account_id = u.id
             JOIN workspaces ws ON ws.id = wsm.workspace_id
             WHERE
               u.workos_user_id = ${workosUserId}
@@ -62,11 +62,11 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
         execute: ({ workosUserId }) =>
           sql`
             SELECT
-              u.id AS user_id,
+              u.id AS account_id,
               ws.id AS workspace_id,
               ws.workos_organization_id as workos_organization_id
-            FROM users u
-            JOIN workspace_memberships wsm ON wsm.user_id = u.id
+            FROM accounts u
+            JOIN workspace_memberships wsm ON wsm.account_id = u.id
             JOIN workspaces ws ON ws.id = wsm.workspace_id
             WHERE
               u.workos_user_id = ${workosUserId}

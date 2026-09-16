@@ -1,16 +1,16 @@
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity } from "@one-kilo/domain/entities/Person"
-import type { PersonUserEntity } from "@one-kilo/domain/entities/User"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import { AccountsModel } from "../accounts/AccountsModel.ts"
+import { toPersonAccountEntity } from "../accounts/internal/AccountsModelTransformations.ts"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
-import { toPersonUserEntity } from "../users/internal/UsersModelTransformations.ts"
-import { UsersModel } from "../users/UsersModel.ts"
 import { PersonRow, toPerson, toPersonEntity } from "./internal/PersonsModelTransformations.ts"
 import { PersonsModel } from "./PersonsModel.ts"
 
@@ -18,13 +18,13 @@ type FindPersonByIdParameters = {
   readonly personId: PersonId
 }
 
-type FindPersonWithUserParameters = {
+type FindPersonWithAccountParameters = {
   readonly personId: PersonId
 }
 
-type PersonWithUser = {
+type PersonWithAccount = {
   readonly person: PersonEntity
-  readonly maybeUser: Option.Option<PersonUserEntity>
+  readonly maybeAccount: Option.Option<PersonAccountEntity>
 }
 
 export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepository>()(
@@ -84,21 +84,21 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         orDieWithUnexpectedError("An unexpected error occurred while finding a person")
       )
 
-      const findPersonEntityWithUserSchema = SqlSchema.findOne({
+      const findPersonEntityWithAccountSchema = SqlSchema.findOne({
         Request: PersonId,
         Result: S.Struct({
           person: PersonsModel.select,
-          user: S.NullOr(UsersModel.select)
+          account: S.NullOr(AccountsModel.select)
         }),
         execute: (personId) =>
           sql`
             SELECT
               ${sql.unsafe(PersonsModel.asJsonBBuildObject())} AS person,
               CASE
-                WHEN u.id IS NOT NULL THEN ${sql.unsafe(UsersModel.asJsonBBuildObject())}
-              END AS user
+                WHEN u.id IS NOT NULL THEN ${sql.unsafe(AccountsModel.asJsonBBuildObject())}
+              END AS account
             FROM persons p
-            LEFT JOIN users u
+            LEFT JOIN accounts u
               ON u.person_id = p.id
               AND u.type = 'Person'
               AND u.archived_at IS NULL
@@ -109,38 +109,38 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
           `
       })
 
-      const findPersonEntityWithUser = Effect.fn("PersonsQueryRepository.findPersonEntityWithUser")(
-        function*({ personId }: FindPersonWithUserParameters) {
-          const maybeRow = yield* findPersonEntityWithUserSchema(personId)
+      const findPersonEntityWithAccount = Effect.fn("PersonsQueryRepository.findPersonEntityWithAccount")(
+        function*({ personId }: FindPersonWithAccountParameters) {
+          const maybeRow = yield* findPersonEntityWithAccountSchema(personId)
 
           if (Option.isNone(maybeRow)) {
-            return Option.none<PersonWithUser>()
+            return Option.none<PersonWithAccount>()
           }
 
           const row = maybeRow.value
 
           const person = toPersonEntity(row.person)
-          const user = yield* pipe(
-            Option.fromNullable(row.user),
+          const account = yield* pipe(
+            Option.fromNullable(row.account),
             Option.match({
-              onNone: () => Effect.succeed(Option.none<PersonUserEntity>()),
+              onNone: () => Effect.succeed(Option.none<PersonAccountEntity>()),
               onSome: (_) =>
                 Effect.map(
-                  toPersonUserEntity(_),
+                  toPersonAccountEntity(_),
                   Option.some
                 )
             })
           )
 
-          return Option.some({ person, maybeUser: user })
+          return Option.some({ person, maybeAccount: account })
         },
-        orDieWithUnexpectedError("An unexpected error occurred while finding a person with attached user")
+        orDieWithUnexpectedError("An unexpected error occurred while finding a person with attached account")
       )
 
       return {
         findPersonById,
         findPersonEntity,
-        findPersonEntityWithUser
+        findPersonEntityWithAccount
       }
     })
   }

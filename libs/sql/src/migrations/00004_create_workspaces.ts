@@ -8,8 +8,8 @@ export default Effect.gen(function*() {
     CREATE TABLE workspaces (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
 
-      created_by_user_id UUID NOT NULL,
-      updated_by_user_id UUID NOT NULL,
+      created_by_account_id UUID NOT NULL,
+      updated_by_account_id UUID NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -19,8 +19,8 @@ export default Effect.gen(function*() {
       type TEXT NOT NULL,
       workos_organization_id TEXT NOT NULL,
 
-      CONSTRAINT fk_ws_created_by FOREIGN KEY (created_by_user_id) REFERENCES users (id),
-      CONSTRAINT fk_ws_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES users (id)
+      CONSTRAINT fk_ws_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_ws_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
     )
   `
 

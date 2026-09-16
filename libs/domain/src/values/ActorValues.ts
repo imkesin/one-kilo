@@ -1,37 +1,37 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import { AccountId } from "../ids/AccountId.ts"
 import { MachineClientId } from "../ids/MachineClientId.ts"
 import { PersonId } from "../ids/PersonId.ts"
-import { UserId } from "../ids/UserId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 
-const PersonActorUser = S.Struct({
-  id: UserId,
+const PersonActorAccount = S.Struct({
+  id: AccountId,
   type: S.Literal("Person"),
   person: S.Struct({
     id: PersonId
   })
 })
 
-const MachineClientActorUser = S.Struct({
-  id: UserId,
+const MachineClientActorAccount = S.Struct({
+  id: AccountId,
   type: S.Literal("MachineClient"),
   machineClient: S.Struct({
     id: MachineClientId
   })
 })
 
-const ActorIdentityUser = S.Union(PersonActorUser, MachineClientActorUser)
+const ActorIdentityAccount = S.Union(PersonActorAccount, MachineClientActorAccount)
 
 export const ActorIdentity = pipe(
   S.Struct({
-    user: ActorIdentityUser,
+    account: ActorIdentityAccount,
     workspace: S.Struct({
       id: WorkspaceId
     })
   }),
   S.annotations({
-    description: "The identity of the actor performing an action, including user type and workspace scope",
+    description: "The identity of the actor performing an action, including account type and workspace scope",
     identifier: "ActorIdentity",
     title: "Actor Identity"
   })

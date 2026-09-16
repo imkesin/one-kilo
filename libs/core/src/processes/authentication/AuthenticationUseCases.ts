@@ -48,10 +48,10 @@ export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCase
             }),
             Effect.andThen(
               Option.match({
-                onNone: () => dieWithUnexpectedError("User or workspace not found for authentication context"),
-                onSome: ({ userId, workspaceId }) =>
+                onNone: () => dieWithUnexpectedError("Account or workspace not found for authentication context"),
+                onSome: ({ accountId, workspaceId }) =>
                   Effect.succeed({
-                    userId,
+                    accountId,
                     workspaceId,
                     workosAccessToken,
                     workosRefreshToken: outputWorkosRefreshToken

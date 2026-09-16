@@ -3,8 +3,8 @@ import * as Effect from "effect/Effect"
 import { ApplicationServerApiClient } from "~/infra/api/server/ServerApiClients"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 
-export class UsersWebProxy extends Effect.Service<UsersWebProxy>()(
-  "@one-kilo/web/UsersWebProxy",
+export class AccountsWebProxy extends Effect.Service<AccountsWebProxy>()(
+  "@one-kilo/web/AccountsWebProxy",
   {
     dependencies: [
       ApplicationServerApiClient.Default,
@@ -14,10 +14,10 @@ export class UsersWebProxy extends Effect.Service<UsersWebProxy>()(
       const applicationClient = yield* ApplicationServerApiClient
       const authentication = yield* AuthenticationWebModule
 
-      const me = Effect.fn("UsersWebProxy.me")(function*() {
+      const me = Effect.fn("AccountsWebProxy.me")(function*() {
         const { workosAccessToken } = yield* authentication.currentAuthenticationContext
 
-        return yield* applicationClient.users.me({
+        return yield* applicationClient.accounts.me({
           headers: AuthenticationHeaders.fromAccessToken(workosAccessToken)
         })
       })

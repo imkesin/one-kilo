@@ -1,16 +1,16 @@
 import * as HttpApi from "@effect/platform/HttpApi"
 import * as HttpApiError from "@effect/platform/HttpApiError"
 import { AuthenticationMiddleware } from "./infra/AuthenticationSecurity.ts"
+import { AccountsApi } from "./modules/accounts/AccountsApi.ts"
 import { AthletesApi } from "./modules/athletes/AthletesApi.ts"
 import { AuthenticationApi as AuthenticationApiGroup } from "./modules/authentication/AuthenticationApi.ts"
 import { HealthApi } from "./modules/health/HealthApi.ts"
 import { PersonsApi } from "./modules/persons/PersonsApi.ts"
-import { UsersApi } from "./modules/users/UsersApi.ts"
 
 export const ApplicationApi = HttpApi.make("@one-kilo/ApplicationApi")
   .add(AthletesApi)
   .add(PersonsApi)
-  .add(UsersApi)
+  .add(AccountsApi)
   .middleware(AuthenticationMiddleware)
   .addError(HttpApiError.InternalServerError)
 

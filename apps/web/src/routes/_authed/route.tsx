@@ -7,9 +7,9 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { RedirectError } from "~/lib/RedirectError"
+import { meAtomInitialValue } from "~/modules/accounts/accountsAtoms"
+import { AccountsWebProxy } from "~/modules/accounts/server/AccountsWebProxy"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
-import { UsersWebProxy } from "~/modules/users/server/UsersWebProxy"
-import { meAtomInitialValue } from "~/modules/users/usersAtoms"
 import { Viewport } from "~/ui/components/root/Viewport"
 
 const handleBeforeLoadAuthed = pipe(
@@ -28,8 +28,8 @@ const beforeLoadAuthedServerFn = createServerFn({ method: "GET" })
   })
 
 const handleLoadAuthedData = Effect.gen(function*() {
-  const usersWebProxy = yield* UsersWebProxy
-  const me = yield* usersWebProxy.me()
+  const accountsWebProxy = yield* AccountsWebProxy
+  const me = yield* accountsWebProxy.me()
 
   const registry = Registry.make({ initialValues: [meAtomInitialValue(me)] })
 

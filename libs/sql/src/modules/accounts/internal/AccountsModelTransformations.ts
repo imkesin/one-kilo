@@ -1,14 +1,14 @@
-import { EmailAddressOnPerson } from "@one-kilo/domain/entities/EmailAddress"
-import { MachineClientOnUser } from "@one-kilo/domain/entities/MachineClient"
-import { PersonOnUser } from "@one-kilo/domain/entities/Person"
 import {
-  MachineClientUser,
-  MachineClientUserEntity,
-  PersonUser,
-  PersonUserEntity,
-  type User,
-  type UserEntity
-} from "@one-kilo/domain/entities/User"
+  type Account,
+  type AccountEntity,
+  MachineClientAccount,
+  MachineClientAccountEntity,
+  PersonAccount,
+  PersonAccountEntity
+} from "@one-kilo/domain/entities/Account"
+import { EmailAddressOnPerson } from "@one-kilo/domain/entities/EmailAddress"
+import { MachineClientOnAccount } from "@one-kilo/domain/entities/MachineClient"
+import { PersonOnAccount } from "@one-kilo/domain/entities/Person"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Arr from "effect/Array"
 import * as Effect from "effect/Effect"
@@ -16,9 +16,9 @@ import { pipe } from "effect/Function"
 import type { EmailAddressesModel } from "../../email-addresses/EmailAddressesModel.ts"
 import type { MachineClientsModel } from "../../machine-clients/MachineClientsModel.ts"
 import type { PersonsModel } from "../../persons/PersonsModel.ts"
-import type { UsersModel } from "../UsersModel.ts"
+import type { AccountsModel } from "../AccountsModel.ts"
 
-export const toPersonUserEntity = ({
+export const toPersonAccountEntity = ({
   id,
   type,
   personId,
@@ -26,14 +26,14 @@ export const toPersonUserEntity = ({
   createdAt,
   updatedAt,
   archivedAt
-}: typeof UsersModel.select.Type): Effect.Effect<PersonUserEntity> => {
+}: typeof AccountsModel.select.Type): Effect.Effect<PersonAccountEntity> => {
   if (
     type === "Person"
     && personId
     && workosUserId
   ) {
     return Effect.succeed(
-      PersonUserEntity.make({
+      PersonAccountEntity.make({
         id,
         type: "Person",
         personId,
@@ -45,10 +45,10 @@ export const toPersonUserEntity = ({
     )
   }
 
-  return dieWithUnexpectedError("A user model could not be transformed into a person user entity.")
+  return dieWithUnexpectedError("An account model could not be transformed into a person account entity.")
 }
 
-export const toUserEntity = ({
+export const toAccountEntity = ({
   id,
   type,
   personId,
@@ -58,14 +58,14 @@ export const toUserEntity = ({
   createdAt,
   updatedAt,
   archivedAt
-}: typeof UsersModel.select.Type): Effect.Effect<UserEntity> => {
+}: typeof AccountsModel.select.Type): Effect.Effect<AccountEntity> => {
   if (
     type === "Person"
     && personId
     && workosUserId
   ) {
     return Effect.succeed(
-      PersonUserEntity.make({
+      PersonAccountEntity.make({
         id,
         type: "Person",
         personId,
@@ -83,7 +83,7 @@ export const toUserEntity = ({
     && workosClientId
   ) {
     return Effect.succeed(
-      MachineClientUserEntity.make({
+      MachineClientAccountEntity.make({
         id,
         type: "MachineClient",
         machineClientId,
@@ -96,9 +96,9 @@ export const toUserEntity = ({
   }
 
   return pipe(
-    dieWithUnexpectedError("A user model could not be converted to a domain entity"),
+    dieWithUnexpectedError("An account model could not be converted to a domain entity"),
     Effect.annotateLogs({
-      user: {
+      account: {
         id,
         type
       }
@@ -109,12 +109,12 @@ export const toUserEntity = ({
 type PersonWithEmailAddresses = typeof PersonsModel.select.Type & {
   emailAddresses: ReadonlyArray<typeof EmailAddressesModel.select.Type>
 }
-type UserWithRelations = typeof UsersModel.select.Type & {
+type AccountWithRelations = typeof AccountsModel.select.Type & {
   person: PersonWithEmailAddresses | null
   machineClient: typeof MachineClientsModel.select.Type | null
 }
 
-export const toUser = ({
+export const toAccount = ({
   id,
   type,
   workosUserId,
@@ -124,7 +124,7 @@ export const toUser = ({
   createdAt,
   updatedAt,
   archivedAt
-}: UserWithRelations): Effect.Effect<User> => {
+}: AccountWithRelations): Effect.Effect<Account> => {
   if (
     type === "Person"
     && workosUserId
@@ -134,11 +134,11 @@ export const toUser = ({
     const [onlyEmailAddress] = person.emailAddresses
 
     return Effect.succeed(
-      PersonUser.make({
+      PersonAccount.make({
         id,
         type: "Person",
         workosUserId,
-        person: PersonOnUser.make({
+        person: PersonOnAccount.make({
           id: person.id,
           preferredName: person.preferredName,
           fullName: person.fullName,
@@ -171,11 +171,11 @@ export const toUser = ({
     && machineClient
   ) {
     return Effect.succeed(
-      MachineClientUser.make({
+      MachineClientAccount.make({
         id,
         type: "MachineClient",
         workosClientId,
-        machineClient: MachineClientOnUser.make({
+        machineClient: MachineClientOnAccount.make({
           id: machineClient.id,
           name: machineClient.name,
           createdAt: machineClient.createdAt,
@@ -190,9 +190,9 @@ export const toUser = ({
   }
 
   return pipe(
-    dieWithUnexpectedError("A user model with relations could not be converted to a domain user"),
+    dieWithUnexpectedError("An account model with relations could not be converted to a domain account"),
     Effect.annotateLogs({
-      user: {
+      account: {
         id,
         type
       }

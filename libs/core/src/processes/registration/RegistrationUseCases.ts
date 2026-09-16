@@ -2,8 +2,8 @@ import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import type * as WorkOSEntities from "@effect/auth-workos/domain/Entities"
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as PgClient from "@effect/sql-pg/PgClient"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
@@ -16,12 +16,12 @@ import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { UsersCreationModule } from "../../modules/users/UsersCreationModule.ts"
+import { AccountsCreationModule } from "../../modules/accounts/AccountsCreationModule.ts"
 import { WorkspacesCreationModule } from "../../modules/workspaces/WorkspacesCreationModule.ts"
 
 type PersistRegistrationParameters = {
-  readonly userParameters: {
-    readonly id: UserId
+  readonly accountParameters: {
+    readonly id: AccountId
     readonly preferredName: PreferredName
     readonly fullName: FullName
     readonly emailAddress: EmailAddress
@@ -37,7 +37,7 @@ type PersistRegistrationParameters = {
   }
 }
 
-type RegisterHumanUserParameters = {
+type RegisterAccountForPersonParameters = {
   readonly workosUser: WorkOSEntities.User
 }
 
@@ -47,7 +47,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
     dependencies: [
       DomainIdGenerator.Default,
       PersonFallbackNameGenerator.Default,
-      UsersCreationModule.Default,
+      AccountsCreationModule.Default,
       WorkspacesCreationModule.Default
     ],
     effect: Effect.gen(function*() {
@@ -56,23 +56,23 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
       const idGenerator = yield* DomainIdGenerator
       const fallbackNameGenerator = yield* PersonFallbackNameGenerator
-      const usersCreationModule = yield* UsersCreationModule
+      const accountsCreationModule = yield* AccountsCreationModule
       const workspacesCreationModule = yield* WorkspacesCreationModule
 
       const persistRegistration = Effect.fn("RegistrationUseCases.persistRegistration")(
         function*(
           {
-            userParameters,
+            accountParameters,
             workspaceParameters,
             workspaceMembershipParameters
           }: PersistRegistrationParameters
         ) {
-          const user = yield* usersCreationModule.createPersonUser({
-            id: userParameters.id,
-            preferredName: userParameters.preferredName,
-            fullName: userParameters.fullName,
-            emailAddress: userParameters.emailAddress,
-            workosUserId: userParameters.workosUserId
+          const account = yield* accountsCreationModule.createAccountForPerson({
+            id: accountParameters.id,
+            preferredName: accountParameters.preferredName,
+            fullName: accountParameters.fullName,
+            emailAddress: accountParameters.emailAddress,
+            workosUserId: accountParameters.workosUserId
           })
 
           const {
@@ -81,12 +81,12 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           } = yield* workspacesCreationModule.createPersonalWorkspace({
             id: workspaceParameters.id,
             workosOrganizationId: workspaceParameters.workosOrganizationId,
-            userId: userParameters.id,
+            accountId: accountParameters.id,
             workspaceMembershipParameters
           })
 
           return {
-            user,
+            account,
             workspace,
             workspaceMembership
           }
@@ -104,7 +104,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
               }),
               Effect.tapErrorCause((cause) =>
                 pipe(
-                  Effect.logWarning("Failed to decode person names from a WorkOS user", cause),
+                  Effect.logWarning("Failed to decode person names from a WorkOS account", cause),
                   Effect.annotateLogs({
                     workosUser: {
                       id,
@@ -125,7 +125,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             }
           }
 
-          yield* Effect.logWarning("Failed to derive person names from WorkOS user, using fallback names")
+          yield* Effect.logWarning("Failed to derive person names from WorkOS account, using fallback names")
 
           return yield* Effect.map(
             fallbackNameGenerator.generate,
@@ -138,11 +138,11 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         }
       )
 
-      const registerHumanUser = Effect.fn("RegistrationUseCases.registerHumanUser")(
+      const registerAccountForPerson = Effect.fn("RegistrationUseCases.registerAccountForPerson")(
         function*({
           workosUser
-        }: RegisterHumanUserParameters) {
-          const userId = yield* idGenerator.userId
+        }: RegisterAccountForPersonParameters) {
+          const accountId = yield* idGenerator.accountId
           const workspaceId = yield* idGenerator.workspaceId
           const workspaceMembershipId = yield* idGenerator.workspaceMembershipId
 
@@ -156,7 +156,9 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           const emailAddress = yield* pipe(
             workosUser.email,
             S.decode(EmailAddress),
-            orDieWithUnexpectedError("The `email` on the WorkOS user does not conform to our email address standards")
+            orDieWithUnexpectedError(
+              "The `email` on the WorkOS account does not conform to our email address standards"
+            )
           )
 
           const [workosOrganization] = yield* Effect.all(
@@ -172,12 +174,12 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
                 workosGatewayClient.userManagement.updateUser(
                   workosUser.id,
                   {
-                    externalId: userId,
+                    externalId: accountId,
                     firstName: workosName.firstName,
                     lastName: workosName.lastName
                   }
                 ),
-                orDieWithUnexpectedError("Failed to update WorkOS user during registration.")
+                orDieWithUnexpectedError("Failed to update WorkOS account during registration.")
               )
             ],
             { concurrency: "unbounded" }
@@ -207,8 +209,8 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           )
 
           yield* persistRegistration({
-            userParameters: {
-              id: userId,
+            accountParameters: {
+              id: accountId,
               workosUserId: workosUser.id,
               preferredName,
               fullName,
@@ -225,7 +227,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           })
 
           return {
-            userId,
+            accountId,
             workspaceId,
             workosOrganizationId: workosOrganization.id
           }
@@ -233,7 +235,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
         Effect.scoped
       )
 
-      return { registerHumanUser }
+      return { registerAccountForPerson }
     })
   }
 ) {}

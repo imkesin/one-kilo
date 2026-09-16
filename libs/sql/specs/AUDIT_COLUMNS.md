@@ -7,9 +7,9 @@ observed? The audit columns follow from the answer.
 
 Someone decided to do this (Person, Workspace, EmailAddress creations).
 
-- `created_by_user_id`, `updated_by_user_id`, `created_at` — all `NOT NULL`.
-- System actors that genuinely write the table are modeled as real users (e.g. a MachineClient user)
-  so the FK stays `NOT NULL`.
+- `created_by_account_id`, `updated_by_account_id`, `created_at` — all `NOT NULL`.
+- System actors that genuinely write the table are modeled as real accounts (e.g. a MachineClient
+  account) so the FK stays `NOT NULL`.
 
 ## Event records
 
@@ -23,8 +23,9 @@ retries-exhausted, rate-limit-hits, deadletter-arrivals).
 
 Avoids two failure modes:
 
-- Inventing a system user just to satisfy a `NOT NULL` audit column on a table no human writes to.
-- Nullable `created_by_user_id`, which conflates "missing data", "system actor", and "anonymous"
+- Inventing a system account just to satisfy a `NOT NULL` audit column on a table no human writes
+  to.
+- Nullable `created_by_account_id`, which conflates "missing data", "system actor", and "anonymous"
   into one ambiguous `NULL`.
 
 Never reach for a nullable audit FK. Decide the row type instead.

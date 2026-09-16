@@ -6,8 +6,8 @@ import * as Encoding from "effect/Encoding"
 import { pipe } from "effect/Function"
 import { randomBytes } from "node:crypto"
 
-export class TestUserFactory extends Effect.Service<TestUserFactory>()(
-  "@one-kilo/server/TestUserFactory",
+export class TestAccountFactory extends Effect.Service<TestAccountFactory>()(
+  "@one-kilo/server/TestAccountFactory",
   {
     dependencies: [RegistrationUseCases.Default],
     effect: Effect.gen(function*() {
@@ -16,29 +16,29 @@ export class TestUserFactory extends Effect.Service<TestUserFactory>()(
       const workosStore = yield* WorkOSStore.Store
       const workosTokenGenerator = yield* WorkOSTokenGenerator.TokenGenerator
 
-      const makeTestHumanUser = Effect.fn(function*() {
+      const makeTestAccountForPerson = Effect.fn(function*() {
         const email = pipe(
           Encoding.encodeHex(randomBytes(2)),
-          (hex) => `human-user-${hex}@test.com`
+          (hex) => `human-account-${hex}@test.com`
         )
 
         const workosUser = yield* workosStore.apiClient.userManagement.createUser({ email })
 
         const {
-          userId,
+          accountId,
           workspaceId,
           workosOrganizationId
-        } = yield* registrationUseCases.registerHumanUser({ workosUser })
+        } = yield* registrationUseCases.registerAccountForPerson({ workosUser })
 
         const workosAccessToken = yield* workosTokenGenerator.generateSessionAccessToken({
           userId: workosUser.id,
           organizationId: workosOrganizationId
         })
 
-        return { userId, workspaceId, workosAccessToken }
+        return { accountId, workspaceId, workosAccessToken }
       })
 
-      return { makeTestHumanUser }
+      return { makeTestAccountForPerson }
     })
   }
 ) {}

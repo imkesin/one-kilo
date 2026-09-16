@@ -23,9 +23,9 @@ export class CoachingRelationshipsModel extends Model.Class<CoachingRelationship
         'athlete_id', ${alias}.athlete_id,
         'period', ${alias}.period,
         'created_at', ${alias}.created_at,
-        'created_by_user_id', ${alias}.created_by_user_id,
+        'created_by_account_id', ${alias}.created_by_account_id,
         'updated_at', ${alias}.updated_at,
-        'updated_by_user_id', ${alias}.updated_by_user_id,
+        'updated_by_account_id', ${alias}.updated_by_account_id,
         'archived_at', ${alias}.archived_at
       )
     `

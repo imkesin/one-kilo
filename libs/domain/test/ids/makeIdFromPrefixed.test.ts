@@ -1,14 +1,14 @@
 import { describe, it } from "@effect/vitest"
 import * as S from "effect/Schema"
 import { expect } from "vitest"
-import { UserIdFromPrefixed } from "../../src/ids/UserId.ts"
+import { AccountIdFromPrefixed } from "../../src/ids/AccountId.ts"
 
 const FULL = "019c1144-15bd-7eff-a88d-37439858704e"
 const SHORTENED = "06E12H0NQNZFZA4D6X1SGP3G9R"
-const PREFIXED = `u_${SHORTENED}`
+const PREFIXED = `account_${SHORTENED}`
 
 describe("makeIdFromPrefixed (decode)", () => {
-  const decode = S.decodeSync(UserIdFromPrefixed)
+  const decode = S.decodeSync(AccountIdFromPrefixed)
 
   it("decodes a prefixed shortened id", () => {
     expect(decode(PREFIXED)).toBe(FULL)
@@ -27,6 +27,6 @@ describe("makeIdFromPrefixed (decode)", () => {
   })
 
   it("encodes back to the prefixed form", () => {
-    expect(S.encodeSync(UserIdFromPrefixed)(decode(PREFIXED))).toBe(PREFIXED)
+    expect(S.encodeSync(AccountIdFromPrefixed)(decode(PREFIXED))).toBe(PREFIXED)
   })
 })

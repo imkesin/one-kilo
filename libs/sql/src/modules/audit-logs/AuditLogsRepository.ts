@@ -1,9 +1,9 @@
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import type * as AuditLogDefinitions from "@one-kilo/domain/audit-logs/AuditLogDefinitions"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type * as Brand from "effect/Brand"
 import type * as DateTime from "effect/DateTime"
@@ -14,7 +14,7 @@ import { AuditLogsModel } from "./AuditLogsModel.ts"
 import { toAuditLog } from "./internal/AuditLogsModelTransformations.ts"
 
 type InsertAuditLogParameters = {
-  readonly performedByUserId: UserId
+  readonly performedByAccountId: AccountId
   readonly encodedContext: Option.Option<string>
   readonly targets: readonly [
     AuditLogDefinitions.AuditLogTarget,
@@ -43,7 +43,7 @@ export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
       })
       const insert = Effect.fn("AuditLogsRepository.insert")(
         function*({
-          performedByUserId,
+          performedByAccountId,
           encodedContext,
           targets,
           traceId,
@@ -63,7 +63,7 @@ export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
               (auditLogId) =>
                 insertSchema({
                   id: auditLogId,
-                  performedByUserId,
+                  performedByAccountId,
                   context: Option.getOrNull(encodedContext),
                   targets,
                   /*
