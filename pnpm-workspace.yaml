@@ -21,3 +21,8 @@ packages:
   - libs/*
   - packages/*
   - scripts/*
+
+# Expose dprint's platform binary at the root so the VS Code extension auto-detects it
+# without a `dprint.path` setting (and its per-workspace approval prompt).
+publicHoistPattern:
+  - '@dprint/*'

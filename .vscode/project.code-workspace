@@ -130,7 +130,6 @@
       "uuidv7"
     ],
     "editor.formatOnSave": true,
-    "dprint.path": "./node_modules/dprint/dprint",
     "dprint.experimentalLsp": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.oxc": "explicit"
