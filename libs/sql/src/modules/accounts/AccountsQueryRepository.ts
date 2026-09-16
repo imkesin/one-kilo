@@ -44,17 +44,17 @@ export class AccountsQueryRepository extends Effect.Service<AccountsQueryReposit
         execute: (workosUserId) =>
           sql`
             SELECT
-              u.*,
+              accounts.*,
               NULL AS machine_client,
               ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())} AS person
-            FROM accounts u
+            FROM accounts
             LEFT JOIN persons p
-              ON p.id = u.person_id
+              ON p.id = accounts.person_id
               AND p.archived_at IS NULL
             WHERE
-              u.workos_user_id = ${workosUserId}
-              AND u.type = 'Person'
-              AND u.archived_at IS NULL
+              accounts.workos_user_id = ${workosUserId}
+              AND accounts.type = 'Person'
+              AND accounts.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -98,25 +98,25 @@ export class AccountsQueryRepository extends Effect.Service<AccountsQueryReposit
         execute: (accountId) =>
           sql`
             SELECT
-              u.*,
+              accounts.*,
               CASE
-                WHEN u.type = 'MachineClient'
+                WHEN accounts.type = 'MachineClient'
                 THEN ${sql.unsafe(MachineClientsModel.asJsonBBuildObject())}
               END AS machine_client,
               CASE
-                WHEN u.type = 'Person'
+                WHEN accounts.type = 'Person'
                 THEN ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())}
               END AS person
-            FROM accounts u
+            FROM accounts
             LEFT JOIN machine_clients mc
-              ON mc.id = u.machine_client_id
+              ON mc.id = accounts.machine_client_id
               AND mc.archived_at IS NULL
             LEFT JOIN persons p
-              ON p.id = u.person_id
+              ON p.id = accounts.person_id
               AND p.archived_at IS NULL
             WHERE
-              u.id = ${accountId}
-              AND u.archived_at IS NULL
+              accounts.id = ${accountId}
+              AND accounts.archived_at IS NULL
             LIMIT 1
           `
       })

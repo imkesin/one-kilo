@@ -20,7 +20,7 @@ export class AccountsModel extends Model.Class<AccountsModel>("AccountsModel")({
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "u" } = {}) {
+  static asJsonBBuildObject({ alias = "accounts" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

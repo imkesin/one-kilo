@@ -30,15 +30,15 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
         execute: ({ workosUserId, workosOrganizationId }) =>
           sql`
             SELECT
-              u.id AS account_id,
+              accounts.id AS account_id,
               ws.id AS workspace_id
-            FROM accounts u
-            JOIN workspace_memberships wsm ON wsm.account_id = u.id
+            FROM accounts
+            JOIN workspace_memberships wsm ON wsm.account_id = accounts.id
             JOIN workspaces ws ON ws.id = wsm.workspace_id
             WHERE
-              u.workos_user_id = ${workosUserId}
+              accounts.workos_user_id = ${workosUserId}
               AND ws.workos_organization_id = ${workosOrganizationId}
-              AND u.archived_at IS NULL
+              AND accounts.archived_at IS NULL
               AND wsm.archived_at IS NULL
               AND ws.archived_at IS NULL
             LIMIT 1
@@ -62,17 +62,17 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
         execute: ({ workosUserId }) =>
           sql`
             SELECT
-              u.id AS account_id,
+              accounts.id AS account_id,
               ws.id AS workspace_id,
               ws.workos_organization_id as workos_organization_id
-            FROM accounts u
-            JOIN workspace_memberships wsm ON wsm.account_id = u.id
+            FROM accounts
+            JOIN workspace_memberships wsm ON wsm.account_id = accounts.id
             JOIN workspaces ws ON ws.id = wsm.workspace_id
             WHERE
-              u.workos_user_id = ${workosUserId}
+              accounts.workos_user_id = ${workosUserId}
               AND ws.type = 'Personal'
               AND wsm.role = 'Owner'
-              AND u.archived_at IS NULL
+              AND accounts.archived_at IS NULL
               AND wsm.archived_at IS NULL
               AND ws.archived_at IS NULL
             LIMIT 1
