@@ -8,8 +8,8 @@ export default Effect.gen(function*() {
     CREATE TABLE persons (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
 
-      created_by_user_id UUID NOT NULL,
-      updated_by_user_id UUID NOT NULL,
+      created_by_account_id UUID NOT NULL,
+      updated_by_account_id UUID NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

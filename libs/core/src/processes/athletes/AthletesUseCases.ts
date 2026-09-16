@@ -3,8 +3,8 @@ import * as PersonPolicies from "@one-kilo/domain/authorization/PersonPolicies"
 import * as Policy from "@one-kilo/domain/authorization/Policy"
 import type { AthleteEntity } from "@one-kilo/domain/entities/Athlete"
 import { PersonNotFoundError } from "@one-kilo/domain/errors/PersonErrors"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
 import * as Data from "effect/Data"
@@ -21,7 +21,7 @@ type RegisterAthleteParameters = {
 
 type EnsureAthleteParameters = {
   personId: PersonId
-  performedByUserId: UserId
+  performedByAccountId: AccountId
 }
 
 export type RegisterAthleteOutcome = Data.TaggedEnum<{
@@ -46,7 +46,7 @@ export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
       const personsQueryModule = yield* PersonsQueryModule
 
       const ensureAthlete = Effect.fn("AthletesUseCases.ensureAthlete")(
-        function*({ personId, performedByUserId }: EnsureAthleteParameters) {
+        function*({ personId, performedByAccountId }: EnsureAthleteParameters) {
           const maybePerson = yield* personsQueryModule.retrievePersonEntity({ personId })
           if (Option.isNone(maybePerson)) {
             return yield* Effect.fail(new PersonNotFoundError({ personId }))
@@ -57,7 +57,7 @@ export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
             return RegisterAthleteOutcome.AlreadyRegistered({ athlete: maybeExistingAthlete.value })
           }
 
-          const athlete = yield* athletesCreationModule.createAthlete({ personId, performedByUserId })
+          const athlete = yield* athletesCreationModule.createAthlete({ personId, performedByAccountId })
           return RegisterAthleteOutcome.Registered({ athlete })
         },
         PgClientExtensions.withSerializableTransaction(pg)
@@ -65,9 +65,9 @@ export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
 
       const registerAthlete = Effect.fn("AthletesUseCases.registerAthlete")(
         function*({ personId }: RegisterAthleteParameters) {
-          const performedByUserId = yield* Effect.map(Actor, ({ user }) => user.id)
+          const performedByAccountId = yield* Effect.map(Actor, ({ account }) => account.id)
 
-          return yield* ensureAthlete({ personId, performedByUserId })
+          return yield* ensureAthlete({ personId, performedByAccountId })
         },
         (effect, { personId }) =>
           pipe(

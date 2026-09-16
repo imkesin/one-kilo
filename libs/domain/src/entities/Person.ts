@@ -152,17 +152,17 @@ export class Person extends S.TaggedClass<Person>("@one-kilo/domain/Person")(
   }
 ) {}
 
-export class PersonOnUser extends S.TaggedClass<PersonOnUser>("@one-kilo/domain/PersonOnUser")(
-  "PersonOnUser",
+export class PersonOnAccount extends S.TaggedClass<PersonOnAccount>("@one-kilo/domain/PersonOnAccount")(
+  "PersonOnAccount",
   {
     ...EntityBaseFields,
 
     emailAddresses: S.NonEmptyArray(EmailAddressOnPerson)
   },
   {
-    identifier: "PersonOnUser",
-    title: "Person (on User)",
-    description: "A person linked to a user"
+    identifier: "PersonOnAccount",
+    title: "Person (on Account)",
+    description: "A person linked to an account"
   }
 ) {
   deriveWorkOSName = () =>

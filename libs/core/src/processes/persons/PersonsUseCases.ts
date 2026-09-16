@@ -47,9 +47,9 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
         function*({ personId, fields }: UpdatePersonParameters) {
           const {
             person: beforePerson,
-            maybeUser
+            maybeAccount
           } = yield* pipe(
-            personsQueryModule.retrievePersonEntityWithUser({ personId }),
+            personsQueryModule.retrievePersonEntityWithAccount({ personId }),
             Effect.flatMap(
               Option.match({
                 onNone: () => PersonNotFoundError.make({ personId }),
@@ -70,7 +70,7 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
             auditLog,
             beforePerson,
             changedFields,
-            maybeUser
+            maybeAccount
           })
 
           return UpdatePersonOutcome.Updated({ person: updatedPerson })

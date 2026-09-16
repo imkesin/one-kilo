@@ -16,9 +16,9 @@ export class CoachesModel extends Model.Class<CoachesModel>("CoachesModel")({
         'id', ${alias}.id,
         'person_id', ${alias}.person_id,
         'created_at', ${alias}.created_at,
-        'created_by_user_id', ${alias}.created_by_user_id,
+        'created_by_account_id', ${alias}.created_by_account_id,
         'updated_at', ${alias}.updated_at,
-        'updated_by_user_id', ${alias}.updated_by_user_id,
+        'updated_by_account_id', ${alias}.updated_by_account_id,
         'archived_at', ${alias}.archived_at
       )
     `

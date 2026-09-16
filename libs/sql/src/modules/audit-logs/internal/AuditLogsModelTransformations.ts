@@ -1,5 +1,5 @@
+import { AccountCreatedAuditLog } from "@one-kilo/domain/audit-logs/AccountAuditLogs"
 import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
-import { UserCreatedAuditLog } from "@one-kilo/domain/audit-logs/UserAuditLogs"
 import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
 import { WorkspaceMembershipCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceMembershipAuditLogs"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -10,7 +10,7 @@ import type { AuditLogsModel } from "../AuditLogsModel.ts"
 
 export const toAuditLog = ({
   id,
-  performedByUserId,
+  performedByAccountId,
   context,
   targets,
   timestamp,
@@ -19,18 +19,18 @@ export const toAuditLog = ({
   version
 }: typeof AuditLogsModel.select.Type) => {
   if (
-    type === "User.Created"
+    type === "Account.Created"
     && version === 1
-    && S.is(UserCreatedAuditLog.fields.targets)(targets)
+    && S.is(AccountCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
-      UserCreatedAuditLog.make({
+      AccountCreatedAuditLog.make({
         id,
-        performedByUserId,
+        performedByAccountId,
         targets,
         timestamp,
         traceId,
-        type: "User.Created",
+        type: "Account.Created",
         version: 1
       })
     )
@@ -46,7 +46,7 @@ export const toAuditLog = ({
       Effect.map((decodedContext) =>
         PersonUpdatedAuditLog.make({
           id,
-          performedByUserId,
+          performedByAccountId,
           context: decodedContext,
           targets,
           timestamp,
@@ -71,7 +71,7 @@ export const toAuditLog = ({
     return Effect.succeed(
       WorkspaceCreatedAuditLog.make({
         id,
-        performedByUserId,
+        performedByAccountId,
         targets,
         timestamp,
         traceId,
@@ -89,7 +89,7 @@ export const toAuditLog = ({
     return Effect.succeed(
       WorkspaceMembershipCreatedAuditLog.make({
         id,
-        performedByUserId,
+        performedByAccountId,
         targets,
         timestamp,
         traceId,

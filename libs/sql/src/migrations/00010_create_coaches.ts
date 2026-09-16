@@ -10,16 +10,16 @@ export default Effect.gen(function*() {
 
       person_id UUID NOT NULL,
 
-      created_by_user_id UUID NOT NULL,
-      updated_by_user_id UUID NOT NULL,
+      created_by_account_id UUID NOT NULL,
+      updated_by_account_id UUID NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
       archived_at TIMESTAMPTZ,
 
       CONSTRAINT fk_coa_person FOREIGN KEY (person_id) REFERENCES persons (id),
-      CONSTRAINT fk_coa_created_by FOREIGN KEY (created_by_user_id) REFERENCES users (id),
-      CONSTRAINT fk_coa_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES users (id)
+      CONSTRAINT fk_coa_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_coa_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
     )
   `
 

@@ -1,6 +1,6 @@
 import * as Model from "@effect/sql/Model"
+import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
-import { UserId } from "@one-kilo/domain/ids/UserId"
 import { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
@@ -11,7 +11,7 @@ export class AuditLogsModel extends Model.Class<AuditLogsModel>(
 )({
   id: Model.GeneratedByApp(AuditLogId),
 
-  performedByUserId: UserId,
+  performedByAccountId: AccountId,
   /*
    * The context is intentionally marked as unknown at the model-level.
    */

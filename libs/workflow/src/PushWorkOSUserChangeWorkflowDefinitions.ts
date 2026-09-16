@@ -51,7 +51,7 @@ export const PushWorkOSUserChangeWorkflow = Workflow.make({
         )
       }),
       S.annotations({
-        description: "The expected state of the WorkOS user before applying changes."
+        description: "The expected state of the WorkOS account before applying changes."
       })
     ),
     workosUserId: WorkOSIds.UserId

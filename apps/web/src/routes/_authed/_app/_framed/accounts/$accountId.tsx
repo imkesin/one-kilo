@@ -1,32 +1,32 @@
 import { Result, useAtomValue } from "@effect-atom/atom-react"
 import { createFileRoute } from "@tanstack/react-router"
-import { meAtom } from "~/modules/users/usersAtoms"
+import { meAtom } from "~/modules/accounts/accountsAtoms"
 
-function UserPage() {
+function AccountPage() {
   const me = useAtomValue(meAtom)
 
   return (
     <div>
-      <h1>User Page</h1>
+      <h1>Account Page</h1>
       {Result.builder(me)
         .onWaiting(() => <p>Loading…</p>)
         .onFailure(() => <p>Couldn’t load your profile.</p>)
-        .onSuccess(({ user }) => {
-          switch (user._tag) {
-            case "User:Person":
+        .onSuccess(({ account }) => {
+          switch (account._tag) {
+            case "Account:Person":
               return (
                 <dl>
                   <dt>Name</dt>
-                  <dd>{user.person.fullName}</dd>
+                  <dd>{account.person.fullName}</dd>
                   <dt>Email</dt>
-                  <dd>{user.person.emailAddresses[0].value}</dd>
+                  <dd>{account.person.emailAddresses[0].value}</dd>
                 </dl>
               )
-            case "User:MachineClient":
+            case "Account:MachineClient":
               return (
                 <dl>
                   <dt>Machine client</dt>
-                  <dd>{user.machineClient.name}</dd>
+                  <dd>{account.machineClient.name}</dd>
                 </dl>
               )
           }
@@ -36,6 +36,6 @@ function UserPage() {
   )
 }
 
-export const Route = createFileRoute("/_authed/_app/_framed/u/$userId")({
-  component: UserPage
+export const Route = createFileRoute("/_authed/_app/_framed/accounts/$accountId")({
+  component: AccountPage
 })

@@ -1,8 +1,8 @@
 import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
 import type { PersonEntity } from "@one-kilo/domain/entities/Person"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
 import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
@@ -22,7 +22,7 @@ type UpdatePersonFields = {
 
 type RecordPersonUpdatedParameters = {
   readonly fields: UpdatePersonFields
-  readonly performedByUserId: UserId
+  readonly performedByAccountId: AccountId
   readonly personId: PersonId
 }
 
@@ -52,12 +52,12 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
       const personsRepository = yield* PersonsRepository
 
       const recordPersonUpdated = Effect.fn("PersonsManagementModule.recordPersonUpdated")(
-        function*({ fields, performedByUserId, personId }: RecordPersonUpdatedParameters) {
+        function*({ fields, performedByAccountId, personId }: RecordPersonUpdatedParameters) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* PersonUpdatedAuditLog.build({
             id,
-            performedByUserId,
+            performedByAccountId,
             targets: [{ id: personId, type: "Person" as const }],
             context: { fields }
           })
@@ -77,19 +77,19 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
           }
 
           const { keys: changedFields, patch } = diffOutcome
-          const performedByUserId = yield* Effect.map(Actor, ({ user }) => user.id)
+          const performedByAccountId = yield* Effect.map(Actor, ({ account }) => account.id)
 
           const updatedPerson = yield* personsRepository.update(
             person.id,
             {
               fields: patch,
-              performedByUserId
+              performedByAccountId
             }
           )
 
           const auditLog = yield* recordPersonUpdated({
             fields: patch,
-            performedByUserId,
+            performedByAccountId,
             personId: person.id
           })
 

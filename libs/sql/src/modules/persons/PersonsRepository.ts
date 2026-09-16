@@ -1,8 +1,8 @@
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
 import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -17,7 +17,7 @@ type InsertPersonParameters = {
   preferredName: PreferredName
   fullName: FullName
 
-  performedByUserId: UserId
+  performedByAccountId: AccountId
 
   id?: PersonId
 }
@@ -30,7 +30,7 @@ type UpdatePersonParameters = {
     readonly dateOfBirth?: LocalDate
     readonly timezone?: Timezone
   }
-  readonly performedByUserId: UserId
+  readonly performedByAccountId: AccountId
 }
 
 export class PersonsRepository extends Effect.Service<PersonsRepository>()(
@@ -50,7 +50,7 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
         function*({
           preferredName,
           fullName,
-          performedByUserId,
+          performedByAccountId,
           id
         }: InsertPersonParameters) {
           const personIdEffect = id
@@ -67,9 +67,9 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
                 sex: null,
                 dateOfBirth: null,
                 createdAt: undefined,
-                createdByUserId: performedByUserId,
+                createdByAccountId: performedByAccountId,
                 updatedAt: undefined,
-                updatedByUserId: performedByUserId,
+                updatedByAccountId: performedByAccountId,
                 archivedAt: undefined
               })
           )
@@ -101,7 +101,7 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
             id: personId,
             ...parameters.fields,
             updatedAt: undefined,
-            updatedByUserId: parameters.performedByUserId
+            updatedByAccountId: parameters.performedByAccountId
           })
 
           return toPersonEntity(model)

@@ -1,6 +1,6 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as S from "effect/Schema"
-import { UserId } from "../ids/UserId.ts"
+import { AccountId } from "../ids/AccountId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 import { WorkspaceMembershipId } from "../ids/WorkspaceMembershipId.ts"
 import { WorkspaceMembershipRole } from "../values/WorkspaceMembershipValues.ts"
@@ -9,7 +9,7 @@ import { EntityRelationAuditFields } from "./internal/EntityFields.ts"
 const EntityBaseFields = {
   id: WorkspaceMembershipId,
 
-  userId: UserId,
+  accountId: AccountId,
   workspaceId: WorkspaceId,
 
   role: WorkspaceMembershipRole,
@@ -27,6 +27,6 @@ export class WorkspaceMembership extends S.TaggedClass<WorkspaceMembership>("@on
   {
     identifier: "WorkspaceMembership",
     title: "Workspace Membership",
-    description: "An association between a user and a workspace"
+    description: "An association between an account and a workspace"
   }
 ) {}

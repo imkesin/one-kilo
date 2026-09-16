@@ -1,6 +1,6 @@
 import { Atom, Result } from "@effect-atom/atom-react"
 import { orFailWithUnexpectedError, UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import { UsersApi_MeSchemas } from "@one-kilo/server-api/modules/users/UsersApiSchemas"
+import { AccountsApi_MeSchemas } from "@one-kilo/server-api/modules/accounts/AccountsApiSchemas"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { WebApiClient } from "~/infra/api/WebApiClient"
@@ -14,21 +14,21 @@ const meAtomSource = pipe(
       const webApiClient = yield* WebApiClient
 
       return yield* pipe(
-        webApiClient.users.me(),
-        orFailWithUnexpectedError("Failed to load GET /users/me")
+        webApiClient.accounts.me(),
+        orFailWithUnexpectedError("Failed to load GET /accounts/me")
       )
     })
   ),
   Atom.serializable({
-    key: "/users/me",
+    key: "/accounts/me",
     schema: Result.Schema({
-      success: UsersApi_MeSchemas.Success,
+      success: AccountsApi_MeSchemas.Success,
       error: UnexpectedError
     })
   })
 )
 
-export const meAtomInitialValue = (success: typeof UsersApi_MeSchemas.Success.Type) =>
+export const meAtomInitialValue = (success: typeof AccountsApi_MeSchemas.Success.Type) =>
   Atom.initialValue(
     meAtomSource,
     Result.success(success)

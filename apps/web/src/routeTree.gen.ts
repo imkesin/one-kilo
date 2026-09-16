@@ -23,7 +23,7 @@ import { Route as AuthedAdminFramedRouteRouteImport } from './routes/_authed/adm
 import { Route as AuthedAppFramedRouteRouteImport } from './routes/_authed/_app/_framed/route'
 import { Route as AuthedAdminFramedIndexRouteImport } from './routes/_authed/admin/_framed/index'
 import { Route as AuthedAppFramedWsWorkspaceIdRouteImport } from './routes/_authed/_app/_framed/ws/$workspaceId'
-import { Route as AuthedAppFramedUUserIdRouteImport } from './routes/_authed/_app/_framed/u/$userId'
+import { Route as AuthedAppFramedAccountsAccountIdRouteImport } from './routes/_authed/_app/_framed/accounts/$accountId'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
@@ -92,11 +92,12 @@ const AuthedAppFramedWsWorkspaceIdRoute =
     path: '/ws/$workspaceId',
     getParentRoute: () => AuthedAppFramedRouteRoute,
   } as any)
-const AuthedAppFramedUUserIdRoute = AuthedAppFramedUUserIdRouteImport.update({
-  id: '/u/$userId',
-  path: '/u/$userId',
-  getParentRoute: () => AuthedAppFramedRouteRoute,
-} as any)
+const AuthedAppFramedAccountsAccountIdRoute =
+  AuthedAppFramedAccountsAccountIdRouteImport.update({
+    id: '/accounts/$accountId',
+    path: '/accounts/$accountId',
+    getParentRoute: () => AuthedAppFramedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,7 +109,7 @@ export interface FileRoutesByFullPath {
   '/api/$': typeof ApiSplatRoute
   '/sign-in/callback': typeof authSignInCallbackRoute
   '/admin/': typeof AuthedAdminFramedIndexRoute
-  '/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/accounts/$accountId': typeof AuthedAppFramedAccountsAccountIdRoute
   '/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRoutesByTo {
@@ -120,7 +121,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
   '/sign-in/callback': typeof authSignInCallbackRoute
-  '/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/accounts/$accountId': typeof AuthedAppFramedAccountsAccountIdRoute
   '/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRoutesById {
@@ -138,7 +139,7 @@ export interface FileRoutesById {
   '/_authed/admin/_framed': typeof AuthedAdminFramedRouteRouteWithChildren
   '/(auth)/sign-in/callback': typeof authSignInCallbackRoute
   '/_authed/admin/_framed/': typeof AuthedAdminFramedIndexRoute
-  '/_authed/_app/_framed/u/$userId': typeof AuthedAppFramedUUserIdRoute
+  '/_authed/_app/_framed/accounts/$accountId': typeof AuthedAppFramedAccountsAccountIdRoute
   '/_authed/_app/_framed/ws/$workspaceId': typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 export interface FileRouteTypes {
@@ -153,7 +154,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/sign-in/callback'
     | '/admin/'
-    | '/u/$userId'
+    | '/accounts/$accountId'
     | '/ws/$workspaceId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,7 +166,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/$'
     | '/sign-in/callback'
-    | '/u/$userId'
+    | '/accounts/$accountId'
     | '/ws/$workspaceId'
   id:
     | '__root__'
@@ -182,7 +183,7 @@ export interface FileRouteTypes {
     | '/_authed/admin/_framed'
     | '/(auth)/sign-in/callback'
     | '/_authed/admin/_framed/'
-    | '/_authed/_app/_framed/u/$userId'
+    | '/_authed/_app/_framed/accounts/$accountId'
     | '/_authed/_app/_framed/ws/$workspaceId'
   fileRoutesById: FileRoutesById
 }
@@ -295,23 +296,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppFramedWsWorkspaceIdRouteImport
       parentRoute: typeof AuthedAppFramedRouteRoute
     }
-    '/_authed/_app/_framed/u/$userId': {
-      id: '/_authed/_app/_framed/u/$userId'
-      path: '/u/$userId'
-      fullPath: '/u/$userId'
-      preLoaderRoute: typeof AuthedAppFramedUUserIdRouteImport
+    '/_authed/_app/_framed/accounts/$accountId': {
+      id: '/_authed/_app/_framed/accounts/$accountId'
+      path: '/accounts/$accountId'
+      fullPath: '/accounts/$accountId'
+      preLoaderRoute: typeof AuthedAppFramedAccountsAccountIdRouteImport
       parentRoute: typeof AuthedAppFramedRouteRoute
     }
   }
 }
 
 interface AuthedAppFramedRouteRouteChildren {
-  AuthedAppFramedUUserIdRoute: typeof AuthedAppFramedUUserIdRoute
+  AuthedAppFramedAccountsAccountIdRoute: typeof AuthedAppFramedAccountsAccountIdRoute
   AuthedAppFramedWsWorkspaceIdRoute: typeof AuthedAppFramedWsWorkspaceIdRoute
 }
 
 const AuthedAppFramedRouteRouteChildren: AuthedAppFramedRouteRouteChildren = {
-  AuthedAppFramedUUserIdRoute: AuthedAppFramedUUserIdRoute,
+  AuthedAppFramedAccountsAccountIdRoute: AuthedAppFramedAccountsAccountIdRoute,
   AuthedAppFramedWsWorkspaceIdRoute: AuthedAppFramedWsWorkspaceIdRoute,
 }
 

@@ -1,8 +1,8 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
+import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { UserId } from "@one-kilo/domain/ids/UserId"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceName, WorkspaceType } from "@one-kilo/domain/values/WorkspaceValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
@@ -10,7 +10,7 @@ import * as Effect from "effect/Effect"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
 
 type InsertWorkspaceParameters = {
-  performedByUserId: UserId
+  performedByAccountId: AccountId
   name: WorkspaceName
   type: WorkspaceType
   workosOrganizationId: WorkOSIds.OrganizationId
@@ -37,7 +37,7 @@ export class WorkspacesRepository extends Effect.Service<WorkspacesRepository>()
           type,
           workosOrganizationId,
           id,
-          performedByUserId
+          performedByAccountId
         }: InsertWorkspaceParameters) {
           const workspaceIdEffect = id
             ? Effect.succeed(id)
@@ -52,9 +52,9 @@ export class WorkspacesRepository extends Effect.Service<WorkspacesRepository>()
                 type,
                 workosOrganizationId,
                 createdAt: undefined,
-                createdByUserId: performedByUserId,
+                createdByAccountId: performedByAccountId,
                 updatedAt: undefined,
-                updatedByUserId: performedByUserId,
+                updatedByAccountId: performedByAccountId,
                 archivedAt: undefined
               })
           )

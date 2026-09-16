@@ -27,12 +27,12 @@ const adminRole = SystemRoleConfig.make({
   name: "Admin",
   permissionSets: [allResource]
 })
-const userRole = SystemRoleConfig.make({
-  name: "User",
+const accountRole = SystemRoleConfig.make({
+  name: "Account",
   permissionSets: []
 })
 
-const systemRoleConfigs = [adminRole, userRole] as const
+const systemRoleConfigs = [adminRole, accountRole] as const
 const systemRoleIdentifiers = systemRoleConfigs.map((role) => role.name)
 
 export const systemRoleLookup = new Map(systemRoleConfigs.map((role) => [role.name, role] as const))

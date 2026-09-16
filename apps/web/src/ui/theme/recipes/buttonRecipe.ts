@@ -15,7 +15,7 @@ export const buttonRecipe = defineRecipe({
     transitionDuration: "normal",
     transitionProperty: "background, border-color, color, opacity",
     transitionTimingFunction: "default",
-    userSelect: "none",
+    accountSelect: "none",
     verticalAlign: "middle",
     whiteSpace: "nowrap",
 

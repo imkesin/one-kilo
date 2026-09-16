@@ -1,6 +1,6 @@
 import type { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
+import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity, PersonMutableFieldKey } from "@one-kilo/domain/entities/Person"
-import type { PersonUserEntity } from "@one-kilo/domain/entities/User"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { PushWorkOSUserChangeWorkflow } from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
 import * as Arr from "effect/Array"
@@ -10,7 +10,7 @@ import * as Option from "effect/Option"
 
 /**
  * WorkOS mirrors a person's name, so a change to either name field must be propagated to the
- * linked WorkOS user.
+ * linked WorkOS account.
  */
 const WORKOS_MIRRORED_PERSON_FIELDS = ["preferredName", "fullName"] as const satisfies Arr.NonEmptyReadonlyArray<
   PersonMutableFieldKey
@@ -23,21 +23,21 @@ type EnqueueIfNeededParameters = {
   readonly auditLog: PersonUpdatedAuditLog
   readonly beforePerson: PersonEntity
   readonly changedFields: Arr.NonEmptyReadonlyArray<PersonMutableFieldKey>
-  readonly maybeUser: Option.Option<PersonUserEntity>
+  readonly maybeAccount: Option.Option<PersonAccountEntity>
 }
 
 /**
- * Enqueues a WorkOS user-change workflow when a person update both touches a WorkOS-mirrored field
- * and belongs to a linked user. A no-op otherwise.
+ * Enqueues a WorkOS account-change workflow when a person update both touches a WorkOS-mirrored field
+ * and belongs to a linked account. A no-op otherwise.
  */
 export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
   function*({
     auditLog,
     beforePerson,
     changedFields,
-    maybeUser
+    maybeAccount
   }: EnqueueIfNeededParameters) {
-    if (Option.isNone(maybeUser) || !changeRequiresSync(changedFields)) {
+    if (Option.isNone(maybeAccount) || !changeRequiresSync(changedFields)) {
       return
     }
 
@@ -53,7 +53,7 @@ export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
           firstName: beforeWorkOsName.firstName,
           lastName: beforeWorkOsName.lastName
         },
-        workosUserId: maybeUser.value.workosUserId
+        workosUserId: maybeAccount.value.workosUserId
       },
       { discard: true }
     )

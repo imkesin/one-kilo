@@ -6,12 +6,12 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { WebApi } from "~/infra/api/WebApi"
 import { getManagedWebServerRuntime } from "~/infra/runtime/server/getManagedServerRuntime"
+import { AccountsWebHttp } from "~/modules/accounts/api/AccountsWebHttp"
 import { WebAuthenticationMiddlewareLive } from "~/modules/authentication/server/WebAuthenticationMiddlewareLive"
-import { UsersWebHttp } from "~/modules/users/api/UsersWebHttp"
 
 const WebApiLive = pipe(
   HttpApiBuilder.api(WebApi),
-  Layer.provide([UsersWebHttp]),
+  Layer.provide([AccountsWebHttp]),
   Layer.provide(WebAuthenticationMiddlewareLive)
 )
 

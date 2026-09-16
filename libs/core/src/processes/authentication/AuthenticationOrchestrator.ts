@@ -11,8 +11,8 @@ import { AuthenticationQueryModule } from "../../modules/authentication/Authenti
 import { RegistrationUseCases } from "../registration/RegistrationUseCases.ts"
 
 type CodeExchangeOutcome = Data.TaggedEnum<{
-  NewlyCreatedUser: AuthenticationContext
-  ReturningUser: AuthenticationContext
+  NewlyCreatedAccount: AuthenticationContext
+  ReturningAccount: AuthenticationContext
 }>
 const CodeExchangeOutcome = Data.taggedEnum<CodeExchangeOutcome>()
 
@@ -44,9 +44,9 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             )
           )
 
-          const handleRegisterHumanUser = pipe(
-            registrationProcesses.registerHumanUser({ workosUser }),
-            Effect.flatMap(({ userId, workspaceId, workosOrganizationId }) =>
+          const handleRegisterAccountForPerson = pipe(
+            registrationProcesses.registerAccountForPerson({ workosUser }),
+            Effect.flatMap(({ accountId, workspaceId, workosOrganizationId }) =>
               pipe(
                 workosDirectClient.userManagement.authenticateWithRefreshToken({
                   refreshToken: workosRefreshToken,
@@ -54,8 +54,8 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
                 }),
                 orDieWithUnexpectedError("Failed to refresh WorkOS token after registration."),
                 Effect.map(({ accessToken, refreshToken }) =>
-                  CodeExchangeOutcome.NewlyCreatedUser({
-                    userId,
+                  CodeExchangeOutcome.NewlyCreatedAccount({
+                    accountId,
                     workspaceId,
                     workosAccessToken: accessToken,
                     workosRefreshToken: refreshToken
@@ -66,8 +66,8 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
           )
 
           /*
-           * Even though our system enforces a personal workspace for each user, it is still possible for a
-           * WorkOS code exchange - for a user already registered in our system - to not specify an organization.
+           * Even though our system enforces a personal workspace for each account, it is still possible for a
+           * WorkOS code exchange - for an account already registered in our system - to not specify an organization.
            *
            * This block must exists to gracefully handle this scenario.
            */
@@ -75,9 +75,9 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
             return yield* Effect.andThen(
               authenticationQueryModule.retrieveDefaultAuthenticationIdentity({ workosUserId: workosUser.id }),
               Option.match({
-                onNone: () => handleRegisterHumanUser,
+                onNone: () => handleRegisterAccountForPerson,
                 onSome: ({
-                  userId,
+                  accountId,
                   workspaceId,
                   workosOrganizationId: defaultWorkosOrganizationId
                 }) =>
@@ -87,11 +87,11 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
                       organizationId: defaultWorkosOrganizationId
                     }),
                     orDieWithUnexpectedError(
-                      "Failed to refresh WorkOS token for an existing user without an organization in the code exchange response."
+                      "Failed to refresh WorkOS token for an existing account without an organization in the code exchange response."
                     ),
                     Effect.map(({ accessToken, refreshToken }) =>
-                      CodeExchangeOutcome.ReturningUser({
-                        userId,
+                      CodeExchangeOutcome.ReturningAccount({
+                        accountId,
                         workspaceId,
                         workosAccessToken: accessToken,
                         workosRefreshToken: refreshToken
@@ -108,11 +108,11 @@ export class AuthenticationOrchestrator extends Effect.Service<AuthenticationOrc
               workosOrganizationId
             }),
             Option.match({
-              onNone: () => handleRegisterHumanUser,
-              onSome: ({ userId, workspaceId }) =>
+              onNone: () => handleRegisterAccountForPerson,
+              onSome: ({ accountId, workspaceId }) =>
                 Effect.succeed(
-                  CodeExchangeOutcome.ReturningUser({
-                    userId,
+                  CodeExchangeOutcome.ReturningAccount({
+                    accountId,
                     workspaceId,
                     workosAccessToken,
                     workosRefreshToken
