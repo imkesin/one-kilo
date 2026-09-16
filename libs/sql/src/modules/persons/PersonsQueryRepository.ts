@@ -95,13 +95,13 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
             SELECT
               ${sql.unsafe(PersonsModel.asJsonBBuildObject())} AS person,
               CASE
-                WHEN u.id IS NOT NULL THEN ${sql.unsafe(AccountsModel.asJsonBBuildObject())}
+                WHEN accounts.id IS NOT NULL THEN ${sql.unsafe(AccountsModel.asJsonBBuildObject())}
               END AS account
             FROM persons p
-            LEFT JOIN accounts u
-              ON u.person_id = p.id
-              AND u.type = 'Person'
-              AND u.archived_at IS NULL
+            LEFT JOIN accounts
+              ON accounts.person_id = p.id
+              AND accounts.type = 'Person'
+              AND accounts.archived_at IS NULL
             WHERE
               p.id = ${personId}
               AND p.archived_at IS NULL
