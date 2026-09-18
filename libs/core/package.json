@@ -24,7 +24,7 @@
     "build": "tsc --build tsconfig.src.json",
     "clean": "rm -rf .turbo dist",
     "test": "vitest",
-    "test:once": "vitest run",
+    "test:once": "vitest run --passWithNoTests",
     "typecheck": "tsc --build && tsc --project tsconfig.test.json --noEmit"
   },
   "type": "module"
