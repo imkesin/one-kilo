@@ -23,7 +23,7 @@ describe("makeIdFromPrefixed (decode)", () => {
   })
 
   it("rejects a foreign prefix", () => {
-    expect(() => decode(`coa_${SHORTENED}`)).toThrow()
+    expect(() => decode(`coach_${SHORTENED}`)).toThrow()
   })
 
   it("encodes back to the prefixed form", () => {
