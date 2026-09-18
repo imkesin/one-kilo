@@ -2,19 +2,19 @@ import { updateWorkOSUserActivity } from "@one-kilo/core/activities/UpdateWorkOS
 import { AccountsQueryModule } from "@one-kilo/core/modules/accounts/AccountsQueryModule"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
 import {
-  PushWorkOSUserChangeError,
-  PushWorkOSUserChangeSuccess,
-  PushWorkOSUserChangeWorkflow
-} from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
+  PushPersonChangeToWorkOSError,
+  PushPersonChangeToWorkOSSuccess,
+  PushPersonChangeToWorkOSWorkflow
+} from "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflowDefinitions"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Match from "effect/Match"
 import * as WorkflowExtensions from "./WorkflowExtensions.ts"
 
-export const PushWorkOSUserChangeWorkflowLive = pipe(
-  PushWorkOSUserChangeWorkflow.toLayer(
-    Effect.fn("PushWorkOSUserChangeWorkflow.execute")(
+export const PushPersonChangeToWorkOSWorkflowLive = pipe(
+  PushPersonChangeToWorkOSWorkflow.toLayer(
+    Effect.fn("PushPersonChangeToWorkOSWorkflow.execute")(
       function*(payload) {
         const activityOutcome = yield* pipe(
           updateWorkOSUserActivity({
@@ -32,32 +32,32 @@ export const PushWorkOSUserChangeWorkflowLive = pipe(
           ),
           Effect.catchTags({
             "RetryBudgetExhaustedError": (e) =>
-              PushWorkOSUserChangeError.make({
+              PushPersonChangeToWorkOSError.make({
                 cause: e,
                 reason: "RetryExhausted"
               }),
 
             "TargetedAccountNotFoundError": (e) =>
-              PushWorkOSUserChangeError.make({
+              PushPersonChangeToWorkOSError.make({
                 cause: e,
                 reason: "Unexpected"
               }),
 
             "WorkOSUserNotFoundError": (e) =>
-              PushWorkOSUserChangeError.make({
+              PushPersonChangeToWorkOSError.make({
                 cause: e,
                 reason: "Unexpected"
               }),
 
             "WorkOSOperationError": (e) =>
-              PushWorkOSUserChangeError.make({
+              PushPersonChangeToWorkOSError.make({
                 cause: e,
                 reason: "Unexpected"
               })
           })
         )
 
-        return PushWorkOSUserChangeSuccess.make({
+        return PushPersonChangeToWorkOSSuccess.make({
           outcome: Match.valueTags(
             activityOutcome,
             {

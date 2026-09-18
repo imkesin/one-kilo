@@ -5,7 +5,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { AliveCron } from "./crons/AliveCron.ts"
 import { WorkOSLive } from "./infra/WorkOS.ts"
-import { PushWorkOSUserChangeWorkflowLive } from "./workflows/PushWorkOSUserChangeWorkflow.ts"
+import { PushPersonChangeToWorkOSWorkflowLive } from "./workflows/PushPersonChangeToWorkOSWorkflow.ts"
 
 const SqlLive = PgLayers.layer()
 
@@ -25,7 +25,7 @@ export function makeRunnerLive<A, E, R>(ClusterLayer: Layer.Layer<A, E, R>) {
   )
 
   const WorkflowsLive = pipe(
-    Layer.mergeAll(PushWorkOSUserChangeWorkflowLive),
+    Layer.mergeAll(PushPersonChangeToWorkOSWorkflowLive),
     Layer.provide(WorkflowEngineLive)
   )
 

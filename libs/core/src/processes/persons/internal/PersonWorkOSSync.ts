@@ -2,7 +2,7 @@ import type { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAu
 import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity, PersonMutableFieldKey } from "@one-kilo/domain/entities/Person"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import { PushWorkOSUserChangeWorkflow } from "@one-kilo/workflow/PushWorkOSUserChangeWorkflowDefinitions"
+import { PushPersonChangeToWorkOSWorkflow } from "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflowDefinitions"
 import * as Arr from "effect/Array"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -27,8 +27,8 @@ type EnqueueIfNeededParameters = {
 }
 
 /**
- * Enqueues a WorkOS user-change workflow when a person update both touches a WorkOS-mirrored field
- * and belongs to a linked account. A no-op otherwise.
+ * Enqueues a workflow that pushes the person change to WorkOS when a person update both touches a
+ * WorkOS-mirrored field and belongs to a linked account. A no-op otherwise.
  */
 export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
   function*({
@@ -46,7 +46,7 @@ export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
       orDieWithUnexpectedError("Failed to derive a WorkOS name from the before-state person")
     )
 
-    yield* PushWorkOSUserChangeWorkflow.execute(
+    yield* PushPersonChangeToWorkOSWorkflow.execute(
       {
         causedByAuditLogId: auditLog.id,
         expected: {

@@ -4,12 +4,12 @@ import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
-const ID_PREFIX = "@one-kilo/workflow/PushWorkOSUserChangeWorkflow"
+const ID_PREFIX = "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflow"
 
-export class PushWorkOSUserChangeSuccess extends S.TaggedClass<PushWorkOSUserChangeSuccess>(
+export class PushPersonChangeToWorkOSSuccess extends S.TaggedClass<PushPersonChangeToWorkOSSuccess>(
   `${ID_PREFIX}/Success`
 )(
-  "PushWorkOSUserChangeSuccess",
+  "PushPersonChangeToWorkOSSuccess",
   {
     outcome: S.Literal(
       "AlreadySynced",
@@ -19,10 +19,10 @@ export class PushWorkOSUserChangeSuccess extends S.TaggedClass<PushWorkOSUserCha
   }
 ) {}
 
-export class PushWorkOSUserChangeError extends S.TaggedError<PushWorkOSUserChangeError>(
+export class PushPersonChangeToWorkOSError extends S.TaggedError<PushPersonChangeToWorkOSError>(
   `${ID_PREFIX}/Error`
 )(
-  "PushWorkOSUserChangeError",
+  "PushPersonChangeToWorkOSError",
   {
     reason: S.Literal(
       "RetryExhausted",
@@ -32,8 +32,8 @@ export class PushWorkOSUserChangeError extends S.TaggedError<PushWorkOSUserChang
   }
 ) {}
 
-export const PushWorkOSUserChangeWorkflow = Workflow.make({
-  name: "@one-kilo/workflow/PushWorkOSUserChangeWorkflow",
+export const PushPersonChangeToWorkOSWorkflow = Workflow.make({
+  name: "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflow",
   payload: {
     causedByAuditLogId: pipe(
       AuditLogId,
@@ -56,8 +56,8 @@ export const PushWorkOSUserChangeWorkflow = Workflow.make({
     ),
     workosUserId: WorkOSIds.UserId
   },
-  success: PushWorkOSUserChangeSuccess,
-  error: PushWorkOSUserChangeError,
+  success: PushPersonChangeToWorkOSSuccess,
+  error: PushPersonChangeToWorkOSError,
   idempotencyKey: ({ causedByAuditLogId }) => causedByAuditLogId
 })
   .annotate(Workflow.SuspendOnFailure, true)
