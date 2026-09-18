@@ -9,8 +9,7 @@ export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
       const accountsQueryRepository = yield* AccountsQueryRepository
 
       return {
-        retrieveAccount: accountsQueryRepository.findAccountByAccountId,
-        retrieveAccountByWorkOSUserId: accountsQueryRepository.findAccountByWorkOSUserId
+        retrieveAccount: accountsQueryRepository.findAccountByAccountId
       }
     })
   }

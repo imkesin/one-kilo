@@ -1,5 +1,5 @@
 import { updateWorkOSUserActivity } from "@one-kilo/core/activities/UpdateWorkOSUserActivity"
-import { AccountsQueryModule } from "@one-kilo/core/modules/accounts/AccountsQueryModule"
+import { PersonsQueryModule } from "@one-kilo/core/modules/persons/PersonsQueryModule"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
 import {
   PushPersonChangeToWorkOSError,
@@ -18,18 +18,23 @@ export const PushPersonChangeToWorkOSWorkflowLive = pipe(
       function*(payload) {
         const activityOutcome = yield* pipe(
           updateWorkOSUserActivity({
-            workosUserId: payload.workosUserId,
+            personId: payload.personId,
             expected: payload.expected
           }),
-          Effect.catchTag(
-            "WorkOSUserStateDriftError",
+          Effect.catchTags({
+            /*
+             * The account was unlinked between enqueue and run, so there is no longer a WorkOS user
+             * to update. Nothing to reconcile.
+             */
+            "AccountNotLinkedError": () => Effect.succeed({ _tag: "AccountUnlinked" as const }),
+
             /*
              * Drift means another actor (the WorkOS dashboard, another sync, etc.) mutated the
              * user since this workflow was scheduled. Abort rather than clobber their change —
              * the inbound `user.updated` webhook will reconcile our local state back to WorkOS.
              */
-            () => Effect.succeed({ _tag: "DriftDetected" as const })
-          ),
+            "WorkOSUserStateDriftError": () => Effect.succeed({ _tag: "DriftDetected" as const })
+          }),
           Effect.catchTags({
             "RetryBudgetExhaustedError": (e) =>
               PushPersonChangeToWorkOSError.make({
@@ -37,7 +42,7 @@ export const PushPersonChangeToWorkOSWorkflowLive = pipe(
                 reason: "RetryExhausted"
               }),
 
-            "TargetedAccountNotFoundError": (e) =>
+            "TargetedPersonNotFoundError": (e) =>
               PushPersonChangeToWorkOSError.make({
                 cause: e,
                 reason: "Unexpected"
@@ -61,6 +66,7 @@ export const PushPersonChangeToWorkOSWorkflowLive = pipe(
           outcome: Match.valueTags(
             activityOutcome,
             {
+              "AccountUnlinked": () => "AccountUnlinked" as const,
               "AlreadySyncedOutcome": () => "AlreadySynced" as const,
               "DriftDetected": () => "DriftDetected" as const,
               "UpdatedOutcome": () => "Updated" as const
@@ -72,7 +78,7 @@ export const PushPersonChangeToWorkOSWorkflowLive = pipe(
     )
   ),
   Layer.provide([
-    AccountsQueryModule.Default,
+    PersonsQueryModule.Default,
     WorkflowSuspensionsCreationModule.Default
   ])
 )

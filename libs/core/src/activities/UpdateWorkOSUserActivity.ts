@@ -1,18 +1,19 @@
 import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSError from "@effect/auth-workos/domain/Errors"
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
+import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { AccountsQueryModule } from "../modules/accounts/AccountsQueryModule.ts"
+import { PersonsQueryModule } from "../modules/persons/PersonsQueryModule.ts"
 import * as ActivityExtensions from "./ActivityExtensions.ts"
 
 const ID_PREFIX = "@one-kilo/core/UpdateWorkOSUserActivity"
 
 type UpdateWorkOSUserActivityParameters = {
-  readonly workosUserId: WorkOSIds.UserId
+  readonly personId: PersonId
   readonly expected: {
     firstName: string
     lastName: string | null
@@ -38,12 +39,26 @@ const UpdateWorkOSUserActivityOutcome = S.Union(
   UpdatedOutcome
 )
 
-class TargetedAccountNotFoundError extends S.TaggedError<TargetedAccountNotFoundError>(
-  `${ID_PREFIX}/TargetedAccountNotFoundError`
+class TargetedPersonNotFoundError extends S.TaggedError<TargetedPersonNotFoundError>(
+  `${ID_PREFIX}/TargetedPersonNotFoundError`
 )(
-  "TargetedAccountNotFoundError",
+  "TargetedPersonNotFoundError",
   {
-    workosUserId: WorkOSIds.UserId
+    personId: PersonId
+  }
+) {
+  readonly isRetryable = false
+}
+
+class AccountNotLinkedError extends S.TaggedError<AccountNotLinkedError>(
+  `${ID_PREFIX}/AccountNotLinkedError`
+)(
+  "AccountNotLinkedError",
+  {
+    personId: PersonId
+  },
+  {
+    description: "The targeted person has no linked account, so there is no WorkOS user to update."
   }
 ) {
   readonly isRetryable = false
@@ -103,7 +118,8 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
 }
 
 const UpdateWorkOSUserActivityError = S.Union(
-  TargetedAccountNotFoundError,
+  AccountNotLinkedError,
+  TargetedPersonNotFoundError,
   WorkOSOperationError,
   WorkOSUserNotFoundError,
   WorkOSUserStateDriftError
@@ -117,40 +133,46 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
     while: (e) => e.isRetryable,
     execute: Effect.gen(function*() {
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
-      const accountsQueryModule = yield* AccountsQueryModule
+      const personsQueryModule = yield* PersonsQueryModule
 
-      const [account, workosUser] = yield* Effect.all(
-        [
-          pipe(
-            accountsQueryModule.retrieveAccountByWorkOSUserId({ workosUserId: parameters.workosUserId }),
-            Effect.andThen(
-              Option.match({
-                onSome: Effect.succeed,
-                onNone: () => TargetedAccountNotFoundError.make({ workosUserId: parameters.workosUserId })
-              })
-            )
-          ),
-          pipe(
-            workosGatewayClient.userManagement.retrieveUser(parameters.workosUserId),
-            Effect.catchTags({
-              "ResourceNotFoundError": (e) =>
-                WorkOSUserNotFoundError.make({
-                  cause: e,
-                  workosUserId: parameters.workosUserId
-                }),
-              "WorkOSCommonError": (e) =>
-                WorkOSOperationError.make({
-                  cause: e,
-                  operation: "RetrieveUser"
-                })
+      /*
+       * The WorkOS user is resolved at run time rather than carried in the payload, so an account
+       * unlinked between enqueue and run aborts instead of updating a stale WorkOS user.
+       */
+      const { person, maybeAccount } = yield* pipe(
+        personsQueryModule.retrievePersonEntityWithAccount({ personId: parameters.personId }),
+        Effect.flatMap(
+          Option.match({
+            onSome: Effect.succeed,
+            onNone: () => TargetedPersonNotFoundError.make({ personId: parameters.personId })
+          })
+        )
+      )
+
+      if (Option.isNone(maybeAccount)) {
+        return yield* AccountNotLinkedError.make({ personId: parameters.personId })
+      }
+
+      const { workosUserId } = maybeAccount.value
+
+      const workosUser = yield* pipe(
+        workosGatewayClient.userManagement.retrieveUser(workosUserId),
+        Effect.catchTags({
+          "ResourceNotFoundError": (e) =>
+            WorkOSUserNotFoundError.make({
+              cause: e,
+              workosUserId
+            }),
+          "WorkOSCommonError": (e) =>
+            WorkOSOperationError.make({
+              cause: e,
+              operation: "RetrieveUser"
             })
-          )
-        ],
-        { concurrency: "unbounded" }
+        })
       )
 
       const derivedWorkOSName = yield* pipe(
-        account.person.deriveWorkOSName(),
+        person.deriveWorkOSName(),
         orDieWithUnexpectedError("Failed to derive a WorkOS name from the person")
       )
 
@@ -176,7 +198,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
 
       yield* pipe(
         workosGatewayClient.userManagement.updateUser(
-          parameters.workosUserId,
+          workosUserId,
           {
             firstName: derivedWorkOSName.firstName,
             lastName: derivedWorkOSName.lastName
@@ -186,7 +208,7 @@ export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityPar
           "ResourceNotFoundError": (e) =>
             WorkOSUserNotFoundError.make({
               cause: e,
-              workosUserId: parameters.workosUserId
+              workosUserId
             }),
           "WorkOSCommonError": (e) =>
             WorkOSOperationError.make({

@@ -53,7 +53,7 @@ export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
           firstName: beforeWorkOsName.firstName,
           lastName: beforeWorkOsName.lastName
         },
-        workosUserId: maybeAccount.value.workosUserId
+        personId: beforePerson.id
       },
       { discard: true }
     )

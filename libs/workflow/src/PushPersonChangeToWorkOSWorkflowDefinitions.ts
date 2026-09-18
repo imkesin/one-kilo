@@ -1,6 +1,6 @@
-import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
 import * as Workflow from "@effect/workflow/Workflow"
 import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
+import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
@@ -12,6 +12,7 @@ export class PushPersonChangeToWorkOSSuccess extends S.TaggedClass<PushPersonCha
   "PushPersonChangeToWorkOSSuccess",
   {
     outcome: S.Literal(
+      "AccountUnlinked",
       "AlreadySynced",
       "DriftDetected",
       "Updated"
@@ -54,7 +55,13 @@ export const PushPersonChangeToWorkOSWorkflow = Workflow.make({
         description: "The expected state of the WorkOS user before applying changes."
       })
     ),
-    workosUserId: WorkOSIds.UserId
+    personId: pipe(
+      PersonId,
+      S.annotations({
+        description:
+          "The person whose change is being pushed. The linked account's WorkOS user is resolved at run time, not at enqueue time."
+      })
+    )
   },
   success: PushPersonChangeToWorkOSSuccess,
   error: PushPersonChangeToWorkOSError,
