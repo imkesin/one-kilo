@@ -15,7 +15,7 @@ export class CoachingRelationshipsModel extends Model.Class<CoachingRelationship
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "cr" } = {}) {
+  static asJsonBBuildObject({ alias = "coaching_relationships" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

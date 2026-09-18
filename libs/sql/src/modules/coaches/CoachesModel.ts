@@ -10,7 +10,7 @@ export class CoachesModel extends Model.Class<CoachesModel>("CoachesModel")({
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "coa" } = {}) {
+  static asJsonBBuildObject({ alias = "coaches" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

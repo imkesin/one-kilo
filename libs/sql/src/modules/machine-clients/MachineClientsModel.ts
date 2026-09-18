@@ -12,7 +12,7 @@ export class MachineClientsModel extends Model.Class<MachineClientsModel>(
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "mc" } = {}) {
+  static asJsonBBuildObject({ alias = "machine_clients" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

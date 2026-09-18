@@ -75,16 +75,16 @@ export class ActorQueryRepository extends Effect.Service<ActorQueryRepository>()
               accounts.type AS account_type,
               accounts.machine_client_id AS machine_client_id,
               accounts.person_id AS person_id,
-              ws.id AS workspace_id
+              workspaces.id AS workspace_id
             FROM accounts
-            JOIN workspace_memberships wsm ON wsm.account_id = accounts.id
-            JOIN workspaces ws ON ws.id = wsm.workspace_id
+            JOIN workspace_memberships ON workspace_memberships.account_id = accounts.id
+            JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
             WHERE
               accounts.workos_user_id = ${workosUserId}
-              AND ws.workos_organization_id = ${workosOrganizationId}
+              AND workspaces.workos_organization_id = ${workosOrganizationId}
               AND accounts.archived_at IS NULL
-              AND wsm.archived_at IS NULL
-              AND ws.archived_at IS NULL
+              AND workspace_memberships.archived_at IS NULL
+              AND workspaces.archived_at IS NULL
             LIMIT 1
           `
       })

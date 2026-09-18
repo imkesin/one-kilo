@@ -55,12 +55,12 @@ export class AccountsQueryRepository extends Effect.Service<AccountsQueryReposit
                 THEN ${sql.unsafe(PersonsModel.asJsonBBuildObjectWithRelations())}
               END AS person
             FROM accounts
-            LEFT JOIN machine_clients mc
-              ON mc.id = accounts.machine_client_id
-              AND mc.archived_at IS NULL
-            LEFT JOIN persons p
-              ON p.id = accounts.person_id
-              AND p.archived_at IS NULL
+            LEFT JOIN machine_clients
+              ON machine_clients.id = accounts.machine_client_id
+              AND machine_clients.archived_at IS NULL
+            LEFT JOIN persons
+              ON persons.id = accounts.person_id
+              AND persons.archived_at IS NULL
             WHERE
               accounts.id = ${accountId}
               AND accounts.archived_at IS NULL

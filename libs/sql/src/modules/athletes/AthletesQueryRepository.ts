@@ -35,32 +35,32 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
         execute: (athleteId) =>
           sql`
             SELECT
-              ath.*,
-              ${sql.unsafe(PersonsModel.asJsonBBuildObject({ alias: "p" }))} AS person,
+              athletes.*,
+              ${sql.unsafe(PersonsModel.asJsonBBuildObject())} AS person,
               COALESCE(
                 (
                   SELECT JSONB_AGG(
-                    ${sql.unsafe(CoachesModel.asJsonBBuildObject({ alias: "coa" }))}
+                    ${sql.unsafe(CoachesModel.asJsonBBuildObject())}
                     || JSONB_BUILD_OBJECT(
-                      'person', ${sql.unsafe(PersonsModel.asJsonBBuildObject({ alias: "cp" }))},
-                      'relationship', ${sql.unsafe(CoachingRelationshipsModel.asJsonBBuildObject({ alias: "cr" }))}
+                      'person', ${sql.unsafe(PersonsModel.asJsonBBuildObject({ alias: "coach_persons" }))},
+                      'relationship', ${sql.unsafe(CoachingRelationshipsModel.asJsonBBuildObject())}
                     )
                   )
-                  FROM coaching_relationships cr
-                  JOIN coaches coa ON coa.id = cr.coach_id AND coa.archived_at IS NULL
-                  JOIN persons cp ON cp.id = coa.person_id AND cp.archived_at IS NULL
+                  FROM coaching_relationships
+                  JOIN coaches ON coaches.id = coaching_relationships.coach_id AND coaches.archived_at IS NULL
+                  JOIN persons coach_persons ON coach_persons.id = coaches.person_id AND coach_persons.archived_at IS NULL
                   WHERE
-                    cr.athlete_id = ath.id
-                    AND cr.archived_at IS NULL
-                    AND cr.period @> CURRENT_DATE
+                    coaching_relationships.athlete_id = athletes.id
+                    AND coaching_relationships.archived_at IS NULL
+                    AND coaching_relationships.period @> CURRENT_DATE
                 ),
                 '[]'::jsonb
               ) AS coaches
-            FROM athletes ath
-            JOIN persons p ON p.id = ath.person_id AND p.archived_at IS NULL
+            FROM athletes
+            JOIN persons ON persons.id = athletes.person_id AND persons.archived_at IS NULL
             WHERE
-              ath.id = ${athleteId}
-              AND ath.archived_at IS NULL
+              athletes.id = ${athleteId}
+              AND athletes.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -80,10 +80,10 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
         execute: (athleteId) =>
           sql`
             SELECT *
-            FROM athletes ath
+            FROM athletes
             WHERE
-              ath.id = ${athleteId}
-              AND ath.archived_at IS NULL
+              athletes.id = ${athleteId}
+              AND athletes.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -103,10 +103,10 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
         execute: (personId) =>
           sql`
             SELECT *
-            FROM athletes ath
+            FROM athletes
             WHERE
-              ath.person_id = ${personId}
-              AND ath.archived_at IS NULL
+              athletes.person_id = ${personId}
+              AND athletes.archived_at IS NULL
             LIMIT 1
           `
       })

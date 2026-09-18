@@ -12,7 +12,7 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "ea" } = {}) {
+  static asJsonBBuildObject({ alias = "email_addresses" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
@@ -27,7 +27,7 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
     `
   }
 
-  static asJsonBAggForPerson({ alias = "ea", personAlias = "p" } = {}) {
+  static asJsonBAggForPerson({ alias = "email_addresses", personAlias = "persons" } = {}) {
     return `
       COALESCE(
         (

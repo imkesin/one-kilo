@@ -25,7 +25,7 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "p" } = {}) {
+  static asJsonBBuildObject({ alias = "persons" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
@@ -44,8 +44,8 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
   }
 
   static asJsonBBuildObjectWithRelations({
-    alias = "p",
-    emailAddressAlias = "ea"
+    alias = "persons",
+    emailAddressAlias = "email_addresses"
   } = {}) {
     return `
       ${PersonsModel.asJsonBBuildObject({ alias })}

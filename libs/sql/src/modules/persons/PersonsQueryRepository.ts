@@ -40,14 +40,12 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         execute: (personId) =>
           sql`
             SELECT
-              p.*,
-              ${
-            sql.unsafe(EmailAddressesModel.asJsonBAggForPerson({ alias: "ea", personAlias: "p" }))
-          } AS "emailAddresses"
-            FROM persons p
+              persons.*,
+              ${sql.unsafe(EmailAddressesModel.asJsonBAggForPerson())} AS "emailAddresses"
+            FROM persons
             WHERE
-              p.id = ${personId}
-              AND p.archived_at IS NULL
+              persons.id = ${personId}
+              AND persons.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -67,10 +65,10 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         execute: (personId) =>
           sql`
             SELECT *
-            FROM persons p
+            FROM persons
             WHERE
-              p.id = ${personId}
-              AND p.archived_at IS NULL
+              persons.id = ${personId}
+              AND persons.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -97,14 +95,14 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
               CASE
                 WHEN accounts.id IS NOT NULL THEN ${sql.unsafe(AccountsModel.asJsonBBuildObject())}
               END AS account
-            FROM persons p
+            FROM persons
             LEFT JOIN accounts
-              ON accounts.person_id = p.id
+              ON accounts.person_id = persons.id
               AND accounts.type = 'Person'
               AND accounts.archived_at IS NULL
             WHERE
-              p.id = ${personId}
-              AND p.archived_at IS NULL
+              persons.id = ${personId}
+              AND persons.archived_at IS NULL
             LIMIT 1
           `
       })

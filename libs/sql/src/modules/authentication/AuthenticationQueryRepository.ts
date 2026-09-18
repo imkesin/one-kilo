@@ -31,16 +31,16 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
           sql`
             SELECT
               accounts.id AS account_id,
-              ws.id AS workspace_id
+              workspaces.id AS workspace_id
             FROM accounts
-            JOIN workspace_memberships wsm ON wsm.account_id = accounts.id
-            JOIN workspaces ws ON ws.id = wsm.workspace_id
+            JOIN workspace_memberships ON workspace_memberships.account_id = accounts.id
+            JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
             WHERE
               accounts.workos_user_id = ${workosUserId}
-              AND ws.workos_organization_id = ${workosOrganizationId}
+              AND workspaces.workos_organization_id = ${workosOrganizationId}
               AND accounts.archived_at IS NULL
-              AND wsm.archived_at IS NULL
-              AND ws.archived_at IS NULL
+              AND workspace_memberships.archived_at IS NULL
+              AND workspaces.archived_at IS NULL
             LIMIT 1
           `
       })
@@ -63,18 +63,18 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
           sql`
             SELECT
               accounts.id AS account_id,
-              ws.id AS workspace_id,
-              ws.workos_organization_id as workos_organization_id
+              workspaces.id AS workspace_id,
+              workspaces.workos_organization_id as workos_organization_id
             FROM accounts
-            JOIN workspace_memberships wsm ON wsm.account_id = accounts.id
-            JOIN workspaces ws ON ws.id = wsm.workspace_id
+            JOIN workspace_memberships ON workspace_memberships.account_id = accounts.id
+            JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
             WHERE
               accounts.workos_user_id = ${workosUserId}
-              AND ws.type = 'Personal'
-              AND wsm.role = 'Owner'
+              AND workspaces.type = 'Personal'
+              AND workspace_memberships.role = 'Owner'
               AND accounts.archived_at IS NULL
-              AND wsm.archived_at IS NULL
-              AND ws.archived_at IS NULL
+              AND workspace_memberships.archived_at IS NULL
+              AND workspaces.archived_at IS NULL
             LIMIT 1
           `
       })

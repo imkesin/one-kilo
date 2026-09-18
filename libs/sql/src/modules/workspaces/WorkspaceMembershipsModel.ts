@@ -18,7 +18,7 @@ export class WorkspaceMembershipsModel extends Model.Class<WorkspaceMembershipsM
 
   ...ModelAuditFields
 }) {
-  static asJsonBBuildObject({ alias = "wsm" } = {}) {
+  static asJsonBBuildObject({ alias = "workspace_memberships" } = {}) {
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,

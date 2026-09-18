@@ -34,16 +34,16 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         execute: (accountId) =>
           sql`
             SELECT
-              ws.*,
+              workspaces.*,
               JSON_AGG(${sql.unsafe(WorkspaceMembershipsModel.asJsonBBuildObject())}) AS workspaceMemberships
-            FROM workspaces ws
-            JOIN workspace_memberships wsm ON wsm.workspace_id = ws.id
+            FROM workspaces
+            JOIN workspace_memberships ON workspace_memberships.workspace_id = workspaces.id
             WHERE
-              ws.type = 'Personal'
-              AND ws.archived_at IS NULL
-              AND wsm.account_id = ${accountId}
-              AND wsm.archived_at IS NULL
-            GROUP BY ws.id
+              workspaces.type = 'Personal'
+              AND workspaces.archived_at IS NULL
+              AND workspace_memberships.account_id = ${accountId}
+              AND workspace_memberships.archived_at IS NULL
+            GROUP BY workspaces.id
             LIMIT 1
           `
       })
@@ -68,10 +68,10 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         execute: (workosOrganizationId) =>
           sql`
             SELECT *
-            FROM workspaces ws
+            FROM workspaces
             WHERE
-              ws.workos_organization_id = ${workosOrganizationId}
-              AND ws.archived_at IS NULL
+              workspaces.workos_organization_id = ${workosOrganizationId}
+              AND workspaces.archived_at IS NULL
             LIMIT 1
           `
       })
