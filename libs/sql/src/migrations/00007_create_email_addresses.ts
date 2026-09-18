@@ -18,11 +18,11 @@ export default Effect.gen(function*() {
       person_id UUID NOT NULL,
       value TEXT NOT NULL,
 
-      CONSTRAINT fk_ea_person FOREIGN KEY (person_id) REFERENCES persons (id),
-      CONSTRAINT fk_ea_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
-      CONSTRAINT fk_ea_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
+      CONSTRAINT fk_email_address_person FOREIGN KEY (person_id) REFERENCES persons (id),
+      CONSTRAINT fk_email_address_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_email_address_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
     )
   `
 
-  yield* sql`CREATE UNIQUE INDEX idx_ea_person_value ON email_addresses (person_id, value)`
+  yield* sql`CREATE UNIQUE INDEX idx_email_address_person_value ON email_addresses (person_id, value)`
 })

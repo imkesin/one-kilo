@@ -14,7 +14,7 @@ export const WorkspaceId = pipe(
 )
 export type WorkspaceId = typeof WorkspaceId.Type
 
-const WORKSPACE_PREFIX = "ws_"
+const WORKSPACE_PREFIX = "workspace_"
 
 export const PrefixedWorkspaceId = pipe(
   S.NonEmptyTrimmedString,

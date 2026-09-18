@@ -15,11 +15,11 @@ export default Effect.gen(function*() {
       execution_id TEXT NOT NULL,
       workflow_name TEXT NOT NULL,
 
-      CONSTRAINT check_ws_single_outcome CHECK (
+      CONSTRAINT check_workflow_suspension_single_outcome CHECK (
         resumed_at IS NULL OR dismissed_at IS NULL
       )
     )
   `
 
-  yield* sql`CREATE INDEX idx_ws_execution ON workflow_suspensions (execution_id)`
+  yield* sql`CREATE INDEX idx_workflow_suspension_execution ON workflow_suspensions (execution_id)`
 })

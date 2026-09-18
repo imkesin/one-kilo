@@ -14,7 +14,7 @@ export const AuditLogId = pipe(
 )
 export type AuditLogId = typeof AuditLogId.Type
 
-const AUDIT_LOG_PREFIX = "al_"
+const AUDIT_LOG_PREFIX = "audit_log_"
 
 export const PrefixedAuditLogId = pipe(
   S.NonEmptyTrimmedString,

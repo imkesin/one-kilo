@@ -18,10 +18,10 @@ export default Effect.gen(function*() {
 
       context JSONB,
 
-      CONSTRAINT fk_al_performed_by FOREIGN KEY (performed_by_account_id) REFERENCES accounts (id)
+      CONSTRAINT fk_audit_log_performed_by FOREIGN KEY (performed_by_account_id) REFERENCES accounts (id)
     )
   `
 
-  yield* sql`CREATE INDEX idx_al_performed_by ON audit_logs (performed_by_account_id)`
-  yield* sql`CREATE INDEX idx_al_targets ON audit_logs USING GIN (targets jsonb_path_ops)`
+  yield* sql`CREATE INDEX idx_audit_log_performed_by ON audit_logs (performed_by_account_id)`
+  yield* sql`CREATE INDEX idx_audit_log_targets ON audit_logs USING GIN (targets jsonb_path_ops)`
 })

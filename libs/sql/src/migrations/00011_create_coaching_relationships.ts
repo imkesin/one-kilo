@@ -26,12 +26,12 @@ export default Effect.gen(function*() {
 
       archived_at TIMESTAMPTZ,
 
-      CONSTRAINT fk_cr_coach FOREIGN KEY (coach_id) REFERENCES coaches (id),
-      CONSTRAINT fk_cr_athlete FOREIGN KEY (athlete_id) REFERENCES athletes (id),
-      CONSTRAINT fk_cr_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
-      CONSTRAINT fk_cr_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_coaching_relationship_coach FOREIGN KEY (coach_id) REFERENCES coaches (id),
+      CONSTRAINT fk_coaching_relationship_athlete FOREIGN KEY (athlete_id) REFERENCES athletes (id),
+      CONSTRAINT fk_coaching_relationship_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_coaching_relationship_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id),
 
-      CONSTRAINT excl_cr_no_overlap EXCLUDE USING gist (
+      CONSTRAINT excl_coaching_relationship_no_overlap EXCLUDE USING gist (
         coach_id WITH =,
         athlete_id WITH =,
         period WITH &&
@@ -39,6 +39,6 @@ export default Effect.gen(function*() {
     )
   `
 
-  yield* sql`CREATE INDEX idx_cr_coach ON coaching_relationships (coach_id)`
-  yield* sql`CREATE INDEX idx_cr_athlete ON coaching_relationships (athlete_id)`
+  yield* sql`CREATE INDEX idx_coaching_relationship_coach ON coaching_relationships (coach_id)`
+  yield* sql`CREATE INDEX idx_coaching_relationship_athlete ON coaching_relationships (athlete_id)`
 })

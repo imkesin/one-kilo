@@ -1,2 +1,2 @@
-export const PersonsCreatedByForeignKey = "fk_p_created_by"
-export const PersonsUpdatedByForeignKey = "fk_p_updated_by"
+export const PersonsCreatedByForeignKey = "fk_person_created_by"
+export const PersonsUpdatedByForeignKey = "fk_person_updated_by"

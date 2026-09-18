@@ -20,14 +20,14 @@ export default Effect.gen(function*() {
       role TEXT NOT NULL,
       workos_organization_membership_id TEXT NOT NULL,
 
-      CONSTRAINT fk_wm_account FOREIGN KEY (account_id) REFERENCES accounts (id),
-      CONSTRAINT fk_wm_workspace FOREIGN KEY (workspace_id) REFERENCES workspaces (id),
-      CONSTRAINT fk_wm_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
-      CONSTRAINT fk_wm_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
+      CONSTRAINT fk_workspace_membership_account FOREIGN KEY (account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_workspace_membership_workspace FOREIGN KEY (workspace_id) REFERENCES workspaces (id),
+      CONSTRAINT fk_workspace_membership_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_workspace_membership_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
     )
   `
 
-  yield* sql`CREATE UNIQUE INDEX idx_wm_account_workspace ON workspace_memberships (account_id, workspace_id)`
-  yield* sql`CREATE INDEX idx_wm_workspace ON workspace_memberships (workspace_id)`
-  yield* sql`CREATE UNIQUE INDEX idx_wm_workos_org_membership ON workspace_memberships (workos_organization_membership_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_workspace_membership_account_workspace ON workspace_memberships (account_id, workspace_id)`
+  yield* sql`CREATE INDEX idx_workspace_membership_workspace ON workspace_memberships (workspace_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_workspace_membership_workos_org_membership ON workspace_memberships (workos_organization_membership_id)`
 })

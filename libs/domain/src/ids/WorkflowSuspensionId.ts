@@ -14,7 +14,7 @@ export const WorkflowSuspensionId = pipe(
 )
 export type WorkflowSuspensionId = typeof WorkflowSuspensionId.Type
 
-const WORKFLOW_SUSPENSION_PREFIX = "ws_"
+const WORKFLOW_SUSPENSION_PREFIX = "workflow_suspension_"
 
 export const PrefixedWorkflowSuspensionId = pipe(
   S.NonEmptyTrimmedString,

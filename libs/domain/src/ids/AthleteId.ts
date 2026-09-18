@@ -14,7 +14,7 @@ export const AthleteId = pipe(
 )
 export type AthleteId = typeof AthleteId.Type
 
-const ATHLETE_PREFIX = "ath_"
+const ATHLETE_PREFIX = "athlete_"
 
 export const PrefixedAthleteId = pipe(
   S.NonEmptyTrimmedString,

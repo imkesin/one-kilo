@@ -14,7 +14,7 @@ export const EmailAddressId = pipe(
 )
 export type EmailAddressId = typeof EmailAddressId.Type
 
-const EMAIL_ADDRESS_PREFIX = "ea_"
+const EMAIL_ADDRESS_PREFIX = "email_address_"
 
 export const PrefixedEmailAddressId = pipe(
   S.NonEmptyTrimmedString,

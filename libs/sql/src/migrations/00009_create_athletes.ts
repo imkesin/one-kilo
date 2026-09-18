@@ -17,11 +17,11 @@ export default Effect.gen(function*() {
 
       archived_at TIMESTAMPTZ,
 
-      CONSTRAINT fk_ath_person FOREIGN KEY (person_id) REFERENCES persons (id),
-      CONSTRAINT fk_ath_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
-      CONSTRAINT fk_ath_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
+      CONSTRAINT fk_athlete_person FOREIGN KEY (person_id) REFERENCES persons (id),
+      CONSTRAINT fk_athlete_created_by FOREIGN KEY (created_by_account_id) REFERENCES accounts (id),
+      CONSTRAINT fk_athlete_updated_by FOREIGN KEY (updated_by_account_id) REFERENCES accounts (id)
     )
   `
 
-  yield* sql`CREATE UNIQUE INDEX idx_ath_person ON athletes (person_id)`
+  yield* sql`CREATE UNIQUE INDEX idx_athlete_person ON athletes (person_id)`
 })

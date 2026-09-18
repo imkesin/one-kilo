@@ -14,7 +14,7 @@ export const CoachingRelationshipId = pipe(
 )
 export type CoachingRelationshipId = typeof CoachingRelationshipId.Type
 
-const COACHING_RELATIONSHIP_PREFIX = "cr_"
+const COACHING_RELATIONSHIP_PREFIX = "coaching_relationship_"
 
 export const PrefixedCoachingRelationshipId = pipe(
   S.NonEmptyTrimmedString,

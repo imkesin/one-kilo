@@ -1,2 +1,2 @@
-export const MachineClientsCreatedByForeignKey = "fk_mc_created_by"
-export const MachineClientsUpdatedByForeignKey = "fk_mc_updated_by"
+export const MachineClientsCreatedByForeignKey = "fk_machine_client_created_by"
+export const MachineClientsUpdatedByForeignKey = "fk_machine_client_updated_by"
