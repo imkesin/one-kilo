@@ -24,11 +24,11 @@ export class WorkspacesQueryModule extends Effect.Service<WorkspacesQueryModule>
             retrieveWorkspaceEntity({ workspaceId }),
             Effect.flatMap(
               Option.match({
-                onNone: () => dieWithUnexpectedError("Expected a workspace to exist but none was found"),
+                onNone: () =>
+                  dieWithUnexpectedError("Expected a workspace to exist but none was found", { workspaceId }),
                 onSome: Effect.succeed
               })
-            ),
-            Effect.annotateLogs({ workspaceId })
+            )
           )
         }
       )

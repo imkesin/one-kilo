@@ -12,7 +12,6 @@ import { PersonOnAccount } from "@one-kilo/domain/entities/Person"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Arr from "effect/Array"
 import * as Effect from "effect/Effect"
-import { pipe } from "effect/Function"
 import type { EmailAddressesModel } from "../../email-addresses/EmailAddressesModel.ts"
 import type { MachineClientsModel } from "../../machine-clients/MachineClientsModel.ts"
 import type { PersonsModel } from "../../persons/PersonsModel.ts"
@@ -95,14 +94,14 @@ export const toAccountEntity = ({
     )
   }
 
-  return pipe(
-    dieWithUnexpectedError("An account model could not be converted to a domain entity"),
-    Effect.annotateLogs({
+  return dieWithUnexpectedError(
+    "An account model could not be converted to a domain entity",
+    {
       account: {
         id,
         type
       }
-    })
+    }
   )
 }
 
@@ -189,13 +188,13 @@ export const toAccount = ({
     )
   }
 
-  return pipe(
-    dieWithUnexpectedError("An account model with relations could not be converted to a domain account"),
-    Effect.annotateLogs({
+  return dieWithUnexpectedError(
+    "An account model with relations could not be converted to a domain account",
+    {
       account: {
         id,
         type
       }
-    })
+    }
   )
 }

@@ -9,7 +9,6 @@ import { AccountType } from "@one-kilo/domain/values/AccountValues"
 import type { ActorIdentity } from "@one-kilo/domain/values/ActorValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
-import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 
@@ -49,9 +48,9 @@ const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<Actor
     })
   }
 
-  return pipe(
-    dieWithUnexpectedError("An actor identity row could not be converted to a domain value"),
-    Effect.annotateLogs({ account: { id: row.accountId, type: row.accountType } })
+  return dieWithUnexpectedError(
+    "An actor identity row could not be converted to a domain value",
+    { account: { id: row.accountId, type: row.accountType } }
   )
 }
 

@@ -56,9 +56,9 @@ export const toAuditLog = ({
         })
       ),
       Effect.catchTag("ParseError", () =>
-        pipe(
-          dieWithUnexpectedError("Failed to decode `Person.Updated` audit log context"),
-          Effect.annotateLogs({ auditLog: { id, type, version } })
+        dieWithUnexpectedError(
+          "Failed to decode `Person.Updated` audit log context",
+          { auditLog: { id, type, version } }
         ))
     )
   }
@@ -99,14 +99,14 @@ export const toAuditLog = ({
     )
   }
 
-  return pipe(
-    dieWithUnexpectedError("An audit log model could not be converted to a domain entity"),
-    Effect.annotateLogs({
+  return dieWithUnexpectedError(
+    "An audit log model could not be converted to a domain entity",
+    {
       auditLog: {
         id,
         type,
         version
       }
-    })
+    }
   )
 }

@@ -24,11 +24,10 @@ export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
             retrieveAccount({ accountId }),
             Effect.flatMap(
               Option.match({
-                onNone: () => dieWithUnexpectedError("Expected an account to exist but none was found"),
+                onNone: () => dieWithUnexpectedError("Expected an account to exist but none was found", { accountId }),
                 onSome: Effect.succeed
               })
-            ),
-            Effect.annotateLogs({ accountId })
+            )
           )
         }
       )
