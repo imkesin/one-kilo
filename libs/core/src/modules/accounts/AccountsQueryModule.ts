@@ -16,14 +16,12 @@ export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
     effect: Effect.gen(function*() {
       const accountsQueryRepository = yield* AccountsQueryRepository
 
-      /**
-       * For callers that have already established the account exists (e.g. it is the authenticated
-       * actor). A missing row is an invariant violation, so the whole flow dies.
-       */
+      const retrieveAccount = accountsQueryRepository.findAccountByAccountId
+
       const retrieveAccountOrDie = Effect.fn("AccountsQueryModule.retrieveAccountOrDie")(
         function*({ accountId }: RetrieveAccountParameters) {
           return yield* pipe(
-            accountsQueryRepository.findAccountByAccountId({ accountId }),
+            retrieveAccount({ accountId }),
             Effect.flatMap(
               Option.match({
                 onNone: () => dieWithUnexpectedError("Expected an account to exist but none was found"),
@@ -36,7 +34,7 @@ export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
       )
 
       return {
-        retrieveAccount: accountsQueryRepository.findAccountByAccountId,
+        retrieveAccount,
         retrieveAccountOrDie
       }
     })

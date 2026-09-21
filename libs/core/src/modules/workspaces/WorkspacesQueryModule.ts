@@ -16,14 +16,12 @@ export class WorkspacesQueryModule extends Effect.Service<WorkspacesQueryModule>
     effect: Effect.gen(function*() {
       const workspacesQueryRepository = yield* WorkspacesQueryRepository
 
-      /**
-       * For callers that have already established the workspace exists (e.g. it is the actor's
-       * in-scope workspace). A missing row is an invariant violation, so the whole flow dies.
-       */
+      const retrieveWorkspaceEntity = workspacesQueryRepository.findWorkspaceEntityById
+
       const retrieveWorkspaceEntityOrDie = Effect.fn("WorkspacesQueryModule.retrieveWorkspaceEntityOrDie")(
         function*({ workspaceId }: RetrieveWorkspaceEntityParameters) {
           return yield* pipe(
-            workspacesQueryRepository.findWorkspaceEntityById({ workspaceId }),
+            retrieveWorkspaceEntity({ workspaceId }),
             Effect.flatMap(
               Option.match({
                 onNone: () => dieWithUnexpectedError("Expected a workspace to exist but none was found"),
@@ -36,7 +34,7 @@ export class WorkspacesQueryModule extends Effect.Service<WorkspacesQueryModule>
       )
 
       return {
-        retrieveWorkspaceEntity: workspacesQueryRepository.findWorkspaceEntityById,
+        retrieveWorkspaceEntity,
         retrieveWorkspaceEntityOrDie
       }
     })
