@@ -1,4 +1,3 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import type { Account, MachineClientAccount, PersonAccount } from "@one-kilo/domain/entities/Account"
 import { AccountIdFromPrefixed } from "@one-kilo/domain/ids/AccountId"
 import { MachineClientIdFromPrefixed } from "@one-kilo/domain/ids/MachineClientId"
@@ -19,7 +18,7 @@ const Api_MachineClientOnAccount = S.Struct({
   ...ApiAuditFields
 })
 
-class AccountsApi_MachineClientAccount extends S.TaggedClass<AccountsApi_MachineClientAccount>(
+export class Api_MachineClientAccount extends S.TaggedClass<Api_MachineClientAccount>(
   "@one-kilo/server-api/Account:MachineClient"
 )(
   "Account:MachineClient",
@@ -34,7 +33,7 @@ class AccountsApi_MachineClientAccount extends S.TaggedClass<AccountsApi_Machine
     ...ApiAuditFields
   }
 ) {
-  static fromDomain = (account: MachineClientAccount) => AccountsApi_MachineClientAccount.make(account)
+  static fromDomain = (account: MachineClientAccount) => Api_MachineClientAccount.make(account)
 }
 
 const Api_PersonOnAccount = S.Struct({
@@ -46,7 +45,7 @@ const Api_PersonOnAccount = S.Struct({
   ...ApiAuditFields
 })
 
-class AccountsApi_PersonAccount extends S.TaggedClass<AccountsApi_PersonAccount>(
+export class Api_PersonAccount extends S.TaggedClass<Api_PersonAccount>(
   "@one-kilo/server-api/Account:Person"
 )(
   "Account:Person",
@@ -61,33 +60,20 @@ class AccountsApi_PersonAccount extends S.TaggedClass<AccountsApi_PersonAccount>
     ...ApiAuditFields
   }
 ) {
-  static fromDomain = (account: PersonAccount) => AccountsApi_PersonAccount.make(account)
+  static fromDomain = (account: PersonAccount) => Api_PersonAccount.make(account)
 }
 
-const AccountsApi_Account = S.Union(
-  AccountsApi_PersonAccount,
-  AccountsApi_MachineClientAccount
+export const Api_Account = S.Union(
+  Api_PersonAccount,
+  Api_MachineClientAccount
 )
+export type Api_Account = typeof Api_Account.Type
 
-class AccountsApi_Me_Success extends S.TaggedClass<AccountsApi_Me_Success>("@one-kilo/server-api/Me:Success")(
-  "Me:Success",
-  {
-    account: AccountsApi_Account
-  },
-  HttpApiSchema.annotations({ status: 200 })
-) {
-  static fromDomain = (account: Account) =>
-    AccountsApi_Me_Success.make({
-      account: Match.valueTags(
-        account,
-        {
-          "Account:MachineClient": (account) => AccountsApi_MachineClientAccount.fromDomain(account),
-          "Account:Person": (account) => AccountsApi_PersonAccount.fromDomain(account)
-        }
-      )
-    })
-}
-
-export const AccountsApi_MeSchemas = {
-  Success: AccountsApi_Me_Success
-} as const
+export const toApi_Account = (account: Account): Api_Account =>
+  Match.valueTags(
+    account,
+    {
+      "Account:MachineClient": Api_MachineClientAccount.fromDomain,
+      "Account:Person": Api_PersonAccount.fromDomain
+    }
+  )

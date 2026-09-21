@@ -7,9 +7,9 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { RedirectError } from "~/lib/RedirectError"
-import { meAtomInitialValue } from "~/modules/accounts/accountsAtoms"
-import { AccountsWebProxy } from "~/modules/accounts/server/AccountsWebProxy"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
+import { WhoAmIWebProxy } from "~/modules/whoami/server/WhoAmIWebProxy"
+import { whoamiAtomInitialValue } from "~/modules/whoami/whoamiAtoms"
 import { Viewport } from "~/ui/components/root/Viewport"
 
 const handleBeforeLoadAuthed = pipe(
@@ -28,10 +28,10 @@ const beforeLoadAuthedServerFn = createServerFn({ method: "GET" })
   })
 
 const handleLoadAuthedData = Effect.gen(function*() {
-  const accountsWebProxy = yield* AccountsWebProxy
-  const me = yield* accountsWebProxy.me()
+  const whoamiWebProxy = yield* WhoAmIWebProxy
+  const whoami = yield* whoamiWebProxy.whoami()
 
-  const registry = Registry.make({ initialValues: [meAtomInitialValue(me)] })
+  const registry = Registry.make({ initialValues: [whoamiAtomInitialValue(whoami)] })
 
   return Hydration.dehydrate(registry)
 })

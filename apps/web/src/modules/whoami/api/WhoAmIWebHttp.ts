@@ -9,21 +9,21 @@ import { WebActor } from "~/infra/api/WebActor"
 import { WebApi } from "~/infra/api/WebApi"
 import { WebUnauthenticatedError } from "~/infra/api/WebApiErrors"
 
-export const AccountsWebHttp = pipe(
+export const WhoAmIWebHttp = pipe(
   HttpApiBuilder.group(
     WebApi,
-    "accounts",
+    "whoami",
     Effect.fn(function*(handlers) {
       const applicationClient = yield* ApplicationServerApiClient
 
-      return handlers.handle("me", () =>
+      return handlers.handle("whoami", () =>
         Effect.gen(function*() {
           const { workosAccessToken } = yield* WebActor
 
           return yield* pipe(
-            applicationClient.accounts.me({ headers: AuthenticationHeaders.fromAccessToken(workosAccessToken) }),
+            applicationClient.whoami({ headers: AuthenticationHeaders.fromAccessToken(workosAccessToken) }),
             Effect.catchTag("UnauthenticatedError", () => Effect.fail(new WebUnauthenticatedError())),
-            orDieWithUnexpectedError("proxy GET /accounts/me")
+            orDieWithUnexpectedError("proxy GET /whoami")
           )
         }))
     })

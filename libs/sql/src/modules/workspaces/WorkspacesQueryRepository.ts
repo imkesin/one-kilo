@@ -3,6 +3,7 @@ import * as SqlClient from "@effect/sql/SqlClient"
 import * as SqlSchema from "@effect/sql/SqlSchema"
 import { WorkspaceEntity } from "@one-kilo/domain/entities/Workspace"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
+import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import * as Option from "effect/Option"
@@ -13,6 +14,9 @@ import { WorkspacesModel } from "./WorkspacesModel.ts"
 
 type FindPersonalWorkspaceAndMembershipEntityByAccountIdParameters = {
   accountId: AccountId
+}
+type FindWorkspaceEntityByIdParameters = {
+  workspaceId: WorkspaceId
 }
 type FindWorkspaceEntityByWorkOSOrganizationIdParameters = {
   workosOrganizationId: WorkOSIds.OrganizationId
@@ -62,6 +66,29 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
       )
 
+      const findWorkspaceEntityByIdSchema = SqlSchema.findOne({
+        Request: WorkspaceId,
+        Result: WorkspacesModel.select,
+        execute: (workspaceId) =>
+          sql`
+            SELECT *
+            FROM workspaces
+            WHERE
+              workspaces.id = ${workspaceId}
+              AND workspaces.archived_at IS NULL
+            LIMIT 1
+          `
+      })
+      const findWorkspaceEntityById = Effect.fn("WorkspacesQueryRepository.findWorkspaceEntityById")(
+        function*({ workspaceId }: FindWorkspaceEntityByIdParameters) {
+          return yield* Effect.map(
+            findWorkspaceEntityByIdSchema(workspaceId),
+            Option.map((_) => WorkspaceEntity.make(_))
+          )
+        },
+        orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
+      )
+
       const findWorkspaceEntityByWorkOSOrganizationIdSchema = SqlSchema.findOne({
         Request: WorkOSIds.OrganizationId,
         Result: WorkspacesModel.select,
@@ -76,7 +103,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
           `
       })
       const findWorkspaceEntityByWorkOSOrganizationId = Effect.fn(
-        "AccountsQueryRepository.findWorkspaceEntityByWorkOSOrganizationId"
+        "WorkspacesQueryRepository.findWorkspaceEntityByWorkOSOrganizationId"
       )(
         function*({ workosOrganizationId }: FindWorkspaceEntityByWorkOSOrganizationIdParameters) {
           return yield* Effect.map(
@@ -89,6 +116,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
 
       return {
         findPersonalWorkspaceAndMembershipEntitiesByAccountId,
+        findWorkspaceEntityById,
         findWorkspaceEntityByWorkOSOrganizationId
       }
     })

@@ -1,14 +1,14 @@
 import { Result, useAtomValue } from "@effect-atom/atom-react"
 import { createFileRoute } from "@tanstack/react-router"
-import { meAtom } from "~/modules/accounts/accountsAtoms"
+import { whoamiAtom } from "~/modules/whoami/whoamiAtoms"
 
 function AccountPage() {
-  const me = useAtomValue(meAtom)
+  const whoami = useAtomValue(whoamiAtom)
 
   return (
     <div>
       <h1>Account Page</h1>
-      {Result.builder(me)
+      {Result.builder(whoami)
         .onWaiting(() => <p>Loading…</p>)
         .onFailure(() => <p>Couldn’t load your profile.</p>)
         .onSuccess(({ account }) => {
