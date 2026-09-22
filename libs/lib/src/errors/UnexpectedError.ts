@@ -25,9 +25,6 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/l
 
 type UnexpectedErrorContext = typeof UnexpectedError.Type["context"]
 
-/*
- * Annotates only the log statement it wraps, so context never leaks onto the success path.
- */
 const annotateLogWith = (context: UnexpectedErrorContext) => <A, E, R>(self: Effect.Effect<A, E, R>) =>
   context === undefined
     ? self

@@ -5,7 +5,7 @@ import { MachineClientId } from "../ids/MachineClientId.ts"
 import { PersonId } from "../ids/PersonId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 
-const PersonActorAccount = S.Struct({
+const PersonAccountIdentity = S.Struct({
   id: AccountId,
   type: S.Literal("Person"),
   person: S.Struct({
@@ -13,7 +13,7 @@ const PersonActorAccount = S.Struct({
   })
 })
 
-const MachineClientActorAccount = S.Struct({
+const MachineClientAccountIdentity = S.Struct({
   id: AccountId,
   type: S.Literal("MachineClient"),
   machineClient: S.Struct({
@@ -21,11 +21,11 @@ const MachineClientActorAccount = S.Struct({
   })
 })
 
-const ActorIdentityAccount = S.Union(PersonActorAccount, MachineClientActorAccount)
+const ActorAccountIdentity = S.Union(PersonAccountIdentity, MachineClientAccountIdentity)
 
 export const ActorIdentity = pipe(
   S.Struct({
-    account: ActorIdentityAccount,
+    account: ActorAccountIdentity,
     workspace: S.Struct({
       id: WorkspaceId
     })
