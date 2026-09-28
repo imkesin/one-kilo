@@ -1,15 +1,14 @@
-import * as Workflow from "@effect/workflow/Workflow"
+import * as W from "@effect/workflow/Workflow"
 import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
-const ID_PREFIX = "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflow"
+const TAG_NAME = "PushPersonChangeToWorkOS"
+const NAME = `@one-kilo/workflow/${TAG_NAME}`
 
-export class PushPersonChangeToWorkOSSuccess extends S.TaggedClass<PushPersonChangeToWorkOSSuccess>(
-  `${ID_PREFIX}/Success`
-)(
-  "PushPersonChangeToWorkOSSuccess",
+export class WorkflowSuccess extends S.TaggedClass<WorkflowSuccess>(`${NAME}:Success`)(
+  `${TAG_NAME}:Success`,
   {
     outcome: S.Literal(
       "AccountUnlinked",
@@ -20,10 +19,8 @@ export class PushPersonChangeToWorkOSSuccess extends S.TaggedClass<PushPersonCha
   }
 ) {}
 
-export class PushPersonChangeToWorkOSError extends S.TaggedError<PushPersonChangeToWorkOSError>(
-  `${ID_PREFIX}/Error`
-)(
-  "PushPersonChangeToWorkOSError",
+export class WorkflowError extends S.TaggedError<WorkflowError>(`${NAME}:Error`)(
+  `${TAG_NAME}:Error`,
   {
     reason: S.Literal(
       "RetryExhausted",
@@ -33,8 +30,8 @@ export class PushPersonChangeToWorkOSError extends S.TaggedError<PushPersonChang
   }
 ) {}
 
-export const PushPersonChangeToWorkOSWorkflow = Workflow.make({
-  name: "@one-kilo/workflow/PushPersonChangeToWorkOSWorkflow",
+export const Workflow = W.make({
+  name: NAME,
   payload: {
     causedByAuditLogId: pipe(
       AuditLogId,
@@ -63,8 +60,8 @@ export const PushPersonChangeToWorkOSWorkflow = Workflow.make({
       })
     )
   },
-  success: PushPersonChangeToWorkOSSuccess,
-  error: PushPersonChangeToWorkOSError,
+  success: WorkflowSuccess,
+  error: WorkflowError,
   idempotencyKey: ({ causedByAuditLogId }) => causedByAuditLogId
 })
-  .annotate(Workflow.SuspendOnFailure, true)
+  .annotate(W.SuspendOnFailure, true)
