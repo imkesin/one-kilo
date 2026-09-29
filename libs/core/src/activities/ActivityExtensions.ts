@@ -122,7 +122,11 @@ export const makeWithDurableRetry = <
     Activity.CurrentAttempt | WorkflowEngine | WorkflowInstance | Scope.Scope
   >
 > => {
-  return Activity.make({
+  return Activity.make<
+    Exclude<R, Activity.CurrentAttempt> | WorkflowEngine | WorkflowInstance,
+    Success,
+    S.Union<[Error, typeof RetryBudgetExhaustedError]>
+  >({
     name: options.name,
     success: options.success,
     error: S.Union(options.error, RetryBudgetExhaustedError),
