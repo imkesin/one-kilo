@@ -56,10 +56,6 @@
       "name": "@effect/auth-workos",
       "path": "../packages/workos"
     },
-    {
-      "name": "@effect/oxc",
-      "path": "../packages/oxc"
-    },
     // Scripts
     {
       "name": "@one-kilo/local-dev",

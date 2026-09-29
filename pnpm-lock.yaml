@@ -12,9 +12,6 @@ importers:
       '@effect/language-service':
         specifier: latest
         version: 0.73.1
-      '@effect/oxc':
-        specifier: workspace:*
-        version: link:packages/oxc
       '@effect/vitest':
         specifier: latest
         version: 0.27.0(effect@3.21.2)(vitest@3.2.4(@types/node@26.1.0)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -353,12 +350,6 @@ importers:
       effect:
         specifier: ^3.21.2
         version: 3.21.2
-
-  packages/oxc:
-    devDependencies:
-      oxlint:
-        specifier: 1.42.0
-        version: 1.42.0
 
   packages/workos:
     devDependencies:

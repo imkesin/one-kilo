@@ -8,24 +8,41 @@
     "unicorn",
     "node"
   ],
-  "jsPlugins": [
-    "@effect/oxc/oxlint"
-  ],
   "categories": {
     "correctness": "error",
     "suspicious": "error",
     "perf": "error"
   },
   "rules": {
-    "one-kilo/no-import-from-barrel-package": [
+    "eslint/no-restricted-imports": [
       "error",
       {
-        "packageNames": [
-          "effect",
-          "@effect/experimental",
-          "@effect/platform",
-          "@effect/platform-node",
-          "@effect/sql"
+        "paths": [
+          {
+            "name": "effect",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "@effect/experimental",
+            "message": "Import from a specific submodule instead: import * as X from \"@effect/experimental/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "@effect/platform",
+            "message": "Import from a specific submodule instead: import * as X from \"@effect/platform/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "@effect/platform-node",
+            "message": "Import from a specific submodule instead: import * as X from \"@effect/platform-node/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "@effect/sql",
+            "message": "Import from a specific submodule instead: import * as X from \"@effect/sql/X\"",
+            "allowTypeImports": true
+          }
         ]
       }
     ],
