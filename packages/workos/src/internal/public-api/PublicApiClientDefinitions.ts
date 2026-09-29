@@ -9,7 +9,7 @@ import { encodeCatching } from "../schema/SchemaExtensions.ts"
 import { BuildAuthorizationUrlParameters } from "./PublicApiClientDefinitionSchemas.ts"
 
 type BuildAuthorizationUrlParameters_WithoutClientId = Omit<
-  typeof BuildAuthorizationUrlParameters.Type,
+  BuildAuthorizationUrlParameters,
   "clientId"
 >
 

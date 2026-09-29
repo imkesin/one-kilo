@@ -1,5 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "extends": [
+    "./node_modules/@effect/tsgo/oxlint-presets/recommended.json"
+  ],
   "plugins": [
     "typescript",
     "import",
@@ -80,6 +83,9 @@
     "typescript/no-namespace": "off",
     "typescript/no-non-null-assertion": "off",
     "typescript/no-unsafe-function-type": "off",
+    "typescript/unbound-method": "off",
+    "typescript/no-unsafe-type-assertion": "off",
+    "typescript/consistent-return": "off",
     "typescript/no-confusing-non-null-assertion": "off",
     "eslint/no-shadow": "off",
     "eslint/require-yield": "off",

@@ -45,7 +45,7 @@ export class RedirectError extends Data.TaggedError("RedirectError")<{
     /*
      * This is a necessary type assertion; it's difficult to widen the type with all the generics.
      */
-    return new RedirectError({ redirect: redirect(options) as AnyRedirect })
+    return new RedirectError({ redirect: redirect(options) })
   }
 }
 

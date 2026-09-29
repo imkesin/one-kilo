@@ -15,7 +15,6 @@ import { toAuditLog } from "./internal/AuditLogsModelTransformations.ts"
 
 type InsertAuditLogParameters = {
   readonly performedByAccountId: AccountId
-  readonly encodedContext: Option.Option<string>
   readonly targets: readonly [
     AuditLogDefinitions.AuditLogTarget,
     ...ReadonlyArray<AuditLogDefinitions.AuditLogTarget>
@@ -24,6 +23,7 @@ type InsertAuditLogParameters = {
   readonly type: AuditLogDefinitions.AuditLogType
   readonly version: 1 | 2 | 3
 
+  readonly encodedContext?: Option.Option<string>
   readonly id?: AuditLogId
   readonly timestamp?: DateTime.Utc
 }
@@ -44,12 +44,12 @@ export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
       const insert = Effect.fn("AuditLogsRepository.insert")(
         function*({
           performedByAccountId,
-          encodedContext,
           targets,
           traceId,
           type,
           version,
 
+          encodedContext = Option.none(),
           id,
           timestamp
         }: InsertAuditLogParameters) {

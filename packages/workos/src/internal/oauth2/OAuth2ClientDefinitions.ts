@@ -34,30 +34,30 @@ import {
 
 export interface Client {
   readonly authorizeDevice: (
-    parameters: typeof AuthorizeDeviceParameters.Type
+    parameters: AuthorizeDeviceParameters
   ) => Effect.Effect<
-    typeof AuthorizeDeviceResponse.Type,
+    AuthorizeDeviceResponse,
     WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByAuthorizationCode: (
     parameters: RetrieveTokenByAuthorizationCodeParameters_Redacted
   ) => Effect.Effect<
-    typeof RetrieveTokenByAuthorizationCodeResponse.Type,
+    RetrieveTokenByAuthorizationCodeResponse,
     WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByRefreshToken: (
     parameters: RetrieveTokenByRefreshTokenParameters_Redacted
   ) => Effect.Effect<
-    typeof RetrieveTokenByRefreshTokenResponse.Type,
+    RetrieveTokenByRefreshTokenResponse,
     WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveTokenByClientCredentials: (
     parameters: RetrieveTokenByClientCredentialsParameters_Redacted
   ) => Effect.Effect<
-    typeof RetrieveTokenByClientCredentialsResponse.Type,
+    RetrieveTokenByClientCredentialsResponse,
     WorkOSError.WorkOSCommonError
   >
 
@@ -67,14 +67,14 @@ export interface Client {
   readonly retrieveTokenByDeviceCode: (
     parameters: RetrieveTokenByDeviceCodeParameters_Redacted
   ) => Effect.Effect<
-    typeof RetrieveTokenByDeviceCodeResponseSuccess.Type,
+    RetrieveTokenByDeviceCodeResponseSuccess,
     DeviceCodeAuthorizationTerminatedError | WorkOSError.WorkOSCommonError
   >
 
   readonly retrieveUserInfo: (
     accessToken: AccessToken
   ) => Effect.Effect<
-    typeof RetrieveUserInfoResponse.Type,
+    RetrieveUserInfoResponse,
     WorkOSError.WorkOSCommonError
   >
 }

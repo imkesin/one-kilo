@@ -150,7 +150,7 @@
       }
     ],
     "js/ts.preferences.importModuleSpecifierEnding": "js",
-    "js/ts.tsdk.path": "./node_modules/typescript/lib",
+    "js/ts.experimental.useTsgo": true,
     "[json]": {
       "editor.defaultFormatter": "dprint.dprint"
     },

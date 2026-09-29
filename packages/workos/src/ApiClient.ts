@@ -69,7 +69,7 @@ export const make = (
     /**
      * The WorkOS API Key
      */
-    readonly clientSecret: Redacted.Redacted<string>
+    readonly clientSecret: Redacted.Redacted
   }
 ): Effect.Effect<Service, never, HttpClient.HttpClient> =>
   Effect.gen(function*() {
@@ -106,14 +106,14 @@ export const make = (
 export const layer = (
   options: {
     readonly clientId: EnvironmentClientId
-    readonly clientSecret: Redacted.Redacted<string>
+    readonly clientSecret: Redacted.Redacted
   }
 ): Layer.Layer<ApiClient, never, HttpClient.HttpClient> => Layer.effect(ApiClient, make(options))
 
 export const layerConfig = (
   options: {
     readonly clientId: Config.Config<EnvironmentClientId>
-    readonly clientSecret: Config.Config<Redacted.Redacted<string>>
+    readonly clientSecret: Config.Config<Redacted.Redacted>
   }
 ): Layer.Layer<ApiClient, ConfigError, HttpClient.HttpClient> => {
   return pipe(

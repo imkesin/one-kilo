@@ -8,6 +8,7 @@ import * as HashMap from "effect/HashMap"
 import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
+import * as Struct from "effect/Struct"
 import { Organization, OrganizationMembership, User } from "../domain/Entities.ts"
 import * as WorkOSError from "../domain/Errors.ts"
 import {
@@ -56,8 +57,14 @@ class OrganizationMembershipsModel extends S.Class<OrganizationMembershipsModel>
 }) {
   asEntity(organizationName: string) {
     return OrganizationMembership.make({
-      ...this,
-      organizationName
+      id: this.id,
+      userId: this.userId,
+      organizationId: this.organizationId,
+      organizationName,
+      roles: this.roles,
+      status: this.status,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     })
   }
 }
@@ -76,7 +83,7 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
 }
 
 interface UserManagement {
-  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
+  readonly createUser: (parameters: CreateUserParameters) => Effect.Effect<
     User,
     WorkOSError.WorkOSCommonError
   >
@@ -84,7 +91,7 @@ interface UserManagement {
     User,
     WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
-  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
+  readonly updateUser: (userId: UserId, parameters: UpdateUserParameters) => Effect.Effect<
     User,
     WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
@@ -94,7 +101,7 @@ interface UserManagement {
   >
 
   readonly createOrganizationMembership: (
-    parameters: typeof CreateOrganizationMembershipParameters.Type
+    parameters: CreateOrganizationMembershipParameters
   ) => Effect.Effect<
     OrganizationMembership,
     WorkOSError.WorkOSCommonError
@@ -109,7 +116,7 @@ interface UserManagement {
 }
 
 interface Organizations {
-  readonly createOrganization: (parameters: typeof CreateOrganizationParameters.Type) => Effect.Effect<
+  readonly createOrganization: (parameters: CreateOrganizationParameters) => Effect.Effect<
     Organization,
     WorkOSError.WorkOSCommonError
   >
@@ -141,7 +148,7 @@ export type MakeOptions = {
   initialMachineClients?: ReadonlyArray<{
     id: ApplicationClientId
     orgId: OrganizationId
-    secret: Redacted.Redacted<string>
+    secret: Redacted.Redacted
   }>
 }
 
@@ -375,7 +382,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
     return {
       apiClient: {
         userManagement: {
-          createUser: Effect.fn(function*(parameters: typeof CreateUserParameters.Type) {
+          createUser: Effect.fn(function*(parameters: CreateUserParameters) {
             const now = yield* DateTime.nowAsDate
 
             const user = UsersModel.make({
@@ -398,21 +405,25 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
             return user.asEntity()
           }),
-          updateUser: Effect.fn(function*(userId: UserId, parameters: typeof UpdateUserParameters.Type) {
+          updateUser: Effect.fn(function*(userId: UserId, parameters: UpdateUserParameters) {
             const now = yield* DateTime.nowAsDate
             const existing = yield* findUserById(userId)
 
-            const updated = UsersModel.make({
-              ...existing,
-              firstName: parameters.firstName ?? existing.firstName,
-              lastName: parameters.lastName === undefined ? existing.lastName : parameters.lastName,
-              email: parameters.email ? EmailAddress.make(parameters.email) : existing.email,
-              emailVerified: parameters.emailVerified ?? existing.emailVerified,
-              externalId: parameters.externalId ?? existing.externalId,
-              locale: parameters.locale ?? existing.locale,
-              metadata: parameters.metadata ?? existing.metadata,
-              updatedAt: now
-            })
+            const updated = UsersModel.make(
+              pipe(
+                existing,
+                Struct.evolve({
+                  firstName: (firstName) => parameters.firstName ?? firstName,
+                  lastName: (lastName) => parameters.lastName === undefined ? lastName : parameters.lastName,
+                  email: (email) => parameters.email ? EmailAddress.make(parameters.email) : email,
+                  emailVerified: (emailVerified) => parameters.emailVerified ?? emailVerified,
+                  externalId: (externalId) => parameters.externalId ?? externalId,
+                  locale: (locale) => parameters.locale ?? locale,
+                  metadata: (metadata) => parameters.metadata ?? metadata,
+                  updatedAt: () => now
+                })
+              )
+            )
 
             yield* setUser(userId, updated)
 

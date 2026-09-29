@@ -8,7 +8,7 @@ import { encodeCatching } from "../schema/SchemaExtensions.ts"
 import { BuildAuthorizeUrlParameters } from "./PublicOAuth2ClientDefinitionSchemas.ts"
 
 export interface Client {
-  readonly buildAuthorizeUrl: (parameters: typeof BuildAuthorizeUrlParameters.Type) => Effect.Effect<
+  readonly buildAuthorizeUrl: (parameters: BuildAuthorizeUrlParameters) => Effect.Effect<
     string,
     WorkOSError.WorkOSCommonError
   >

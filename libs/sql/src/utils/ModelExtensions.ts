@@ -45,8 +45,8 @@ export const JsonFromStringOnWrite = <
   I
 >(
   schema:
-    | S.Schema<A, I, never>
-    | S.Annotable<S.Schema<A, I, never>, A, I, never>
+    | S.Schema<A, I>
+    | S.Annotable<S.Schema<A, I>, A, I>
 ) => {
   const parsed = S.parseJson(schema)
 

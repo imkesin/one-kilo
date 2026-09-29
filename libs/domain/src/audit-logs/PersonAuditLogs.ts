@@ -35,7 +35,7 @@ export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-
   static build = Effect.fnUntraced(
     function*(
       parameters: Omit<
-        typeof PersonUpdatedAuditLog.Type,
+        PersonUpdatedAuditLog,
         "timestamp" | "traceId" | "type" | "version" | "withEncodedContext"
       >
     ) {

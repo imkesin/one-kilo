@@ -47,7 +47,7 @@ export const Timezone = pipe(
   S.filter(
     (timezone) => supportedTimezones.has(timezone),
     {
-      message: (issue) => `${issue.actual} is not a valid IANA time zone`
+      message: (issue) => `${String(issue.actual)} is not a valid IANA time zone`
     }
   ),
   S.brand("@one-kilo/domain/Timezone"),

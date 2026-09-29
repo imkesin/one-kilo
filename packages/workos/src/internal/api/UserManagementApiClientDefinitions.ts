@@ -44,7 +44,7 @@ export interface Client {
     WorkOSError.InvalidRefreshTokenError | WorkOSError.WorkOSCommonError
   >
 
-  readonly createUser: (parameters: typeof CreateUserParameters.Type) => Effect.Effect<
+  readonly createUser: (parameters: CreateUserParameters) => Effect.Effect<
     User,
     WorkOSError.WorkOSCommonError
   >
@@ -54,7 +54,7 @@ export interface Client {
     WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
 
-  readonly updateUser: (userId: UserId, parameters: typeof UpdateUserParameters.Type) => Effect.Effect<
+  readonly updateUser: (userId: UserId, parameters: UpdateUserParameters) => Effect.Effect<
     User,
     WorkOSError.ResourceNotFoundError | WorkOSError.WorkOSCommonError
   >
@@ -65,7 +65,7 @@ export interface Client {
   >
 
   readonly createOrganizationMembership: (
-    parameters: typeof CreateOrganizationMembershipParameters.Type
+    parameters: CreateOrganizationMembershipParameters
   ) => Effect.Effect<OrganizationMembership, WorkOSError.WorkOSCommonError>
 
   readonly deleteOrganizationMembership: (
@@ -77,7 +77,7 @@ export const make = (
   httpClient: HttpClient.HttpClient,
   options: {
     readonly clientId: EnvironmentClientId
-    readonly clientSecret: Redacted.Redacted<string>
+    readonly clientSecret: Redacted.Redacted
   }
 ): Client => {
   const mapResponse: <A, E>(

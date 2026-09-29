@@ -38,7 +38,7 @@ export const layerConfig = (
   options: {
     readonly authKitDomain: Config.Config<string>
   }
-): Layer.Layer<PublicOAuth2Client, ConfigError, never> => {
+): Layer.Layer<PublicOAuth2Client, ConfigError> => {
   return pipe(
     Config.all(options),
     Effect.flatMap((configs) => make(configs)),

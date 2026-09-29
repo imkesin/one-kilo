@@ -12,7 +12,7 @@ import { CreateOrganizationParameters, DeleteOrganizationOutcome } from "./Organ
 
 export interface Client {
   readonly createOrganization: (
-    parameters: typeof CreateOrganizationParameters.Type
+    parameters: CreateOrganizationParameters
   ) => Effect.Effect<Organization, WorkOSError.WorkOSCommonError>
 
   readonly retrieveOrganization: (

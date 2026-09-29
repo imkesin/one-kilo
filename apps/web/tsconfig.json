@@ -12,6 +12,7 @@
     "plugins": [
       {
         "name": "@effect/language-service",
+        "diagnostics": false,
         "namespaceImportPackages": [
           "effect",
           "@effect/experimental",

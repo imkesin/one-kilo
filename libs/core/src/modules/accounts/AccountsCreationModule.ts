@@ -10,7 +10,6 @@ import { EmailAddressesRepository } from "@one-kilo/sql/modules/email-addresses/
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import * as Option from "effect/Option"
 
 type CreateAccountForPersonParameters = {
   id: AccountId
@@ -47,10 +46,7 @@ export class AccountsCreationModule extends Effect.Service<AccountsCreationModul
             targets: [{ id: account.id, type: "Account" as const }]
           })
 
-          yield* auditLogsRepository.insert({
-            ...auditLog,
-            encodedContext: Option.none()
-          })
+          yield* auditLogsRepository.insert(auditLog)
         }
       )
 

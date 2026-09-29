@@ -9,7 +9,7 @@ import { AccessToken, IdToken, RefreshToken } from "../../domain/Values.ts"
 import { OAuthUserInfoFields } from "../CommonDefinitions.ts"
 
 type WithRedactedClientSecret<T extends { clientSecret: string }> = {
-  [P in keyof T]: P extends "clientSecret" ? Redacted.Redacted<string> : T[P]
+  [P in keyof T]: P extends "clientSecret" ? Redacted.Redacted : T[P]
 }
 
 const ScopeFromSet = S.transform(

@@ -6,9 +6,18 @@ import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Schedule from "effect/Schedule"
+import * as S from "effect/Schema"
 
 const POSTGRES_IMAGE = "postgres:18.2"
 const CONTAINER_NAME = "local-one-kilo-postgres"
+
+class DockerCommandError extends S.TaggedError<DockerCommandError>("@one-kilo/local-dev/DockerCommandError")(
+  "DockerCommandError",
+  {
+    message: S.String,
+    exitCode: S.Number
+  }
+) {}
 
 const isContainerRunning = Effect.gen(function*() {
   const cmd = Command.make("docker", "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME)
@@ -30,7 +39,12 @@ const startExistingContainer = Effect.gen(function*() {
     Command.exitCode
   )
   if (code !== 0) {
-    return yield* Effect.fail(new Error(`Failed to start container '${CONTAINER_NAME}' (exit code ${code})`))
+    return yield* Effect.fail(
+      new DockerCommandError({
+        message: `Failed to start container '${CONTAINER_NAME}' (exit code ${code})`,
+        exitCode: code
+      })
+    )
   }
   yield* Effect.log(`Started existing container '${CONTAINER_NAME}'`)
 })
@@ -47,7 +61,12 @@ const ensureImagePulled = Effect.gen(function*() {
     Command.exitCode
   )
   if (pullCode !== 0) {
-    return yield* Effect.fail(new Error(`Failed to pull ${POSTGRES_IMAGE} (exit code ${pullCode})`))
+    return yield* Effect.fail(
+      new DockerCommandError({
+        message: `Failed to pull ${POSTGRES_IMAGE} (exit code ${pullCode})`,
+        exitCode: pullCode
+      })
+    )
   }
 })
 
@@ -73,7 +92,12 @@ const createContainer = Effect.gen(function*() {
     Command.exitCode
   )
   if (code !== 0) {
-    return yield* Effect.fail(new Error(`Failed to create container '${CONTAINER_NAME}' (exit code ${code})`))
+    return yield* Effect.fail(
+      new DockerCommandError({
+        message: `Failed to create container '${CONTAINER_NAME}' (exit code ${code})`,
+        exitCode: code
+      })
+    )
   }
   yield* Effect.log(`Created and started container '${CONTAINER_NAME}'`)
 })
@@ -84,7 +108,7 @@ const waitForPostgres = pipe(
   Effect.flatMap((code) =>
     code === 0
       ? Effect.void
-      : Effect.fail(new Error(`pg_isready exited with code ${code}`))
+      : Effect.fail(new DockerCommandError({ message: `pg_isready exited with code ${code}`, exitCode: code }))
   ),
   Effect.retry({
     times: 30,

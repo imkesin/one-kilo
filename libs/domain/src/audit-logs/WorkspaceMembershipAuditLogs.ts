@@ -33,7 +33,7 @@ export class WorkspaceMembershipCreatedAuditLog
 {
   static build = Effect.fnUntraced(
     function*(
-      parameters: Omit<typeof WorkspaceMembershipCreatedAuditLog.Type, "timestamp" | "traceId" | "type" | "version">
+      parameters: Omit<WorkspaceMembershipCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">
     ) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId

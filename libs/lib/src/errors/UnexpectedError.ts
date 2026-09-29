@@ -23,7 +23,7 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/l
   }
 ) {}
 
-type UnexpectedErrorContext = typeof UnexpectedError.Type["context"]
+type UnexpectedErrorContext = UnexpectedError["context"]
 
 const annotateLogWith = (context: UnexpectedErrorContext) => <A, E, R>(self: Effect.Effect<A, E, R>) =>
   context === undefined
@@ -37,21 +37,22 @@ export const dieWithUnexpectedError = (message: string, context?: UnexpectedErro
     Effect.andThen(Effect.die(UnexpectedError.make({ message, context })))
   )
 
-export const dieWithUnexpectedErrorCallback = <E>(message: string, context?: UnexpectedErrorContext) => (error?: E) => {
-  if (error instanceof UnexpectedError) {
+export const dieWithUnexpectedErrorCallback =
+  (message: string, context?: UnexpectedErrorContext) => (error?: unknown) => {
+    if (error instanceof UnexpectedError) {
+      return pipe(
+        Effect.logError(error.message, error.cause),
+        annotateLogWith(error.context),
+        Effect.andThen(Effect.die(error))
+      )
+    }
+
     return pipe(
-      Effect.logError(error.message, error.cause),
-      annotateLogWith(error.context),
-      Effect.andThen(Effect.die(error))
+      Effect.logError(message, error),
+      annotateLogWith(context),
+      Effect.andThen(Effect.die(UnexpectedError.make({ message, cause: error, context })))
     )
   }
-
-  return pipe(
-    Effect.logError(message, error),
-    annotateLogWith(context),
-    Effect.andThen(Effect.die(UnexpectedError.make({ message, cause: error, context })))
-  )
-}
 
 export const orDieWithUnexpectedError =
   <A, E, R>(message: string, context?: UnexpectedErrorContext) => (self: Effect.Effect<A, E, R>) =>

@@ -20,7 +20,7 @@ export class WorkspaceCreatedAuditLog
   )
 {
   static build = Effect.fnUntraced(
-    function*(parameters: Omit<typeof WorkspaceCreatedAuditLog.Type, "timestamp" | "traceId" | "type" | "version">) {
+    function*(parameters: Omit<WorkspaceCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 

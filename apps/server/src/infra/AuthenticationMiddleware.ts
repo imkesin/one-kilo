@@ -22,7 +22,7 @@ export const AuthenticationMiddlewareLive = pipe(
           const decodedAccessToken = yield* pipe(
             workosTokenClient.verifyAccessToken(WorkOSValues.AccessToken.make(Redacted.value(bearerToken))),
             Effect.tapErrorCause(Effect.logError),
-            Effect.orElseFail(UnauthenticatedError.make)
+            Effect.orElseFail(() => UnauthenticatedError.make())
           )
 
           if (

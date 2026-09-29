@@ -53,10 +53,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             targets: [{ id: workspace.id, type: "Workspace" as const }]
           })
 
-          yield* auditLogsRepository.insert({
-            ...auditLog,
-            encodedContext: Option.none()
-          })
+          yield* auditLogsRepository.insert(auditLog)
         }
       )
 
@@ -79,10 +76,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             ]
           })
 
-          yield* auditLogsRepository.insert({
-            ...auditLog,
-            encodedContext: Option.none()
-          })
+          yield* auditLogsRepository.insert(auditLog)
         }
       )
 

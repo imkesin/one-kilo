@@ -66,7 +66,7 @@ describe("UUIDGenerator", () => {
         const encodedMs = parseInt(timestampHex, 16)
 
         // Should be within a small margin of current time
-        expect(Math.abs(encodedMs - Number(currentMs))).toBeLessThan(10)
+        expect(Math.abs(encodedMs - currentMs)).toBeLessThan(10)
       }))
   })
 })

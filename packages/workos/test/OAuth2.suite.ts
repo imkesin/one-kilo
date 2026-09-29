@@ -8,7 +8,7 @@ import * as TokenClient from "../src/TokenClient.ts"
 
 export interface TestSuiteContext {
   readonly machineClientId: ApplicationClientId
-  readonly machineClientSecret: Redacted.Redacted<string>
+  readonly machineClientSecret: Redacted.Redacted
 }
 
 export class OAuth2TestSuiteContext extends Context.Tag(

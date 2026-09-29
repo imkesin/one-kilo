@@ -18,7 +18,7 @@ export class AthleteCreatedAuditLog extends S.Class<AthleteCreatedAuditLog>("@on
   }
 ) {
   static build = Effect.fnUntraced(
-    function*(parameters: Omit<typeof AthleteCreatedAuditLog.Type, "timestamp" | "traceId" | "type" | "version">) {
+    function*(parameters: Omit<AthleteCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 

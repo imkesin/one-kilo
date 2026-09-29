@@ -6,7 +6,6 @@ import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { AthletesRepository } from "@one-kilo/sql/modules/athletes/AthletesRepository"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import * as Effect from "effect/Effect"
-import * as Option from "effect/Option"
 
 type CreateAthleteParameters = {
   personId: PersonId
@@ -41,10 +40,7 @@ export class AthletesCreationModule extends Effect.Service<AthletesCreationModul
             targets: [{ id: athlete.id, type: "Athlete" as const }]
           })
 
-          yield* auditLogsRepository.insert({
-            ...auditLog,
-            encodedContext: Option.none()
-          })
+          yield* auditLogsRepository.insert(auditLog)
         }
       )
 
