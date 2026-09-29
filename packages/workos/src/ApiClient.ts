@@ -9,12 +9,14 @@ import * as Layer from "effect/Layer"
 import type * as Redacted from "effect/Redacted"
 import { UnexpectedError, WorkOSCommonError } from "./domain/Errors.ts"
 import type { EnvironmentClientId } from "./domain/Ids.ts"
+import * as EventsClientDefinitions from "./internal/api/EventsApiClientDefinitions.ts"
 import * as OrganizationsClientDefinitions from "./internal/api/OrganizationsApiClientDefinitions.ts"
 import * as UserManagementClientDefinitions from "./internal/api/UserManagementApiClientDefinitions.ts"
 
 export interface Service {
-  readonly userManagement: UserManagementClientDefinitions.Client
+  readonly events: EventsClientDefinitions.Client
   readonly organizations: OrganizationsClientDefinitions.Client
+  readonly userManagement: UserManagementClientDefinitions.Client
 }
 
 export class ApiClient extends Context.Tag(
@@ -32,6 +34,14 @@ export const makeNotImplemented = (): Service => {
     )
 
   return ApiClient.of({
+    events: {
+      listEvents: failWithNotImplementedError("listEvents")
+    },
+    organizations: {
+      createOrganization: failWithNotImplementedError("createOrganization"),
+      deleteOrganization: failWithNotImplementedError("deleteOrganization"),
+      retrieveOrganization: failWithNotImplementedError("retrieveOrganization")
+    },
     userManagement: {
       authenticateWithCode: failWithNotImplementedError("authenticateWithCode"),
       authenticateWithRefreshToken: failWithNotImplementedError("authenticateWithRefreshToken"),
@@ -41,11 +51,6 @@ export const makeNotImplemented = (): Service => {
       deleteUser: failWithNotImplementedError("deleteUser"),
       retrieveUser: failWithNotImplementedError("retrieveUser"),
       updateUser: failWithNotImplementedError("updateUser")
-    },
-    organizations: {
-      createOrganization: failWithNotImplementedError("createOrganization"),
-      deleteOrganization: failWithNotImplementedError("deleteOrganization"),
-      retrieveOrganization: failWithNotImplementedError("retrieveOrganization")
     }
   })
 }
@@ -78,18 +83,23 @@ export const make = (
         )
       )
     )
-    const userManagementHttpClient = HttpClient.mapRequest(
+    const eventsHttpClient = HttpClient.mapRequest(
       baseHttpClient,
-      HttpClientRequest.prependUrl(`${apiPath}/user_management`)
+      HttpClientRequest.prependUrl(`${apiPath}/events`)
     )
     const organizationsHttpClient = HttpClient.mapRequest(
       baseHttpClient,
       HttpClientRequest.prependUrl(`${apiPath}/organizations`)
     )
+    const userManagementHttpClient = HttpClient.mapRequest(
+      baseHttpClient,
+      HttpClientRequest.prependUrl(`${apiPath}/user_management`)
+    )
 
     return ApiClient.of({
-      userManagement: UserManagementClientDefinitions.make(userManagementHttpClient, options),
-      organizations: OrganizationsClientDefinitions.make(organizationsHttpClient)
+      events: EventsClientDefinitions.make(eventsHttpClient),
+      organizations: OrganizationsClientDefinitions.make(organizationsHttpClient),
+      userManagement: UserManagementClientDefinitions.make(userManagementHttpClient, options)
     })
   })
 

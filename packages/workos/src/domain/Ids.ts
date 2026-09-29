@@ -21,6 +21,14 @@ export const EnvironmentClientId = pipe(
 export type EnvironmentClientId = typeof EnvironmentClientId.Type
 export const generateEnvironmentClientId = makePrefixedIdGenerator(EnvironmentClientId, "client")
 
+export const EventId = pipe(
+  S.NonEmptyTrimmedString,
+  S.startsWith("event_"),
+  S.brand("@effect/auth-workos/EventId")
+)
+export type EventId = typeof EventId.Type
+export const generateEventId = makePrefixedIdGenerator(EventId, "event")
+
 export const OrganizationDomainId = pipe(
   S.NonEmptyTrimmedString,
   S.startsWith("org_domain_"),

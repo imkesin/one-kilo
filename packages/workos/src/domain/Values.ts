@@ -34,6 +34,9 @@ export const EmailAddress = pipe(
 )
 export type EmailAddress = typeof EmailAddress.Type
 
+export const EventType = S.Literal("user.updated")
+export type EventType = typeof EventType.Type
+
 export const IdToken = pipe(
   S.NonEmptyTrimmedString,
   S.brand("@effect/auth-workos/IdToken")

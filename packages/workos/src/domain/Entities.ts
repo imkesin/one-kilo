@@ -1,8 +1,9 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
-import { OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./Ids.ts"
+import { EventId, OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./Ids.ts"
 import {
   EmailAddress,
+  EventType,
   OrganizationDomainState,
   OrganizationDomainVerificationStrategy,
   OrganizationMembershipStatus,
@@ -207,3 +208,30 @@ export class User extends S.Class<User>("@effect/auth-workos/User")({
     S.fromKey("updated_at")
   )
 }) {}
+
+export class UserUpdatedEvent extends S.Class<UserUpdatedEvent>("@effect/auth-workos/UserUpdatedEvent")({
+  _tag: pipe(
+    S.Literal("UserUpdatedEvent"),
+    S.optional,
+    S.withDefaults({
+      constructor: () => "UserUpdatedEvent" as const,
+      decoding: () => "UserUpdatedEvent" as const
+    })
+  ),
+
+  id: EventId,
+  event: pipe(
+    EventType,
+    S.pickLiteral("user.updated")
+  ),
+  data: User,
+
+  createdAt: pipe(
+    S.Date,
+    S.propertySignature,
+    S.fromKey("created_at")
+  )
+}) {}
+
+export const Event = S.Union(UserUpdatedEvent)
+export type Event = typeof Event.Type
