@@ -23,8 +23,8 @@
     "dev": "turbo watch dev",
     "format": "dprint fmt",
     "format:check": "dprint check",
-    "lint": "oxlint && dprint check",
-    "lint:fix": "oxlint --fix && dprint fmt",
+    "lint": "turbo build --filter='./libs/*' --filter='./packages/*' && oxlint && pnpm format:check",
+    "lint:fix": "turbo build --filter='./libs/*' --filter='./packages/*' && oxlint --fix && pnpm format",
     "start": "turbo start",
     "test:once": "turbo test:once",
     "typecheck": "turbo typecheck"
