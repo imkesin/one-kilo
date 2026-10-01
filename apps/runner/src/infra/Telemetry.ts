@@ -6,7 +6,7 @@ import * as Layer from "effect/Layer"
 
 const SERVICE_NAME = "runner"
 
-export const TelemetryLive = Layer.unwrapEffect(
+export const TelemetryLayer = Layer.unwrapEffect(
   Effect.gen(function*() {
     const serviceVersion = yield* pipe(
       Config.string("SERVICE_VERSION"),

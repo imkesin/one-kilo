@@ -1,5 +1,5 @@
 import * as ManagedRuntime from "effect/ManagedRuntime"
-import { type WebServerLayerSuccess, WebServerLive } from "./webServerLayer"
+import { WebServerLayer, type WebServerLayerSuccess } from "./webServerLayer"
 
 type WebServerManagedRuntime = ManagedRuntime.ManagedRuntime<WebServerLayerSuccess, unknown>
 
@@ -9,7 +9,7 @@ declare global {
 
 export function getManagedWebServerRuntime() {
   if (!global.__STATIC_MANAGED_WEB_SERVER_RUNTIME) {
-    const runtime = ManagedRuntime.make(WebServerLive)
+    const runtime = ManagedRuntime.make(WebServerLayer)
 
     global.__STATIC_MANAGED_WEB_SERVER_RUNTIME = runtime
 

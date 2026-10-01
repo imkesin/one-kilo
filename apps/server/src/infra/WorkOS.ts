@@ -11,7 +11,7 @@ const clientIdConfig = pipe(
   Config.map(WorkOSIds.EnvironmentClientId.make)
 )
 
-const DirectApiClientLive = WorkOSApiClient.layerConfig({
+const DirectApiClientLayer = WorkOSApiClient.layerConfig({
   clientId: clientIdConfig,
   clientSecret: pipe(
     Config.string("WORKOS_API_KEY"),
@@ -19,17 +19,17 @@ const DirectApiClientLive = WorkOSApiClient.layerConfig({
   )
 })
 
-const GatewayApiClientLive = pipe(
+const GatewayApiClientLayer = pipe(
   WorkOSApiGateway.layer(),
-  Layer.provide(DirectApiClientLive)
+  Layer.provide(DirectApiClientLayer)
 )
 
-const TokenClientLive = TokenClient.layerConfig({
+const TokenClientLayer = TokenClient.layerConfig({
   clientId: clientIdConfig
 })
 
-export const WorkOSLive = Layer.mergeAll(
-  DirectApiClientLive,
-  GatewayApiClientLive,
-  TokenClientLive
+export const WorkOSLayer = Layer.mergeAll(
+  DirectApiClientLayer,
+  GatewayApiClientLayer,
+  TokenClientLayer
 )

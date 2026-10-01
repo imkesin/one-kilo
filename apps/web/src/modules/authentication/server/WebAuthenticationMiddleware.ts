@@ -4,10 +4,10 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { WebActor } from "~/infra/api/WebActor"
 import { WebUnauthenticatedError } from "~/infra/api/WebApiErrors"
-import { WebAuthenticationMiddleware } from "~/infra/api/WebAuthenticationMiddleware"
-import { AuthenticationWebModule } from "./AuthenticationWebModule"
+import { WebAuthenticationMiddleware } from "~/infra/api/WebAuthenticationSecurity"
+import { AuthenticationWebModule } from "./AuthenticationWebModule.ts"
 
-export const WebAuthenticationMiddlewareLive = pipe(
+export const WebAuthenticationMiddlewareLayer = pipe(
   Layer.effect(
     WebAuthenticationMiddleware,
     Effect.gen(function*() {

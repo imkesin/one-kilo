@@ -10,17 +10,17 @@ import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { createServer } from "node:http"
-import { AuthenticationMiddlewareLive } from "./infra/AuthenticationMiddleware.ts"
-import { WorkflowEngineLive } from "./infra/Cluster.ts"
-import { SqlLive } from "./infra/Sql.ts"
-import { WorkOSLive } from "./infra/WorkOS.ts"
+import { AuthenticationMiddlewareLayer } from "./infra/AuthenticationMiddleware.ts"
+import { WorkflowEngineLayer } from "./infra/Cluster.ts"
+import { SqlLayer } from "./infra/Sql.ts"
+import { WorkOSLayer } from "./infra/WorkOS.ts"
 import { AthletesHttp } from "./modules/athletes/AthletesHttp.ts"
 import { AuthenticationHttp } from "./modules/authentication/AuthenticationHttp.ts"
 import { HealthHttp } from "./modules/health/HealthHttp.ts"
 import { PersonsHttp } from "./modules/persons/PersonsHttp.ts"
 import { WhoAmIHttp } from "./modules/whoami/WhoAmIHttp.ts"
 
-const ServerApiLive = pipe(
+const ServerApiLayer = pipe(
   HttpApiBuilder.api(ServerApi),
   Layer.provide([
     AthletesHttp,
@@ -29,12 +29,12 @@ const ServerApiLive = pipe(
     PersonsHttp,
     WhoAmIHttp
   ]),
-  Layer.provide(AuthenticationMiddlewareLive)
+  Layer.provide(AuthenticationMiddlewareLayer)
 )
 
-const ServerInfraLive = pipe(
-  Layer.merge(WorkflowEngineLive, WorkOSLive),
-  Layer.provideMerge(SqlLive),
+const ServerInfraLayer = pipe(
+  Layer.merge(WorkflowEngineLayer, WorkOSLayer),
+  Layer.provideMerge(SqlLayer),
   Layer.provide(NodeHttpClient.layerUndici)
 )
 
@@ -47,16 +47,16 @@ const middleware = (httpApp: HttpApp.Default) =>
 
 export const HttpTestWithoutInfra = pipe(
   HttpApiBuilder.serve(middleware),
-  Layer.provide(ServerApiLive),
+  Layer.provide(ServerApiLayer),
   Layer.provide(WorkflowEngine.layerMemory),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 
-export const HttpLive = pipe(
+export const HttpLayer = pipe(
   HttpApiBuilder.serve(middleware),
   HttpServer.withLogAddress,
-  Layer.provide(ServerApiLive),
-  Layer.provide(ServerInfraLive),
+  Layer.provide(ServerApiLayer),
+  Layer.provide(ServerInfraLayer),
   Layer.provide(
     NodeHttpServer.layerConfig(
       createServer,

@@ -1,3 +1,3 @@
 import * as PgLayers from "@one-kilo/sql/PgLayers"
 
-export const SqlLive = PgLayers.layerWithMigrations()
+export const SqlLayer = PgLayers.layerWithMigrations()

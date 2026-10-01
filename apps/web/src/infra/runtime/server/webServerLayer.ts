@@ -7,23 +7,23 @@ import * as Logger from "effect/Logger"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 import { WhoAmIWebProxy } from "~/modules/whoami/server/WhoAmIWebProxy"
 
-const WebModulesLive = Layer.mergeAll(
+const WebModulesLayer = Layer.mergeAll(
   AuthenticationWebModule.Default,
   WhoAmIWebProxy.Default
 )
 
-const WorkOSPublicApiClientLive = WorkOSPublicApiClient.layerConfig({
+const WorkOSPublicApiClientLayer = WorkOSPublicApiClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
     Config.map(WorkOSIds.EnvironmentClientId.make)
   )
 })
 
-export const WebServerLive = pipe(
+export const WebServerLayer = pipe(
   Layer.empty,
-  Layer.merge(WebModulesLive),
-  Layer.merge(WorkOSPublicApiClientLive),
+  Layer.merge(WebModulesLayer),
+  Layer.merge(WorkOSPublicApiClientLayer),
   Layer.provide(Logger.pretty)
 )
 
-export type WebServerLayerSuccess = Layer.Layer.Success<typeof WebServerLive>
+export type WebServerLayerSuccess = Layer.Layer.Success<typeof WebServerLayer>

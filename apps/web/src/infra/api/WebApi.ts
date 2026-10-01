@@ -1,7 +1,7 @@
 import * as HttpApi from "@effect/platform/HttpApi"
 import * as HttpApiError from "@effect/platform/HttpApiError"
 import { WhoAmIWebApi } from "~/modules/whoami/api/WhoAmIWebApi"
-import { WebAuthenticationMiddleware } from "./WebAuthenticationMiddleware"
+import { WebAuthenticationMiddleware } from "./WebAuthenticationSecurity"
 
 export class WebApi extends HttpApi.make("WebApi")
   .add(WhoAmIWebApi)

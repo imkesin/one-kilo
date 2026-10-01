@@ -5,7 +5,7 @@ import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 
-const DirectApiClientLive = WorkOSApiClient.layerConfig({
+const DirectApiClientLayer = WorkOSApiClient.layerConfig({
   clientId: pipe(
     Config.string("WORKOS_CLIENT_ID"),
     Config.map(WorkOSIds.EnvironmentClientId.make)
@@ -16,7 +16,7 @@ const DirectApiClientLive = WorkOSApiClient.layerConfig({
   )
 })
 
-export const WorkOSLive = pipe(
+export const WorkOSLayer = pipe(
   WorkOSApiGateway.layer(),
-  Layer.provide(DirectApiClientLive)
+  Layer.provide(DirectApiClientLayer)
 )

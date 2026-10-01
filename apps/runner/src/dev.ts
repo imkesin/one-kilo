@@ -6,7 +6,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
-import { makeRunnerLive } from "./Runner.ts"
+import { makeRunnerLayer } from "./Runner.ts"
 
 const RunnerConfig = pipe(
   Config.all({
@@ -22,7 +22,7 @@ const RunnerConfig = pipe(
   Config.nested("RUNNER")
 )
 
-const ClusterLive = pipe(
+const ClusterLayer = pipe(
   Effect.gen(function*() {
     const config = yield* RunnerConfig
 
@@ -39,10 +39,10 @@ const ClusterLive = pipe(
   Layer.unwrapEffect
 )
 
-const RunnerLive = makeRunnerLive(ClusterLive)
+const RunnerLayer = makeRunnerLayer(ClusterLayer)
 
 pipe(
-  RunnerLive,
+  RunnerLayer,
   Layer.launch,
   NodeRuntime.runMain
 )
