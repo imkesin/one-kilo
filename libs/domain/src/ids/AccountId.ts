@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const AccountId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/AccountId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an account.",
     identifier: "AccountId",
     title: "Account ID"
@@ -17,10 +17,10 @@ export type AccountId = typeof AccountId.Type
 const ACCOUNT_PREFIX = "account_"
 
 export const PrefixedAccountId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(ACCOUNT_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(ACCOUNT_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedAccountId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an account.",
     identifier: "PrefixedAccountId",
     title: "Account ID (Prefixed)"

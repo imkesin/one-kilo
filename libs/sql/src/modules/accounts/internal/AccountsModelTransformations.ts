@@ -128,7 +128,7 @@ export const toAccount = ({
     type === "Person"
     && workosUserId
     && person
-    && Arr.isNonEmptyReadonlyArray(person.emailAddresses)
+    && Arr.isReadonlyArrayNonEmpty(person.emailAddresses)
   ) {
     const [onlyEmailAddress] = person.emailAddresses
 

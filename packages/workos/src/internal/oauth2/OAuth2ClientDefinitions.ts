@@ -1,9 +1,9 @@
-import type * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
-import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
-import * as UrlParams from "@effect/platform/UrlParams"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import type * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
+import * as HttpClientResponse from "effect/http/HttpClientResponse"
+import * as UrlParams from "effect/http/UrlParams"
 import * as Redacted from "effect/Redacted"
 import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
@@ -13,23 +13,29 @@ import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
 import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
   AuthorizeDeviceParameters,
-  AuthorizeDeviceResponse,
+  type AuthorizeDeviceResponse,
+  AuthorizeDeviceResponseFromWire,
   DeviceCodeAuthorizationTerminatedError,
   RetrieveTokenByAuthorizationCodeParameters,
   type RetrieveTokenByAuthorizationCodeParameters_Redacted,
-  RetrieveTokenByAuthorizationCodeResponse,
+  type RetrieveTokenByAuthorizationCodeResponse,
+  RetrieveTokenByAuthorizationCodeResponseFromWire,
   RetrieveTokenByClientCredentialsParameters,
   type RetrieveTokenByClientCredentialsParameters_Redacted,
-  RetrieveTokenByClientCredentialsResponse,
+  type RetrieveTokenByClientCredentialsResponse,
+  RetrieveTokenByClientCredentialsResponseFromWire,
   RetrieveTokenByDeviceCodeParameters,
   type RetrieveTokenByDeviceCodeParameters_Redacted,
   RetrieveTokenByDeviceCodeResponseAuthorizationDeclined,
   RetrieveTokenByDeviceCodeResponseAuthorizationPending,
-  RetrieveTokenByDeviceCodeResponseSuccess,
+  type RetrieveTokenByDeviceCodeResponseSuccess,
+  RetrieveTokenByDeviceCodeResponseSuccessFromWire,
   RetrieveTokenByRefreshTokenParameters,
   type RetrieveTokenByRefreshTokenParameters_Redacted,
-  RetrieveTokenByRefreshTokenResponse,
-  RetrieveUserInfoResponse
+  type RetrieveTokenByRefreshTokenResponse,
+  RetrieveTokenByRefreshTokenResponseFromWire,
+  type RetrieveUserInfoResponse,
+  RetrieveUserInfoResponseFromWire
 } from "./OAuth2ClientDefinitionSchemas.ts"
 
 export interface Client {
@@ -116,7 +122,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(AuthorizeDeviceResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(AuthorizeDeviceResponseFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -136,7 +142,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByAuthorizationCodeResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByAuthorizationCodeResponseFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -156,7 +162,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByRefreshTokenResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByRefreshTokenResponseFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -176,7 +182,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByClientCredentialsResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByClientCredentialsResponseFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -196,12 +202,12 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByDeviceCodeResponseSuccess),
+            "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByDeviceCodeResponseSuccessFromWire),
             "4xx": HttpResponseExtensions.decodeExpected(
-              S.Union(
+              S.Union([
                 RetrieveTokenByDeviceCodeResponseAuthorizationPending,
                 RetrieveTokenByDeviceCodeResponseAuthorizationDeclined
-              )
+              ])
             ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
@@ -243,7 +249,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         HttpClientRequest.bearerToken(accessToken),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(RetrieveUserInfoResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(RetrieveUserInfoResponseFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )

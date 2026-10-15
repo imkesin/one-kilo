@@ -1,4 +1,3 @@
-import * as KeyValueStore from "@effect/platform/KeyValueStore"
 import * as Arr from "effect/Array"
 import * as DateTime from "effect/DateTime"
 import * as Duration from "effect/Duration"
@@ -6,6 +5,7 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as HashMap from "effect/HashMap"
 import * as Option from "effect/Option"
+import * as KeyValueStore from "effect/persistence/KeyValueStore"
 import * as Redacted from "effect/Redacted"
 import * as S from "effect/Schema"
 import * as Struct from "effect/Struct"
@@ -41,7 +41,7 @@ import {
 class ClientsModel extends S.Class<ClientsModel>("ClientModel")({
   id: ApplicationClientId,
   orgId: OrganizationId,
-  secret: S.NonEmptyTrimmedString
+  secret: S.Trimmed.check(S.isNonEmpty())
 }) {}
 
 class OrganizationsModel extends S.Class<OrganizationsModel>("OrganizationModel")({
@@ -73,7 +73,7 @@ class UsersModel extends S.Class<UsersModel>("UserModel")({
   ...User.fields,
 
   password: pipe(
-    S.NonEmptyTrimmedString,
+    S.Trimmed.check(S.isNonEmpty()),
     S.NullOr
   )
 }) {
@@ -165,7 +165,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
     const usersStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
-      (store) => store.forSchema(S.ReadonlyMap({ key: UserId, value: UsersModel }))
+      (store) => KeyValueStore.toSchemaStore(store, S.ReadonlyMap(UserId, UsersModel))
     )
     const loadAllUsers = pipe(
       usersStore.get("users"),
@@ -178,7 +178,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         Effect.map((users) =>
           pipe(
             users.get(userId),
-            Option.fromNullable
+            Option.fromNullishOr
           )
         ),
         Effect.filterOrFail(
@@ -216,7 +216,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
     const clientsStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
-      (store) => store.forSchema(S.ReadonlyMap({ key: ApplicationClientId, value: ClientsModel }))
+      (store) => KeyValueStore.toSchemaStore(store, S.ReadonlyMap(ApplicationClientId, ClientsModel))
     )
     const setClients = (clients: ReadonlyMap<ApplicationClientId, ClientsModel>) =>
       pipe(
@@ -234,7 +234,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         Effect.map((clients) =>
           pipe(
             clients.get(clientId),
-            Option.fromNullable
+            Option.fromNullishOr
           )
         ),
         Effect.filterOrFail(
@@ -249,7 +249,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
     const organizationsStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
-      (store) => store.forSchema(S.ReadonlyMap({ key: OrganizationId, value: OrganizationsModel }))
+      (store) => KeyValueStore.toSchemaStore(store, S.ReadonlyMap(OrganizationId, OrganizationsModel))
     )
     const loadAllOrganizations = pipe(
       organizationsStore.get("organizations"),
@@ -262,7 +262,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
         Effect.map((organizations) =>
           pipe(
             organizations.get(organizationId),
-            Option.fromNullable
+            Option.fromNullishOr
           )
         ),
         Effect.filterOrFail(
@@ -301,7 +301,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
 
     const organizationMembershipsStore = yield* Effect.map(
       KeyValueStore.KeyValueStore,
-      (store) => store.forSchema(S.HashMap({ key: OrganizationMembershipId, value: OrganizationMembershipsModel }))
+      (store) => KeyValueStore.toSchemaStore(store, S.HashMap(OrganizationMembershipId, OrganizationMembershipsModel))
     )
     const loadAllOrganizationMemberships = pipe(
       organizationMembershipsStore.get("organization_memberships"),

@@ -6,9 +6,11 @@ import { PersonNotFoundError } from "@one-kilo/domain/errors/PersonErrors"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
+import * as Context from "effect/Context"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import { PersonsManagementModule } from "../../modules/persons/PersonsManagementModule.ts"
 import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
@@ -30,14 +32,10 @@ type UpdatePersonOutcome = Data.TaggedEnum<{
 }>
 const UpdatePersonOutcome = Data.taggedEnum<UpdatePersonOutcome>()
 
-export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
+export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
   "@one-kilo/core/PersonsUseCases",
   {
-    dependencies: [
-      PersonsManagementModule.Default,
-      PersonsQueryModule.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const pg = yield* PgClient.PgClient
 
       const personsManagementModule = yield* PersonsManagementModule
@@ -86,4 +84,12 @@ export class PersonsUseCases extends Effect.Service<PersonsUseCases>()(
       return { update }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      PersonsManagementModule.layer,
+      PersonsQueryModule.layer
+    ])
+  )
+}

@@ -7,9 +7,9 @@ import * as Store from "./Store.ts"
 
 export type Service = StoreDefinitions.ApiClient
 
-export class ApiGateway extends Context.Tag(
+export class ApiGateway extends Context.Service<ApiGateway, Service>()(
   "@effect/auth-workos/ApiGateway"
-)<ApiGateway, Service>() {}
+) {}
 
 export const makeTest = (): Effect.Effect<Service, never, Store.Store> =>
   Effect.gen(function*() {

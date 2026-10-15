@@ -1,9 +1,9 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as Model from "@effect/sql/Model"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceMembershipRole } from "@one-kilo/domain/values/WorkspaceMembershipValues"
+import * as Model from "effect/schema/Model"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class WorkspaceMembershipsModel extends Model.Class<WorkspaceMembershipsModel>("WorkspaceMembershipsModel")({

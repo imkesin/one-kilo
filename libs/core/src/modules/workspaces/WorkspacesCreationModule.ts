@@ -11,8 +11,10 @@ import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsR
 import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
 import { WorkspacesQueryRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesQueryRepository"
 import { WorkspacesRepository } from "@one-kilo/sql/modules/workspaces/WorkspacesRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 
 type CreatePersonalWorkspaceParameters = {
@@ -26,17 +28,10 @@ type CreatePersonalWorkspaceParameters = {
   }
 }
 
-export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationModule>()(
+export class WorkspacesCreationModule extends Context.Service<WorkspacesCreationModule>()(
   "@one-kilo/core/WorkspacesCreationModule",
   {
-    dependencies: [
-      AuditLogsRepository.Default,
-      DomainIdGenerator.Default,
-      WorkspaceMembershipsRepository.Default,
-      WorkspacesQueryRepository.Default,
-      WorkspacesRepository.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const auditLogsRepository = yield* AuditLogsRepository
       const idGenerator = yield* DomainIdGenerator
       const workspaceMembershipsRepository = yield* WorkspaceMembershipsRepository
@@ -91,7 +86,7 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
             workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByAccountId({ accountId }),
             Effect.andThen(
               Option.match({
-                onNone: () => Effect.ignore,
+                onNone: () => Effect.void,
                 onSome: () => dieWithUnexpectedError("A personal workspace already exists for this account")
               })
             )
@@ -125,4 +120,15 @@ export class WorkspacesCreationModule extends Effect.Service<WorkspacesCreationM
       return { createPersonalWorkspace }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      AuditLogsRepository.layer,
+      DomainIdGenerator.layer,
+      WorkspaceMembershipsRepository.layer,
+      WorkspacesQueryRepository.layer,
+      WorkspacesRepository.layer
+    ])
+  )
+}

@@ -5,9 +5,10 @@ do **not** participate in project references via `composite: true`.
 
 ## Why
 
-`Effect.Service` infers deeply nested types that transitively reference things like `Stream`. When
-`composite: true` forces declaration emit, TypeScript fails because it can't name those types. Test
-declarations are never consumed by anything, so emitting them is pure cost.
+Services defined with `Context.Service` and an inferred `make` produce deeply nested types that
+transitively reference things like `Stream`. When `composite: true` forces declaration emit,
+TypeScript fails because it can't name those types. Test declarations are never consumed by
+anything, so emitting them is pure cost.
 
 ## How
 

@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const AuditLogId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/AuditLogId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an audit log.",
     identifier: "AuditLogId",
     title: "Audit Log ID"
@@ -17,10 +17,10 @@ export type AuditLogId = typeof AuditLogId.Type
 const AUDIT_LOG_PREFIX = "audit_log_"
 
 export const PrefixedAuditLogId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(AUDIT_LOG_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(AUDIT_LOG_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedAuditLogId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an audit log.",
     identifier: "PrefixedAuditLogId",
     title: "Audit Log ID (Prefixed)"

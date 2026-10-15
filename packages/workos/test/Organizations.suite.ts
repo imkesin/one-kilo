@@ -3,9 +3,9 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as ApiGateway from "../src/ApiGateway.ts"
 
-export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway, boolean>) => {
+export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway>) => {
   describe("Organizations", () => {
-    it.scoped("can create an organization", () =>
+    it.effect("can create an organization", () =>
       Effect.gen(function*() {
         const gatewayClient = yield* ApiGateway.ApiGateway
 
@@ -22,7 +22,7 @@ export const makeOrganizationTests = () => (it: Vitest.MethodsNonLive<ApiGateway
         yield* Effect.addFinalizer(() =>
           pipe(
             gatewayClient.organizations.deleteOrganization(organization.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )
         )

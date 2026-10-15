@@ -1,6 +1,3 @@
-import * as Activity from "@effect/workflow/Activity"
-import * as DurableClock from "@effect/workflow/DurableClock"
-import type { WorkflowEngine, WorkflowInstance } from "@effect/workflow/WorkflowEngine"
 import * as Cause from "effect/Cause"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
@@ -10,6 +7,9 @@ import * as Option from "effect/Option"
 import * as Predicate from "effect/Predicate"
 import * as S from "effect/Schema"
 import type * as Scope from "effect/Scope"
+import * as Activity from "effect/workflow/Activity"
+import * as DurableClock from "effect/workflow/DurableClock"
+import type { WorkflowEngine, WorkflowInstance } from "effect/workflow/WorkflowEngine"
 
 const BASE_DURATION = Duration.seconds(5)
 const BACKOFF_FACTOR = 2
@@ -22,9 +22,9 @@ export class RetryBudgetExhaustedError extends S.TaggedError<RetryBudgetExhauste
 )(
   "RetryBudgetExhaustedError",
   {
-    activityName: S.NonEmptyTrimmedString,
+    activityName: S.Trimmed.check(S.isNonEmpty()),
     attemptCount: S.Int,
-    latestError: S.Defect
+    latestError: S.Defect()
   }
 ) {}
 
@@ -58,7 +58,7 @@ const retryDurable = <A, E, R>(options: DurableRetryOptions<E>) => (effect: Effe
         return exit.value
       }
 
-      const failure = Cause.failureOption(exit.cause)
+      const failure = Cause.findErrorOption(exit.cause)
 
       const isRetryable = Option.match(
         failure,
@@ -104,8 +104,8 @@ const retryDurable = <A, E, R>(options: DurableRetryOptions<E>) => (effect: Effe
 
 export const makeWithDurableRetry = <
   R,
-  Success extends S.Schema.Any = typeof S.Void,
-  Error extends S.Schema.All = typeof S.Never
+  Success extends S.Constraint = S.Void,
+  Error extends S.Constraint = S.Never
 >(
   options: {
     readonly name: string
@@ -117,19 +117,16 @@ export const makeWithDurableRetry = <
 ): Activity.Activity<
   Success,
   S.Union<[Error, typeof RetryBudgetExhaustedError]>,
-  Exclude<
-    R,
-    Activity.CurrentAttempt | WorkflowEngine | WorkflowInstance | Scope.Scope
-  >
+  Exclude<R, WorkflowEngine | WorkflowInstance | Scope.Scope>
 > => {
   return Activity.make<
-    Exclude<R, Activity.CurrentAttempt> | WorkflowEngine | WorkflowInstance,
+    R | WorkflowEngine | WorkflowInstance,
     Success,
     S.Union<[Error, typeof RetryBudgetExhaustedError]>
   >({
     name: options.name,
     success: options.success,
-    error: S.Union(options.error, RetryBudgetExhaustedError),
+    error: S.Union([options.error, RetryBudgetExhaustedError]),
     execute: pipe(
       options.execute,
       retryDurable({

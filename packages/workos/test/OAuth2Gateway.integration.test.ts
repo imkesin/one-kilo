@@ -12,25 +12,22 @@ import * as OAuth2TestSuite from "./OAuth2.suite.ts"
 const oauth2Gateway = pipe(
   OAuth2Gateway.layer(),
   Layer.provide(
-    OAuth2Client.layerConfig({ authKitDomain: Config.string("WORKOS_AUTHKIT_DOMAIN") })
+    OAuth2Client.layerConfig({ authKitDomain: Config.String("WORKOS_AUTHKIT_DOMAIN") })
   )
 )
 const tokenClient = TokenClient.layerConfig({
   clientId: pipe(
-    Config.string("WORKOS_CLIENT_ID"),
+    Config.String("WORKOS_CLIENT_ID"),
     Config.map(EnvironmentClientId.make)
   )
 })
 const configIntegration = Config.nested(
   Config.all({
     machineClientId: pipe(
-      Config.string("MACHINE_CLIENT_ID"),
+      Config.String("MACHINE_CLIENT_ID"),
       Config.map(ApplicationClientId.make)
     ),
-    machineClientSecret: pipe(
-      Config.string("MACHINE_CLIENT_SECRET"),
-      (_) => Config.redacted(_)
-    )
+    machineClientSecret: Config.Redacted("MACHINE_CLIENT_SECRET")
   }),
   "WORKOS"
 )
@@ -50,7 +47,7 @@ const integrationTestLayer = pipe(
     tokenClient,
     testSuiteContext
   ),
-  Layer.provide(NodeHttpClient.layer)
+  Layer.provide(NodeHttpClient.layerNodeHttp)
 )
 
 describe("OAuth2Client - Integration", () => {

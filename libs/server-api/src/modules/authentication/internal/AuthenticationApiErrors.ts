@@ -1,4 +1,4 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
@@ -11,15 +11,12 @@ export class AuthenticationApi_ExchangeCode_InvalidCodeError
     "ExchangeCode:InvalidCodeError",
     {
       message: pipe(
-        S.NonEmptyTrimmedString,
-        S.optional,
-        S.withDefaults({
-          constructor: () => INVALID_CODE_ERROR_MESSAGE,
-          decoding: () => INVALID_CODE_ERROR_MESSAGE
-        })
+        S.Trimmed.check(S.isNonEmpty()),
+        S.withDecodingDefault(Effect.succeed(INVALID_CODE_ERROR_MESSAGE)),
+        S.withConstructorDefault(Effect.succeed(INVALID_CODE_ERROR_MESSAGE))
       )
     },
-    HttpApiSchema.annotations({ status: 401 })
+    { httpApiStatus: 401 }
   )
 {}
 
@@ -33,14 +30,11 @@ export class AuthenticationApi_RefreshContext_InvalidRefreshTokenError
     "RefreshContext:InvalidRefreshTokenError",
     {
       message: pipe(
-        S.NonEmptyTrimmedString,
-        S.optional,
-        S.withDefaults({
-          constructor: () => INVALID_REFRESH_TOKEN_ERROR_MESSAGE,
-          decoding: () => INVALID_REFRESH_TOKEN_ERROR_MESSAGE
-        })
+        S.Trimmed.check(S.isNonEmpty()),
+        S.withDecodingDefault(Effect.succeed(INVALID_REFRESH_TOKEN_ERROR_MESSAGE)),
+        S.withConstructorDefault(Effect.succeed(INVALID_REFRESH_TOKEN_ERROR_MESSAGE))
       )
     },
-    HttpApiSchema.annotations({ status: 401 })
+    { httpApiStatus: 401 }
   )
 {}

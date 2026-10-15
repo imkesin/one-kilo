@@ -3,15 +3,13 @@
   "version": "0.1.0",
   "dependencies": {
     "@effect/auth-workos": "workspace:*",
-    "@effect/cluster": "^0.58.1",
-    "@effect/platform-node": "^0.106.0",
-    "@effect/workflow": "^0.18.0",
+    "@effect/platform-node": "^4.0.3",
     "@one-kilo/core": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/sql": "workspace:*",
     "@one-kilo/telemetry": "workspace:*",
     "@one-kilo/workflow": "workspace:*",
-    "effect": "^3.21.2"
+    "effect": "^4.0.3"
   },
   "private": true,
   "scripts": {

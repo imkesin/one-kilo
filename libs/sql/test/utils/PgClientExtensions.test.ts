@@ -1,11 +1,11 @@
 import * as PgClient from "@effect/sql-pg/PgClient"
-import * as SqlClient from "@effect/sql/SqlClient"
 import { describe, layer } from "@effect/vitest"
 import * as Deferred from "effect/Deferred"
 import * as Effect from "effect/Effect"
 import * as Fiber from "effect/Fiber"
 import { pipe } from "effect/Function"
 import * as Ref from "effect/Ref"
+import * as SqlClient from "effect/sql/SqlClient"
 import { expect } from "vitest"
 import * as PgLayers from "../../src/PgLayers.ts"
 import { withSerializableTransaction } from "../../src/utils/PgClientExtensions.ts"
@@ -62,8 +62,8 @@ describe("`withSerializableTransaction`", () => {
         )
 
         // Run both transactions concurrently
-        const fiberA = yield* Effect.fork(txA)
-        const fiberB = yield* Effect.fork(txB)
+        const fiberA = yield* Effect.forkChild(txA)
+        const fiberB = yield* Effect.forkChild(txB)
         yield* Fiber.join(fiberA)
         yield* Fiber.join(fiberB)
 
@@ -140,7 +140,7 @@ describe("`withSerializableTransaction`", () => {
           withSerializableTransaction(pg)
         )
 
-        yield* Effect.either(outer)
+        yield* Effect.result(outer)
 
         // The nested insert was not an independent commit: rolling back the outer discards both.
         const rows = yield* sql`SELECT id FROM _test_nested_tx_rollback`
@@ -197,8 +197,8 @@ describe("`withSerializableTransaction`", () => {
           withSerializableTransaction(pg)
         )
 
-        const fiberA = yield* Effect.fork(txA)
-        const fiberB = yield* Effect.fork(txB)
+        const fiberA = yield* Effect.forkChild(txA)
+        const fiberB = yield* Effect.forkChild(txB)
         yield* Fiber.join(fiberA)
         yield* Fiber.join(fiberB)
 

@@ -4,9 +4,9 @@ import * as SimplifiedLatin from "./internal/SimplifiedLatin.ts"
 
 export const MachineClientName = pipe(
   SimplifiedLatin.Name,
-  S.maxLength(64),
+  S.check(S.isMaxLength(64)),
   S.brand("@one-kilo/domain/MachineClientName"),
-  S.annotations({
+  S.annotate({
     description: "The name of a machine client",
     identifier: "MachineClientName",
     title: "Machine Client Name"

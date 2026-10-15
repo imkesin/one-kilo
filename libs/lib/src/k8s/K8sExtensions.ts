@@ -6,7 +6,7 @@ import * as Option from "effect/Option"
 const K8sConfig = pipe(
   Config.all({
     serviceHost: pipe(
-      Config.string("SERVICE_HOST"),
+      Config.String("SERVICE_HOST"),
       Config.option
     )
   }),

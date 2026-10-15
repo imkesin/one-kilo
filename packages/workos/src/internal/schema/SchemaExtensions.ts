@@ -6,13 +6,13 @@ import * as WorkOSError from "../../domain/Errors.ts"
 export const encodeCatching = <
   A,
   I
->(schema: S.Schema<A, I>) =>
+>(schema: S.Codec<A, I>) =>
 (input: A) =>
   pipe(
     input,
-    S.encode(schema),
+    S.encodeEffect(schema),
     Effect.catchTag(
-      "ParseError",
+      "SchemaError",
       (error) =>
         Effect.fail(
           WorkOSError.WorkOSCommonError.make({

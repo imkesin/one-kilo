@@ -1,5 +1,5 @@
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint"
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup"
+import * as HttpApiEndpoint from "effect/http-api/HttpApiEndpoint"
+import * as HttpApiGroup from "effect/http-api/HttpApiGroup"
 import {
   AuthenticationApi_ExchangeCodeSchemas,
   AuthenticationApi_RefreshContextSchemas
@@ -11,16 +11,16 @@ import {
 
 export class AuthenticationApi extends HttpApiGroup.make("authentication")
   .add(
-    HttpApiEndpoint.post("exchangeCode", "/exchange-code")
-      .setPayload(AuthenticationApi_ExchangeCodeSchemas.Payload)
-      .addSuccess(AuthenticationApi_ExchangeCodeSchemas.Success)
-      .addError(AuthenticationApi_ExchangeCode_InvalidCodeError)
-  )
-  .add(
-    HttpApiEndpoint.post("refreshContext", "/refresh-context")
-      .setPayload(AuthenticationApi_RefreshContextSchemas.Payload)
-      .addSuccess(AuthenticationApi_RefreshContextSchemas.Success)
-      .addError(AuthenticationApi_RefreshContext_InvalidRefreshTokenError)
+    HttpApiEndpoint.post("exchangeCode", "/exchange-code", {
+      payload: AuthenticationApi_ExchangeCodeSchemas.Payload,
+      success: AuthenticationApi_ExchangeCodeSchemas.Success,
+      error: AuthenticationApi_ExchangeCode_InvalidCodeError
+    }),
+    HttpApiEndpoint.post("refreshContext", "/refresh-context", {
+      payload: AuthenticationApi_RefreshContextSchemas.Payload,
+      success: AuthenticationApi_RefreshContextSchemas.Success,
+      error: AuthenticationApi_RefreshContext_InvalidRefreshTokenError
+    })
   )
   .prefix("/authentication")
 {}

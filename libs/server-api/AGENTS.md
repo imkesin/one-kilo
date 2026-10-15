@@ -1,6 +1,6 @@
 # Server API
 
-HTTP API contract definitions using `@effect/platform` HttpApi.
+HTTP API contract definitions using `effect/http-api` HttpApi.
 
 ## Structure (`/src`)
 

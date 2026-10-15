@@ -1,76 +1,71 @@
 import * as Data from "effect/Data"
 import { pipe } from "effect/Function"
-import * as Option from "effect/Option"
 import * as S from "effect/Schema"
-import { User } from "../../domain/Entities.ts"
+import { UserFromWire } from "../../domain/Entities.ts"
 import { EnvironmentClientId, OrganizationId, UserId } from "../../domain/Ids.ts"
 import { AccessToken, AuthenticationCode, Impersonator, RefreshToken } from "../../domain/Values.ts"
+import { LiteralWithEncodingDefault } from "../CommonDefinitions.ts"
 
 const AuthenticateRequestCommonFields = {
-  clientId: pipe(
-    EnvironmentClientId,
-    S.propertySignature,
-    S.fromKey("client_id")
-  ),
+  clientId: EnvironmentClientId,
   ipAddress: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("ip_address")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.optional
   ),
   userAgent: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("user_agent")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.optional
   )
+} as const
+
+const AuthenticateRequestCommonKeys = {
+  clientId: "client_id",
+  ipAddress: "ip_address",
+  userAgent: "user_agent"
 } as const
 
 const AuthenticateRequestWithSecretCommonFields = {
   ...AuthenticateRequestCommonFields,
 
-  clientSecret: pipe(
-    S.NonEmptyTrimmedString,
-    S.propertySignature,
-    S.fromKey("client_secret")
-  )
+  clientSecret: S.Trimmed.check(S.isNonEmpty())
+} as const
+
+const AuthenticateRequestWithSecretCommonKeys = {
+  ...AuthenticateRequestCommonKeys,
+
+  clientSecret: "client_secret"
 } as const
 
 const AuthenticateResponseCommonFields = {
-  user: User,
+  user: UserFromWire,
   organizationId: pipe(
     OrganizationId,
-    S.optional,
-    S.fromKey("organization_id")
+    S.optional
   ),
-  accessToken: pipe(
-    AccessToken,
-    S.propertySignature,
-    S.fromKey("access_token")
-  ),
-  refreshToken: pipe(
-    RefreshToken,
-    S.propertySignature,
-    S.fromKey("refresh_token")
-  )
+  accessToken: AccessToken,
+  refreshToken: RefreshToken
 } as const
 
-export class AuthenticateWithCodeParameters
-  extends S.Class<AuthenticateWithCodeParameters>("AuthenticateWithCodeParameters")({
+const AuthenticateResponseCommonKeys = {
+  organizationId: "organization_id",
+  accessToken: "access_token",
+  refreshToken: "refresh_token"
+} as const
+
+export const AuthenticateWithCodeParameters = pipe(
+  S.Struct({
     code: AuthenticationCode,
-    grantType: pipe(
-      S.requiredToOptional(
-        S.Literal("authorization_code"),
-        S.Literal("authorization_code"),
-        {
-          decode: () => Option.some("authorization_code" as const),
-          encode: () => "authorization_code" as const
-        }
-      ),
-      S.fromKey("grant_type")
-    ),
+    grantType: LiteralWithEncodingDefault("authorization_code"),
 
     ...AuthenticateRequestWithSecretCommonFields
+  }),
+  S.encodeKeys({
+    grantType: "grant_type",
+
+    ...AuthenticateRequestWithSecretCommonKeys
   })
-{}
+)
+export type AuthenticateWithCodeParameters = typeof AuthenticateWithCodeParameters.Type
 
 export class AuthenticateWithCodeResponse
   extends S.Class<AuthenticateWithCodeResponse>("AuthenticateWithCodeResponse")({
@@ -82,142 +77,148 @@ export class AuthenticateWithCodeResponse
     )
   })
 {}
+export const AuthenticateWithCodeResponseFromWire = pipe(
+  AuthenticateWithCodeResponse,
+  S.encodeKeys(AuthenticateResponseCommonKeys)
+)
+
 export const AuthenticateWithCodeError = {
   InvalidGrant: S.Struct({
     error: S.Literal("invalid_grant")
   })
 } as const
 
-export class AuthenticateWithPKCEParameters
-  extends S.Class<AuthenticateWithPKCEParameters>("AuthenticateWithPKCEParameters")({
+export const AuthenticateWithPKCEParameters = pipe(
+  S.Struct({
     code: AuthenticationCode,
-    codeVerifier: pipe(
-      S.NonEmptyTrimmedString,
-      S.propertySignature,
-      S.fromKey("code_verifier")
-    ),
-    grantType: pipe(
-      S.requiredToOptional(
-        S.Literal("authorization_code"),
-        S.Literal("authorization_code"),
-        {
-          decode: () => Option.some("authorization_code" as const),
-          encode: () => "authorization_code" as const
-        }
-      ),
-      S.fromKey("grant_type")
-    ),
+    codeVerifier: S.Trimmed.check(S.isNonEmpty()),
+    grantType: LiteralWithEncodingDefault("authorization_code"),
 
     ...AuthenticateRequestCommonFields
-  })
-{}
+  }),
+  S.encodeKeys({
+    codeVerifier: "code_verifier",
+    grantType: "grant_type",
 
-export class AuthenticateWithRefreshTokenParameters
-  extends S.Class<AuthenticateWithRefreshTokenParameters>("AuthenticateWithRefreshTokenParameters")({
-    refreshToken: pipe(
-      RefreshToken,
-      S.propertySignature,
-      S.fromKey("refresh_token")
-    ),
-    grantType: pipe(
-      S.requiredToOptional(
-        S.Literal("refresh_token"),
-        S.Literal("refresh_token"),
-        {
-          decode: () => Option.some("refresh_token" as const),
-          encode: () => "refresh_token" as const
-        }
-      ),
-      S.fromKey("grant_type")
-    ),
+    ...AuthenticateRequestCommonKeys
+  })
+)
+export type AuthenticateWithPKCEParameters = typeof AuthenticateWithPKCEParameters.Type
+
+export const AuthenticateWithRefreshTokenParameters = pipe(
+  S.Struct({
+    refreshToken: RefreshToken,
+    grantType: LiteralWithEncodingDefault("refresh_token"),
     organizationId: pipe(
       OrganizationId,
-      S.optional,
-      S.fromKey("organization_id")
+      S.optional
     ),
 
     ...AuthenticateRequestWithSecretCommonFields
+  }),
+  S.encodeKeys({
+    refreshToken: "refresh_token",
+    grantType: "grant_type",
+    organizationId: "organization_id",
+
+    ...AuthenticateRequestWithSecretCommonKeys
   })
-{}
+)
+export type AuthenticateWithRefreshTokenParameters = typeof AuthenticateWithRefreshTokenParameters.Type
+
 export class AuthenticateWithRefreshTokenResponse
   extends S.Class<AuthenticateWithRefreshTokenResponse>("AuthenticateWithRefreshTokenResponse")({
     ...AuthenticateResponseCommonFields
   })
 {}
+export const AuthenticateWithRefreshTokenResponseFromWire = pipe(
+  AuthenticateWithRefreshTokenResponse,
+  S.encodeKeys(AuthenticateResponseCommonKeys)
+)
 
-export class CreateUserParameters extends S.Class<CreateUserParameters>("CreateUserParameters")({
-  email: S.NonEmptyTrimmedString,
+export const CreateUserParameters = pipe(
+  S.Struct({
+    email: S.Trimmed.check(S.isNonEmpty()),
 
-  password: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional
-  ),
+    password: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
 
-  firstName: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("first_name")
-  ),
-  lastName: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("last_name")
-  ),
-  externalId: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("external_id")
-  ),
+    firstName: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    lastName: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    externalId: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
 
-  metadata: pipe(
-    S.Record({
-      key: S.String,
-      value: S.Unknown
-    }),
-    S.optional
-  )
-}) {}
+    metadata: pipe(
+      S.Record(
+        S.String,
+        S.Unknown
+      ),
+      S.optional
+    )
+  }),
+  S.encodeKeys({
+    firstName: "first_name",
+    lastName: "last_name",
+    externalId: "external_id"
+  })
+)
+export type CreateUserParameters = typeof CreateUserParameters.Type
 
-export class UpdateUserParameters extends S.Class<UpdateUserParameters>("UpdateUserParameters")({
-  firstName: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("first_name")
-  ),
-  lastName: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.optional,
-    S.fromKey("last_name")
-  ),
+export const UpdateUserParameters = pipe(
+  S.Struct({
+    firstName: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    lastName: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.NullOr,
+      S.optional
+    ),
 
-  email: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional
-  ),
-  emailVerified: pipe(
-    S.Boolean,
-    S.optional,
-    S.fromKey("email_verified")
-  ),
+    email: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    emailVerified: pipe(
+      S.Boolean,
+      S.optional
+    ),
 
-  externalId: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("external_id")
-  ),
-  locale: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional
-  ),
-  metadata: pipe(
-    S.Record({
-      key: S.String,
-      value: S.Unknown
-    }),
-    S.optional
-  )
-}) {}
+    externalId: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    locale: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    metadata: pipe(
+      S.Record(
+        S.String,
+        S.Unknown
+      ),
+      S.optional
+    )
+  }),
+  S.encodeKeys({
+    firstName: "first_name",
+    lastName: "last_name",
+    emailVerified: "email_verified",
+    externalId: "external_id"
+  })
+)
+export type UpdateUserParameters = typeof UpdateUserParameters.Type
 
 export type DeleteUserOutcome = Data.TaggedEnum<{
   Success: Record<never, never>
@@ -225,34 +226,32 @@ export type DeleteUserOutcome = Data.TaggedEnum<{
 }>
 export const DeleteUserOutcome = Data.taggedEnum<DeleteUserOutcome>()
 
-export class CreateOrganizationMembershipParameters
-  extends S.Class<CreateOrganizationMembershipParameters>("CreateOrganizationMembershipParameters")({
-    userId: pipe(
-      UserId,
-      S.propertySignature,
-      S.fromKey("user_id")
-    ),
-    organizationId: pipe(
-      OrganizationId,
-      S.propertySignature,
-      S.fromKey("organization_id")
-    ),
+export const CreateOrganizationMembershipParameters = pipe(
+  S.Struct({
+    userId: UserId,
+    organizationId: OrganizationId,
     roles: pipe(
-      S.NonEmptyArray(S.NonEmptyTrimmedString),
-      S.optional,
-      S.fromKey("role_slugs")
+      S.NonEmptyArray(S.Trimmed.check(S.isNonEmpty())),
+      S.optional
     )
+  }),
+  S.encodeKeys({
+    userId: "user_id",
+    organizationId: "organization_id",
+    roles: "role_slugs"
   })
-{}
-export class UpdateOrganizationMembershipParameters
-  extends S.Class<UpdateOrganizationMembershipParameters>("UpdateOrganizationMembershipParameters")({
-    roles: pipe(
-      S.Array(S.NonEmptyTrimmedString),
-      S.propertySignature,
-      S.fromKey("role_slugs")
-    )
+)
+export type CreateOrganizationMembershipParameters = typeof CreateOrganizationMembershipParameters.Type
+
+export const UpdateOrganizationMembershipParameters = pipe(
+  S.Struct({
+    roles: S.Array(S.Trimmed.check(S.isNonEmpty()))
+  }),
+  S.encodeKeys({
+    roles: "role_slugs"
   })
-{}
+)
+export type UpdateOrganizationMembershipParameters = typeof UpdateOrganizationMembershipParameters.Type
 
 export type DeleteOrganizationMembershipOutcome = Data.TaggedEnum<{
   Success: Record<never, never>

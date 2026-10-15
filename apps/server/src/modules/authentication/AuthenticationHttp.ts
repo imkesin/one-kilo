@@ -1,4 +1,3 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import { AuthenticationOrchestrator } from "@one-kilo/core/processes/authentication/AuthenticationOrchestrator"
 import { AuthenticationUseCases } from "@one-kilo/core/processes/authentication/AuthenticationUseCases"
 import {
@@ -8,6 +7,7 @@ import {
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
 import * as Layer from "effect/Layer"
 
 export const AuthenticationHttp = pipe(
@@ -52,7 +52,7 @@ export const AuthenticationHttp = pipe(
     })
   ),
   Layer.provide([
-    AuthenticationOrchestrator.Default,
-    AuthenticationUseCases.Default
+    AuthenticationOrchestrator.layer,
+    AuthenticationUseCases.layer
   ])
 )

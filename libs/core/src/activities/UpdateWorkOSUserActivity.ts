@@ -34,10 +34,10 @@ class UpdatedOutcome extends S.TaggedClass<UpdatedOutcome>(
   {}
 ) {}
 
-const UpdateWorkOSUserActivityOutcome = S.Union(
+const UpdateWorkOSUserActivityOutcome = S.Union([
   AlreadySyncedOutcome,
   UpdatedOutcome
-)
+])
 
 class TargetedPersonNotFoundError extends S.TaggedError<TargetedPersonNotFoundError>(
   `${ID_PREFIX}/TargetedPersonNotFoundError`
@@ -69,7 +69,7 @@ class WorkOSOperationError extends S.TaggedError<WorkOSOperationError>(
 )(
   "WorkOSOperationError",
   {
-    operation: S.Literal("RetrieveUser", "UpdateUser"),
+    operation: S.Literals(["RetrieveUser", "UpdateUser"]),
     cause: WorkOSError.WorkOSCommonError
   }
 ) {
@@ -83,7 +83,7 @@ class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundError>(
 )(
   "WorkOSUserNotFoundError",
   {
-    cause: S.Defect,
+    cause: S.Defect(),
     workosUserId: WorkOSIds.UserId
   }
 ) {
@@ -97,18 +97,18 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
   {
     actual: S.Struct({
       firstName: pipe(
-        S.NonEmptyTrimmedString,
+        S.Trimmed.check(S.isNonEmpty()),
         S.NullOr
       ),
       lastName: pipe(
-        S.NonEmptyTrimmedString,
+        S.Trimmed.check(S.isNonEmpty()),
         S.NullOr
       )
     }),
     expected: S.Struct({
-      firstName: S.NonEmptyTrimmedString,
+      firstName: S.Trimmed.check(S.isNonEmpty()),
       lastName: pipe(
-        S.NonEmptyTrimmedString,
+        S.Trimmed.check(S.isNonEmpty()),
         S.NullOr
       )
     })
@@ -117,13 +117,13 @@ class WorkOSUserStateDriftError extends S.TaggedError<WorkOSUserStateDriftError>
   readonly isRetryable = false
 }
 
-const UpdateWorkOSUserActivityError = S.Union(
+const UpdateWorkOSUserActivityError = S.Union([
   AccountNotLinkedError,
   TargetedPersonNotFoundError,
   WorkOSOperationError,
   WorkOSUserNotFoundError,
   WorkOSUserStateDriftError
-)
+])
 
 export const updateWorkOSUserActivity = (parameters: UpdateWorkOSUserActivityParameters) =>
   ActivityExtensions.makeWithDurableRetry({

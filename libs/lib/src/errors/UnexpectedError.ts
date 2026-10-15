@@ -6,17 +6,17 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@one-kilo/l
   "UnexpectedError",
   {
     cause: pipe(
-      S.Defect,
+      S.Defect(),
       S.optional
     ),
     context: pipe(
-      S.Record({
-        key: S.NonEmptyTrimmedString,
-        value: S.Unknown
-      }),
+      S.Record(
+        S.Trimmed.check(S.isNonEmpty()),
+        S.Unknown
+      ),
       S.optional
     ),
-    message: S.NonEmptyTrimmedString
+    message: S.Trimmed.check(S.isNonEmpty())
   },
   {
     description: "An unexpected error occurred."
@@ -58,19 +58,20 @@ export const orDieWithUnexpectedError =
   <A, E, R>(message: string, context?: UnexpectedErrorContext) => (self: Effect.Effect<A, E, R>) =>
     pipe(
       self,
-      Effect.tapErrorCause((cause) =>
+      Effect.tapCause((cause) =>
         pipe(
           Effect.logError(message, cause),
           annotateLogWith(context)
         )
       ),
-      Effect.orDieWith((error) => {
+      Effect.mapError((error) => {
         if (error instanceof UnexpectedError) {
           return error
         }
 
         return UnexpectedError.make({ message, cause: error, context })
-      })
+      }),
+      Effect.orDie
     )
 
 export const orFailWithUnexpectedError =
@@ -78,7 +79,7 @@ export const orFailWithUnexpectedError =
   (self: Effect.Effect<A, E, R>): Effect.Effect<A, UnexpectedError, R> =>
     pipe(
       self,
-      Effect.tapErrorCause((cause) =>
+      Effect.tapCause((cause) =>
         pipe(
           Effect.logError(message, cause),
           annotateLogWith(context)

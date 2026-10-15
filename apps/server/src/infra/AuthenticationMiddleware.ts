@@ -8,6 +8,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as Redacted from "effect/Redacted"
+import * as S from "effect/Schema"
 
 export const AuthenticationMiddlewareLayer = pipe(
   Layer.effect(
@@ -17,41 +18,45 @@ export const AuthenticationMiddlewareLayer = pipe(
 
       const actorQueryModule = yield* ActorQueryModule
 
-      return AuthenticationMiddleware.of({
-        jwt: Effect.fn("AuthenticationMiddleware.jwt")(function*(bearerToken) {
-          const decodedAccessToken = yield* pipe(
-            workosTokenClient.verifyAccessToken(WorkOSValues.AccessToken.make(Redacted.value(bearerToken))),
-            Effect.tapErrorCause(Effect.logError),
-            Effect.orElseFail(() => UnauthenticatedError.make())
+      const resolveActor = Effect.fn("AuthenticationMiddleware.jwt")(function*(bearerToken: Redacted.Redacted) {
+        const decodedAccessToken = yield* pipe(
+          Redacted.value(bearerToken),
+          S.decodeEffect(WorkOSValues.AccessToken),
+          Effect.flatMap(workosTokenClient.verifyAccessToken),
+          Effect.tapCause(Effect.logError),
+          Effect.mapError(() => UnauthenticatedError.make())
+        )
+
+        if (
+          decodedAccessToken._tag === "DecodedMachineAccessToken"
+          || Option.isNone(decodedAccessToken.orgId)
+        ) {
+          return yield* UnauthenticatedError.make()
+        }
+
+        const actorIdentity = yield* pipe(
+          actorQueryModule.retrieveActorIdentity({
+            workosUserId: decodedAccessToken.sub,
+            workosOrganizationId: decodedAccessToken.orgId.value
+          }),
+          Effect.flatMap(
+            Option.match({
+              onNone: () => Effect.fail(UnauthenticatedError.make()),
+              onSome: Effect.succeed
+            })
           )
+        )
 
-          if (
-            decodedAccessToken._tag === "DecodedMachineAccessToken"
-            || Option.isNone(decodedAccessToken.orgId)
-          ) {
-            return yield* UnauthenticatedError.make()
-          }
-
-          const actorIdentity = yield* pipe(
-            actorQueryModule.retrieveActorIdentity({
-              workosUserId: decodedAccessToken.sub,
-              workosOrganizationId: decodedAccessToken.orgId.value
-            }),
-            Effect.flatMap(
-              Option.match({
-                onNone: () => Effect.fail(UnauthenticatedError.make()),
-                onSome: Effect.succeed
-              })
-            )
-          )
-
-          return Actor.of({
-            ...actorIdentity,
-            permissions: new Set()
-          })
+        return Actor.of({
+          ...actorIdentity,
+          permissions: new Set()
         })
+      })
+
+      return AuthenticationMiddleware.of({
+        jwt: (httpEffect, { credential }) => Effect.provideServiceEffect(httpEffect, Actor, resolveActor(credential))
       })
     })
   ),
-  Layer.provide(ActorQueryModule.Default)
+  Layer.provide(ActorQueryModule.layer)
 )

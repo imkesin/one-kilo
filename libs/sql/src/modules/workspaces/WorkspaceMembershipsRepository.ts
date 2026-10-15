@@ -1,13 +1,16 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import type { WorkspaceMembershipRole } from "@one-kilo/domain/values/WorkspaceMembershipValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 
 type InsertWorkspaceMembershipParameters = {
@@ -20,15 +23,14 @@ type InsertWorkspaceMembershipParameters = {
   performedByAccountId?: AccountId
 }
 
-export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMembershipsRepository>()(
+export class WorkspaceMembershipsRepository extends Context.Service<WorkspaceMembershipsRepository>()(
   "@one-kilo/sql/WorkspaceMembershipsRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: WorkspaceMembershipsModel.insert,
         Result: WorkspaceMembershipsModel.select,
         execute: (request) => sql`INSERT INTO workspace_memberships ${sql.insert(request).returning("*")}`
@@ -69,4 +71,9 @@ export class WorkspaceMembershipsRepository extends Effect.Service<WorkspaceMemb
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

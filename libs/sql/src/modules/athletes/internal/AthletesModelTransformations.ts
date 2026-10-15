@@ -8,21 +8,17 @@ import { CoachingRelationshipsModel } from "../../coaching-relationships/Coachin
 import { PersonsModel } from "../../persons/PersonsModel.ts"
 import { AthletesModel } from "../AthletesModel.ts"
 
-const CoachOnAthleteRow = S.extend(
-  CoachesModel.select,
-  S.Struct({
-    person: PersonsModel.select,
-    relationship: CoachingRelationshipsModel.select
-  })
-)
+const CoachOnAthleteRow = S.Struct({
+  ...CoachesModel.select.fields,
+  person: PersonsModel.select,
+  relationship: CoachingRelationshipsModel.select
+})
 
-export const AthleteRow = S.extend(
-  AthletesModel.select,
-  S.Struct({
-    person: PersonsModel.select,
-    coaches: S.Array(CoachOnAthleteRow)
-  })
-)
+export const AthleteRow = S.Struct({
+  ...AthletesModel.select.fields,
+  person: PersonsModel.select,
+  coaches: S.Array(CoachOnAthleteRow)
+})
 
 export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
   Athlete.make({

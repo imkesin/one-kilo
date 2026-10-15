@@ -1,6 +1,6 @@
 # SQL
 
-Database layer on `@effect/sql` + `@effect/sql-pg` (PostgreSQL).
+Database layer on `effect/sql` + `@effect/sql-pg` (PostgreSQL).
 
 ## Structure (`/src`)
 

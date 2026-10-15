@@ -11,9 +11,11 @@ import { PersonFallbackNameGenerator } from "@one-kilo/domain/values/PersonFallb
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { AccountsCreationModule } from "../../modules/accounts/AccountsCreationModule.ts"
@@ -41,16 +43,10 @@ type RegisterAccountForPersonParameters = {
   readonly workosUser: WorkOSEntities.User
 }
 
-export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()(
+export class RegistrationUseCases extends Context.Service<RegistrationUseCases>()(
   "@one-kilo/core/RegistrationUseCases",
   {
-    dependencies: [
-      DomainIdGenerator.Default,
-      PersonFallbackNameGenerator.Default,
-      AccountsCreationModule.Default,
-      WorkspacesCreationModule.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const pg = yield* PgClient.PgClient
       const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
 
@@ -99,10 +95,10 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
           if (firstName !== null && lastName !== null) {
             const decoded = yield* pipe(
               Effect.all({
-                preferredName: S.decode(PreferredName)(firstName),
-                fullName: S.decode(FullName)(`${firstName} ${lastName}`)
+                preferredName: S.decodeEffect(PreferredName)(firstName),
+                fullName: S.decodeEffect(FullName)(`${firstName} ${lastName}`)
               }),
-              Effect.tapErrorCause((cause) =>
+              Effect.tapCause((cause) =>
                 pipe(
                   Effect.logWarning("Failed to decode person names from a WorkOS user", cause),
                   Effect.annotateLogs({
@@ -155,7 +151,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
 
           const emailAddress = yield* pipe(
             workosUser.email,
-            S.decode(EmailAddress),
+            S.decodeEffect(EmailAddress),
             orDieWithUnexpectedError(
               "The `email` on the WorkOS user does not conform to our email address standards"
             )
@@ -192,7 +188,7 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
             if (Exit.isFailure(exit)) {
               return pipe(
                 workosGatewayClient.organizations.deleteOrganization(workosOrganization.id),
-                Effect.tapErrorCause((cause) => Effect.logWarning("Failed to clean up a WorkOS organization", cause)),
+                Effect.tapCause((cause) => Effect.logWarning("Failed to clean up a WorkOS organization", cause)),
                 Effect.ignore
               )
             }
@@ -238,4 +234,14 @@ export class RegistrationUseCases extends Effect.Service<RegistrationUseCases>()
       return { registerAccountForPerson }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      DomainIdGenerator.layer,
+      PersonFallbackNameGenerator.layer,
+      AccountsCreationModule.layer,
+      WorkspacesCreationModule.layer
+    ])
+  )
+}

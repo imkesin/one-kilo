@@ -1,5 +1,6 @@
-import { Result, useAtomValue } from "@effect-atom/atom-react"
+import { useAtomValue } from "@effect/atom-react"
 import { createFileRoute } from "@tanstack/react-router"
+import * as AsyncResult from "effect/reactivity/AsyncResult"
 import { whoamiAtom } from "~/modules/whoami/whoamiAtoms"
 
 function AccountPage() {
@@ -8,7 +9,7 @@ function AccountPage() {
   return (
     <div>
       <h1>Account Page</h1>
-      {Result.builder(whoami)
+      {AsyncResult.builder(whoami)
         .onWaiting(() => <p>Loading…</p>)
         .onFailure(() => <p>Couldn’t load your profile.</p>)
         .onSuccess(({ account }) => {

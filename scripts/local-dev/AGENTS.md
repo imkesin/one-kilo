@@ -1,6 +1,6 @@
 # Local Dev
 
-Local development environment scripts. Uses Effect + `@effect/platform` for shell commands.
+Local development environment scripts. Uses Effect + `effect/process` for shell commands.
 
 ## Commands
 

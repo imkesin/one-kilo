@@ -1,5 +1,5 @@
-import * as Model from "@effect/sql/Model"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
+import * as Model from "effect/schema/Model"
 import * as ModelExtensions from "./ModelExtensions.ts"
 
 export const ModelAuditFields = {

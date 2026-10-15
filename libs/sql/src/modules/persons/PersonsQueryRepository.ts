@@ -1,13 +1,15 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 import { AccountsModel } from "../accounts/AccountsModel.ts"
 import { toPersonAccountEntity } from "../accounts/internal/AccountsModelTransformations.ts"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
@@ -27,14 +29,13 @@ type PersonWithAccount = {
   readonly maybeAccount: Option.Option<PersonAccountEntity>
 }
 
-export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepository>()(
+export class PersonsQueryRepository extends Context.Service<PersonsQueryRepository>()(
   "@one-kilo/sql/PersonsQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findPersonByIdSchema = SqlSchema.findOne({
+      const findPersonByIdSchema = SqlSchema.findOneOption({
         Request: PersonId,
         Result: PersonRow,
         execute: (personId) =>
@@ -59,7 +60,7 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         orDieWithUnexpectedError("An unexpected error occurred while finding a person")
       )
 
-      const findPersonEntitySchema = SqlSchema.findOne({
+      const findPersonEntitySchema = SqlSchema.findOneOption({
         Request: PersonId,
         Result: PersonsModel.select,
         execute: (personId) =>
@@ -82,7 +83,7 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
         orDieWithUnexpectedError("An unexpected error occurred while finding a person")
       )
 
-      const findPersonEntityWithAccountSchema = SqlSchema.findOne({
+      const findPersonEntityWithAccountSchema = SqlSchema.findOneOption({
         Request: PersonId,
         Result: S.Struct({
           person: PersonsModel.select,
@@ -119,7 +120,7 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
 
           const person = toPersonEntity(row.person)
           const account = yield* pipe(
-            Option.fromNullable(row.account),
+            Option.fromNullishOr(row.account),
             Option.match({
               onNone: () => Effect.succeed(Option.none<PersonAccountEntity>()),
               onSome: (_) =>
@@ -142,4 +143,6 @@ export class PersonsQueryRepository extends Effect.Service<PersonsQueryRepositor
       }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

@@ -1,19 +1,20 @@
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { AccountsQueryRepository } from "@one-kilo/sql/modules/accounts/AccountsQueryRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 
 type RetrieveAccountParameters = {
   readonly accountId: AccountId
 }
 
-export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
+export class AccountsQueryModule extends Context.Service<AccountsQueryModule>()(
   "@one-kilo/core/AccountsQueryModule",
   {
-    dependencies: [AccountsQueryRepository.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const accountsQueryRepository = yield* AccountsQueryRepository
 
       const retrieveAccount = accountsQueryRepository.findAccountByAccountId
@@ -38,4 +39,9 @@ export class AccountsQueryModule extends Effect.Service<AccountsQueryModule>()(
       }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(AccountsQueryRepository.layer)
+  )
+}

@@ -1,12 +1,13 @@
-import { Atom, Result } from "@effect-atom/atom-react"
 import { orFailWithUnexpectedError, UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { WhoAmIApiSchemas } from "@one-kilo/server-api/modules/whoami/WhoAmIApiSchemas"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as AsyncResult from "effect/reactivity/AsyncResult"
+import * as Atom from "effect/reactivity/Atom"
 import { WebApiClient } from "~/infra/api/WebApiClient"
 import { makeAtomRuntime } from "~/infra/runtime/client/atomRuntime"
 
-const runtime = makeAtomRuntime(WebApiClient.Default)
+const runtime = makeAtomRuntime(WebApiClient.layer)
 
 const whoamiAtomSource = pipe(
   runtime.atom(
@@ -21,7 +22,7 @@ const whoamiAtomSource = pipe(
   ),
   Atom.serializable({
     key: "/whoami",
-    schema: Result.Schema({
+    schema: AsyncResult.Schema({
       success: WhoAmIApiSchemas.Success,
       error: UnexpectedError
     })
@@ -31,7 +32,7 @@ const whoamiAtomSource = pipe(
 export const whoamiAtomInitialValue = (success: typeof WhoAmIApiSchemas.Success.Type) =>
   Atom.initialValue(
     whoamiAtomSource,
-    Result.success(success)
+    AsyncResult.success(success)
   )
 
 /*

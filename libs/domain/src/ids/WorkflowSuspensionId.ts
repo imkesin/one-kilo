@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const WorkflowSuspensionId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/WorkflowSuspensionId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a workflow suspension record.",
     identifier: "WorkflowSuspensionId",
     title: "Workflow Suspension ID"
@@ -17,10 +17,10 @@ export type WorkflowSuspensionId = typeof WorkflowSuspensionId.Type
 const WORKFLOW_SUSPENSION_PREFIX = "workflow_suspension_"
 
 export const PrefixedWorkflowSuspensionId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(WORKFLOW_SUSPENSION_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(WORKFLOW_SUSPENSION_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedWorkflowSuspensionId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a workflow suspension record.",
     identifier: "PrefixedWorkflowSuspensionId",
     title: "Workflow Suspension ID (Prefixed)"

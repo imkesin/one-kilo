@@ -1,8 +1,11 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
-import * as HttpMiddleware from "@effect/platform/HttpMiddleware"
-import * as HttpServer from "@effect/platform/HttpServer"
 import { createFileRoute } from "@tanstack/react-router"
+import type * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
+import * as HttpMiddleware from "effect/http/HttpMiddleware"
+import * as HttpRouter from "effect/http/HttpRouter"
+import * as HttpServer from "effect/http/HttpServer"
+import type * as HttpServerResponse from "effect/http/HttpServerResponse"
 import * as Layer from "effect/Layer"
 import { WebApi } from "~/infra/api/WebApi"
 import { getManagedWebServerRuntime } from "~/infra/runtime/server/getManagedServerRuntime"
@@ -10,27 +13,28 @@ import { WebAuthenticationMiddlewareLayer } from "~/modules/authentication/serve
 import { WhoAmIWebHttp } from "~/modules/whoami/api/WhoAmIWebHttp"
 
 const WebApiLayer = pipe(
-  HttpApiBuilder.api(WebApi),
+  HttpApiBuilder.layer(WebApi),
   Layer.provide([WhoAmIWebHttp]),
-  Layer.provide(WebAuthenticationMiddlewareLayer)
+  Layer.provide(WebAuthenticationMiddlewareLayer),
+  Layer.provide(HttpServer.layerServices)
 )
 
-const middleware = HttpApiBuilder.middleware((httpApp) =>
+/*
+ * The logger is applied manually so that it runs inside `xForwardedHeaders` and records the forwarded address.
+ */
+const middleware = <E, R>(httpApp: Effect.Effect<HttpServerResponse.HttpServerResponse, E, R>) =>
   pipe(
     httpApp,
     HttpMiddleware.cors(),
     HttpMiddleware.logger,
     HttpMiddleware.xForwardedHeaders
   )
-)
 
-const { handler } = pipe(
-  Layer.empty,
-  Layer.merge(middleware),
-  Layer.provideMerge(WebApiLayer),
-  Layer.merge(HttpServer.layerContext),
-  (_) => HttpApiBuilder.toWebHandler(_, { memoMap: getManagedWebServerRuntime().memoMap })
-)
+const { handler } = HttpRouter.toWebHandler(WebApiLayer, {
+  memoMap: getManagedWebServerRuntime().memoMap,
+  middleware,
+  disableLogger: true
+})
 
 export const Route = createFileRoute("/api/$")({
   server: {

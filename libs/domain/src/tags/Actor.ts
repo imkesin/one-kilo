@@ -7,7 +7,7 @@ import type { ActorIdentity } from "../values/ActorValues.ts"
  *
  * @category Context
  */
-export class Actor extends Context.Tag("@one-kilo/domain/Actor")<
+export class Actor extends Context.Service<
   Actor,
   ActorIdentity & { readonly permissions: ReadonlySet<Permission> }
->() {}
+>()("@one-kilo/domain/Actor") {}

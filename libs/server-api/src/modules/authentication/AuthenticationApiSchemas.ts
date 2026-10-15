@@ -1,5 +1,4 @@
 import { AuthenticationCode, RefreshToken } from "@effect/auth-workos/domain/Values"
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import { AuthenticationContext } from "@one-kilo/domain/values/AuthenticationContext"
 import * as S from "effect/Schema"
 import {
@@ -16,7 +15,7 @@ class AuthenticationApi_ExchangeCode_Success extends S.TaggedClass<Authenticatio
   {
     authenticationContext: AuthenticationContext
   },
-  HttpApiSchema.annotations({ status: 200 })
+  { httpApiStatus: 200 }
 ) {}
 
 export const AuthenticationApi_ExchangeCodeSchemas = {
@@ -36,7 +35,7 @@ class AuthenticationApi_RefreshContext_Success extends S.TaggedClass<Authenticat
   {
     authenticationContext: AuthenticationContext
   },
-  HttpApiSchema.annotations({ status: 200 })
+  { httpApiStatus: 200 }
 ) {}
 
 export const AuthenticationApi_RefreshContextSchemas = {

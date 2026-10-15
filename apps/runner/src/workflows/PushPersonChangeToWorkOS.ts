@@ -67,7 +67,7 @@ const WorkflowLayerWithoutDependencies = PushPersonChangeToWorkOSDefinition.Work
 export const WorkflowLayer = pipe(
   WorkflowLayerWithoutDependencies,
   Layer.provide([
-    PersonsQueryModule.Default,
-    WorkflowSuspensionsCreationModule.Default
+    PersonsQueryModule.layer,
+    WorkflowSuspensionsCreationModule.layer
   ])
 )

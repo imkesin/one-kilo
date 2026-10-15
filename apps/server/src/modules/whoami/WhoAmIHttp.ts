@@ -1,4 +1,3 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import { AccountsQueryModule } from "@one-kilo/core/modules/accounts/AccountsQueryModule"
 import { WorkspacesQueryModule } from "@one-kilo/core/modules/workspaces/WorkspacesQueryModule"
 import { Actor } from "@one-kilo/domain/tags/Actor"
@@ -6,6 +5,7 @@ import { WhoAmIApiSchemas } from "@one-kilo/server-api/modules/whoami/WhoAmIApiS
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
 import * as Layer from "effect/Layer"
 
 export const WhoAmIHttp = pipe(
@@ -36,7 +36,7 @@ export const WhoAmIHttp = pipe(
     })
   ),
   Layer.provide([
-    AccountsQueryModule.Default,
-    WorkspacesQueryModule.Default
+    AccountsQueryModule.layer,
+    WorkspacesQueryModule.layer
   ])
 )

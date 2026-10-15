@@ -1,11 +1,13 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { AthleteEntity } from "@one-kilo/domain/entities/Athlete"
 import { AthleteId } from "@one-kilo/domain/ids/AthleteId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 import { CoachesModel } from "../coaches/CoachesModel.ts"
 import { CoachingRelationshipsModel } from "../coaching-relationships/CoachingRelationshipsModel.ts"
 import { PersonsModel } from "../persons/PersonsModel.ts"
@@ -22,14 +24,13 @@ type FindAthleteByIdParameters = {
   athleteId: AthleteId
 }
 
-export class AthletesQueryRepository extends Effect.Service<AthletesQueryRepository>()(
+export class AthletesQueryRepository extends Context.Service<AthletesQueryRepository>()(
   "@one-kilo/sql/AthletesQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findAthleteByIdSchema = SqlSchema.findOne({
+      const findAthleteByIdSchema = SqlSchema.findOneOption({
         Request: AthleteId,
         Result: AthleteRow,
         execute: (athleteId) =>
@@ -74,7 +75,7 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
         orDieWithUnexpectedError("An unexpected error occurred while finding an athlete")
       )
 
-      const findAthleteEntityByIdSchema = SqlSchema.findOne({
+      const findAthleteEntityByIdSchema = SqlSchema.findOneOption({
         Request: AthleteId,
         Result: AthletesModel.select,
         execute: (athleteId) =>
@@ -97,7 +98,7 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
         orDieWithUnexpectedError("An unexpected error occurred while finding an athlete")
       )
 
-      const findAthleteEntityByPersonIdSchema = SqlSchema.findOne({
+      const findAthleteEntityByPersonIdSchema = SqlSchema.findOneOption({
         Request: PersonId,
         Result: AthletesModel.select,
         execute: (personId) =>
@@ -127,4 +128,6 @@ export class AthletesQueryRepository extends Effect.Service<AthletesQueryReposit
       }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

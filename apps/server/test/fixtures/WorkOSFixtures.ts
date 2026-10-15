@@ -3,10 +3,11 @@ import * as WorkOSApiGateway from "@effect/auth-workos/ApiGateway"
 import * as WorkOSStore from "@effect/auth-workos/Store"
 import * as WorkOSTokenClient from "@effect/auth-workos/TokenClient"
 import * as WorkOSTokenGenerator from "@effect/auth-workos/TokenGenerator"
-import * as NodeKeyValueStore from "@effect/platform-node/NodeKeyValueStore"
-import * as Encoding from "effect/Encoding"
+import * as NodeServices from "@effect/platform-node/NodeServices"
+import * as Hex from "effect/encoding/Hex"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
+import * as KeyValueStore from "effect/persistence/KeyValueStore"
 import * as Str from "effect/String"
 import { randomBytes } from "node:crypto"
 import * as Path from "node:path"
@@ -23,7 +24,7 @@ function buildDataDirectoryPath(suiteName: string) {
     Str.snakeToKebab
   )
 
-  const randomHex = Encoding.encodeHex(randomBytes(2))
+  const randomHex = Hex.encode(randomBytes(2))
 
   return Path.join(
     STORE_DATA_BASE_PATH,
@@ -42,7 +43,10 @@ export const layerTest = (options: {
 
   const StoreLayer = pipe(
     WorkOSStore.layerTest(),
-    Layer.provide(NodeKeyValueStore.layerFileSystem(dataDirectoryPath)),
+    Layer.provide(pipe(
+      KeyValueStore.layerFileSystem(dataDirectoryPath),
+      Layer.provide(NodeServices.layer)
+    )),
     Layer.provideMerge(WorkOSTokenGenerator.layerKeyPairTest({ authKitDomain: "test.authkit.app" }))
   )
 

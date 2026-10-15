@@ -1,11 +1,12 @@
-import * as HttpApiMiddleware from "@effect/platform/HttpApiMiddleware"
-import { WebActor } from "./WebActor.ts"
+import * as HttpApiMiddleware from "effect/http-api/HttpApiMiddleware"
+import type { WebActor } from "./WebActor.ts"
 import { WebUnauthenticatedError } from "./WebApiErrors.ts"
 
-export class WebAuthenticationMiddleware extends HttpApiMiddleware.Tag<WebAuthenticationMiddleware>()(
+export class WebAuthenticationMiddleware extends HttpApiMiddleware.Service<WebAuthenticationMiddleware, {
+  provides: WebActor
+}>()(
   "@one-kilo/web/WebAuthenticationMiddleware",
   {
-    provides: WebActor,
-    failure: WebUnauthenticatedError
+    error: WebUnauthenticatedError
   }
 ) {}

@@ -1,10 +1,10 @@
-import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as Config from "effect/Config"
-import type { ConfigError } from "effect/ConfigError"
+import type { ConfigError } from "effect/Config"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
 import * as Layer from "effect/Layer"
 import type * as Redacted from "effect/Redacted"
 import { UnexpectedError, WorkOSCommonError } from "./domain/Errors.ts"
@@ -19,9 +19,9 @@ export interface Service {
   readonly userManagement: UserManagementClientDefinitions.Client
 }
 
-export class ApiClient extends Context.Tag(
+export class ApiClient extends Context.Service<ApiClient, Service>()(
   "@effect/auth-workos/ApiClient"
-)<ApiClient, Service>() {}
+) {}
 
 export const makeNotImplemented = (): Service => {
   const failWithNotImplementedError = (methodName: string) => () =>

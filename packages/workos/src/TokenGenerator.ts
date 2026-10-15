@@ -9,9 +9,9 @@ import * as TokenGeneratorDefinitions from "./internal/TokenGeneratorDefinitions
 
 export type Service = TokenGeneratorDefinitions.Generator
 
-export class TokenGenerator extends Context.Tag(
+export class TokenGenerator extends Context.Service<TokenGenerator, Service>()(
   "@effect/auth-workos/TokenGenerator"
-)<TokenGenerator, Service>() {}
+) {}
 
 export const makeTest = (
   options: {
@@ -34,7 +34,7 @@ export const layerKeyPairTest = (options: { readonly authKitDomain: string }) =>
       ({ privateKey }) => makeTest({ authKitDomain: options.authKitDomain, privateKey })
     ),
     Layer.effect(TokenGenerator),
-    Layer.provide(KeyPairTest.Default)
+    Layer.provide(KeyPairTest.layer)
   )
 
 export const layerKeyPairTestConfig = (options: { readonly authKitDomain: Config.Config<string> }) =>
@@ -42,5 +42,5 @@ export const layerKeyPairTestConfig = (options: { readonly authKitDomain: Config
     Effect.all([Config.all(options), KeyPairTest]),
     Effect.flatMap(([{ authKitDomain }, { privateKey }]) => makeTest({ authKitDomain, privateKey })),
     Layer.effect(TokenGenerator),
-    Layer.provide(KeyPairTest.Default)
+    Layer.provide(KeyPairTest.layer)
   )

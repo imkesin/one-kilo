@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const EmailAddressId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/EmailAddressId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an email address.",
     identifier: "EmailAddressId",
     title: "Email Address ID"
@@ -17,10 +17,10 @@ export type EmailAddressId = typeof EmailAddressId.Type
 const EMAIL_ADDRESS_PREFIX = "email_address_"
 
 export const PrefixedEmailAddressId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(EMAIL_ADDRESS_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(EMAIL_ADDRESS_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedEmailAddressId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for an email address.",
     identifier: "PrefixedEmailAddressId",
     title: "Email Address ID (Prefixed)"

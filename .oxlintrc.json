@@ -27,13 +27,68 @@
             "allowTypeImports": true
           },
           {
-            "name": "@effect/experimental",
-            "message": "Import from a specific submodule instead: import * as X from \"@effect/experimental/X\"",
+            "name": "effect/cluster",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/cluster/X\"",
             "allowTypeImports": true
           },
           {
-            "name": "@effect/platform",
-            "message": "Import from a specific submodule instead: import * as X from \"@effect/platform/X\"",
+            "name": "effect/devtools",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/devtools/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/encoding",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/encoding/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/http",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/http/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/http-api",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/http-api/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/observability",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/observability/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/persistence",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/persistence/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/process",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/process/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/reactivity",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/reactivity/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/schema",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/schema/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/sql",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/sql/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/testing",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/testing/X\"",
+            "allowTypeImports": true
+          },
+          {
+            "name": "effect/workflow",
+            "message": "Import from a specific submodule instead: import * as X from \"effect/workflow/X\"",
             "allowTypeImports": true
           },
           {
@@ -42,8 +97,8 @@
             "allowTypeImports": true
           },
           {
-            "name": "@effect/sql",
-            "message": "Import from a specific submodule instead: import * as X from \"@effect/sql/X\"",
+            "name": "@effect/sql-pg",
+            "message": "Import from a specific submodule instead: import * as X from \"@effect/sql-pg/X\"",
             "allowTypeImports": true
           }
         ]
@@ -92,7 +147,8 @@
     "eslint/no-fallthrough": "off",
     "eslint/no-await-in-loop": "off",
     "unicorn/no-new-array": "off",
-    "unicorn/consistent-function-scoping": "off"
+    "unicorn/consistent-function-scoping": "off",
+    "effecttsgo/unstable-api-usage": "off"
   },
   "ignorePatterns": [
     "**/dist",

@@ -1,6 +1,4 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
@@ -8,9 +6,13 @@ import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { AccountType } from "@one-kilo/domain/values/AccountValues"
 import type { ActorIdentity } from "@one-kilo/domain/values/ActorValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 
 type FindActorIdentityParameters = {
   readonly workosUserId: WorkOSIds.UserId
@@ -54,14 +56,13 @@ const toActorIdentity = (row: typeof ActorIdentityRow.Type): Effect.Effect<Actor
   )
 }
 
-export class ActorQueryRepository extends Effect.Service<ActorQueryRepository>()(
+export class ActorQueryRepository extends Context.Service<ActorQueryRepository>()(
   "@one-kilo/sql/ActorQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findActorIdentitySchema = SqlSchema.findOne({
+      const findActorIdentitySchema = SqlSchema.findOneOption({
         Request: S.Struct({
           workosUserId: WorkOSIds.UserId,
           workosOrganizationId: WorkOSIds.OrganizationId
@@ -107,4 +108,6 @@ export class ActorQueryRepository extends Effect.Service<ActorQueryRepository>()
       return { findActorIdentity }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

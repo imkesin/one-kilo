@@ -1,6 +1,6 @@
-import * as Model from "@effect/sql/Model"
 import { CoachId } from "@one-kilo/domain/ids/CoachId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
+import * as Model from "effect/schema/Model"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class CoachesModel extends Model.Class<CoachesModel>("CoachesModel")({

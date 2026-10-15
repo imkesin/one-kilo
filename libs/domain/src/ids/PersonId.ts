@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const PersonId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/PersonId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a person.",
     identifier: "PersonId",
     title: "Person ID"
@@ -17,10 +17,10 @@ export type PersonId = typeof PersonId.Type
 const PERSON_PREFIX = "person_"
 
 export const PrefixedPersonId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(PERSON_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(PERSON_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedPersonId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a person.",
     identifier: "PrefixedPersonId",
     title: "Person ID (Prefixed)"

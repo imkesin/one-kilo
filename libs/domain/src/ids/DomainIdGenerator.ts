@@ -1,5 +1,8 @@
 import * as UUIDGenerator from "@one-kilo/lib/uuid/UUIDGenerator"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import { AccountId } from "./AccountId.js"
 import { AthleteId } from "./AthleteId.js"
 import { AuditLogId } from "./AuditLogId.js"
@@ -12,11 +15,10 @@ import { WorkflowSuspensionId } from "./WorkflowSuspensionId.js"
 import { WorkspaceId } from "./WorkspaceId.js"
 import { WorkspaceMembershipId } from "./WorkspaceMembershipId.js"
 
-export class DomainIdGenerator extends Effect.Service<DomainIdGenerator>()(
+export class DomainIdGenerator extends Context.Service<DomainIdGenerator>()(
   "@one-kilo/domain/DomainIdGenerator",
   {
-    dependencies: [UUIDGenerator.UUIDGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const uuidGenerator = yield* UUIDGenerator.UUIDGenerator
       return {
         athleteId: Effect.map(uuidGenerator.v7, AthleteId.make),
@@ -33,4 +35,9 @@ export class DomainIdGenerator extends Effect.Service<DomainIdGenerator>()(
       }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(UUIDGenerator.UUIDGenerator.layer)
+  )
+}

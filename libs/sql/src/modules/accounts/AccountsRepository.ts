@@ -1,13 +1,15 @@
 import type * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { AccountsModel } from "./AccountsModel.ts"
 import { toAccountEntity } from "./internal/AccountsModelTransformations.ts"
 
@@ -31,15 +33,14 @@ type InsertAccountParameters =
     workosUserId?: never
   })
 
-export class AccountsRepository extends Effect.Service<AccountsRepository>()(
+export class AccountsRepository extends Context.Service<AccountsRepository>()(
   "@one-kilo/sql/AccountsRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: AccountsModel.insert,
         Result: AccountsModel.select,
         execute: (request) => sql`INSERT INTO accounts ${sql.insert(request).returning("*")}`
@@ -84,4 +85,9 @@ export class AccountsRepository extends Effect.Service<AccountsRepository>()(
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

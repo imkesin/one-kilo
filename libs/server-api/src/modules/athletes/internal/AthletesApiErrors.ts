@@ -1,4 +1,4 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
@@ -10,13 +10,10 @@ export class AthletesApi_Register_PersonNotFoundError extends S.TaggedError<Athl
   "Register:PersonNotFoundError",
   {
     message: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.withDefaults({
-        constructor: () => PERSON_NOT_FOUND_ERROR_MESSAGE,
-        decoding: () => PERSON_NOT_FOUND_ERROR_MESSAGE
-      })
+      S.Trimmed.check(S.isNonEmpty()),
+      S.withDecodingDefault(Effect.succeed(PERSON_NOT_FOUND_ERROR_MESSAGE)),
+      S.withConstructorDefault(Effect.succeed(PERSON_NOT_FOUND_ERROR_MESSAGE))
     )
   },
-  HttpApiSchema.annotations({ status: 404 })
+  { httpApiStatus: 404 }
 ) {}

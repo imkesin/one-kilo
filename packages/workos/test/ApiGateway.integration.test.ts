@@ -11,19 +11,16 @@ import * as UserManagementSuite from "./UserManagement.suite.ts"
 
 const apiClient = ApiClient.layerConfig({
   clientId: pipe(
-    Config.string("WORKOS_CLIENT_ID"),
+    Config.String("WORKOS_CLIENT_ID"),
     Config.map(EnvironmentClientId.make)
   ),
-  clientSecret: pipe(
-    Config.string("WORKOS_API_KEY"),
-    (_) => Config.redacted(_)
-  )
+  clientSecret: Config.Redacted("WORKOS_API_KEY")
 })
 
 const integrationTestLayer = pipe(
   ApiGateway.layer(),
   Layer.provide(apiClient),
-  Layer.provide(NodeHttpClient.layer)
+  Layer.provide(NodeHttpClient.layerNodeHttp)
 )
 
 describe("ApiGateway - Integration", () => {

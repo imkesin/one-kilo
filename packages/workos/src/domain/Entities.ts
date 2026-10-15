@@ -1,3 +1,4 @@
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { EventId, OrganizationDomainId, OrganizationId, OrganizationMembershipId, UserId } from "./Ids.ts"
@@ -12,114 +13,81 @@ import {
 
 export class OrganizationDomain extends S.Class<OrganizationDomain>("@effect/auth-workos/OrganizationDomain")({
   _tag: pipe(
-    S.Literal("OrganizationDomain"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "OrganizationDomain" as const,
-      decoding: () => "OrganizationDomain" as const
-    })
+    S.tag("OrganizationDomain"),
+    S.withDecodingDefaultKey(Effect.succeed("OrganizationDomain" as const))
   ),
 
   id: OrganizationDomainId,
-  organizationId: pipe(
-    OrganizationId,
-    S.propertySignature,
-    S.fromKey("organization_id")
-  ),
-  domain: S.NonEmptyTrimmedString,
+  organizationId: OrganizationId,
+  domain: S.Trimmed.check(S.isNonEmpty()),
   state: OrganizationDomainState,
-  verificationStrategy: pipe(
-    OrganizationDomainVerificationStrategy,
-    S.propertySignature,
-    S.fromKey("verification_strategy")
-  ),
-  verificationToken: pipe(
-    S.NonEmptyTrimmedString,
-    S.propertySignature,
-    S.fromKey("verification_token")
-  )
+  verificationStrategy: OrganizationDomainVerificationStrategy,
+  verificationToken: S.Trimmed.check(S.isNonEmpty())
 }) {}
+
+export const OrganizationDomainFromWire = pipe(
+  OrganizationDomain,
+  S.encodeKeys({
+    organizationId: "organization_id",
+    verificationStrategy: "verification_strategy",
+    verificationToken: "verification_token"
+  })
+)
 
 export class Organization extends S.Class<Organization>("@effect/auth-workos/Organization")({
   _tag: pipe(
-    S.Literal("Organization"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "Organization" as const,
-      decoding: () => "Organization" as const
-    })
+    S.tag("Organization"),
+    S.withDecodingDefaultKey(Effect.succeed("Organization" as const))
   ),
 
   id: OrganizationId,
-  name: S.NonEmptyTrimmedString,
+  name: S.Trimmed.check(S.isNonEmpty()),
 
-  domains: S.Array(OrganizationDomain),
+  domains: S.Array(OrganizationDomainFromWire),
 
   stripeCustomerId: pipe(
-    S.NonEmptyTrimmedString,
+    S.Trimmed.check(S.isNonEmpty()),
     S.NullOr,
-    S.optional,
-    S.withDecodingDefault(() => null),
-    S.fromKey("stripe_customer_id")
+    S.withDecodingDefault(Effect.succeed(null))
   ),
   externalId: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("external_id")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.NullOr
   ),
 
-  metadata: S.Record({
-    key: S.String,
-    value: S.Unknown
-  }),
-
-  createdAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("created_at")
+  metadata: S.Record(
+    S.String,
+    S.Unknown
   ),
-  updatedAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("updated_at")
-  )
+
+  createdAt: S.DateFromString,
+  updatedAt: S.DateFromString
 }) {}
+
+export const OrganizationFromWire = pipe(
+  Organization,
+  S.encodeKeys({
+    stripeCustomerId: "stripe_customer_id",
+    externalId: "external_id",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
+  })
+)
 
 const OrganizationMembershipBaseFields = {
   _tag: pipe(
-    S.Literal("OrganizationMembership"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "OrganizationMembership" as const,
-      decoding: () => "OrganizationMembership" as const
-    })
+    S.tag("OrganizationMembership"),
+    S.withDecodingDefaultKey(Effect.succeed("OrganizationMembership" as const))
   ),
 
   id: OrganizationMembershipId,
-  userId: pipe(
-    UserId,
-    S.propertySignature,
-    S.fromKey("user_id")
-  ),
-  organizationId: pipe(
-    OrganizationId,
-    S.propertySignature,
-    S.fromKey("organization_id")
-  ),
+  userId: UserId,
+  organizationId: OrganizationId,
   roles: S.Array(Role),
   status: OrganizationMembershipStatus,
 
-  createdAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("created_at")
-  ),
-  updatedAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("updated_at")
-  )
+  createdAt: S.DateFromString,
+  updatedAt: S.DateFromString
 } as const
 
 export class OrganizationMembership extends S.Class<OrganizationMembership>(
@@ -127,111 +95,104 @@ export class OrganizationMembership extends S.Class<OrganizationMembership>(
 )({
   ...OrganizationMembershipBaseFields,
 
-  organizationName: pipe(
-    S.NonEmptyTrimmedString,
-    S.propertySignature,
-    S.fromKey("organization_name")
-  )
+  organizationName: S.Trimmed.check(S.isNonEmpty())
 }) {
   static normalizedFields = OrganizationMembershipBaseFields
 }
 
+export const OrganizationMembershipFromWire = pipe(
+  OrganizationMembership,
+  S.encodeKeys({
+    userId: "user_id",
+    organizationId: "organization_id",
+    organizationName: "organization_name",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
+  })
+)
+
 export class User extends S.Class<User>("@effect/auth-workos/User")({
   _tag: pipe(
-    S.Literal("User"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "User" as const,
-      decoding: () => "User" as const
-    })
+    S.tag("User"),
+    S.withDecodingDefaultKey(Effect.succeed("User" as const))
   ),
 
   id: UserId,
   email: EmailAddress,
-  emailVerified: pipe(
-    S.Boolean,
-    S.propertySignature,
-    S.fromKey("email_verified")
-  ),
+  emailVerified: S.Boolean,
 
   firstName: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("first_name")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.NullOr
   ),
   lastName: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("last_name")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.NullOr
   ),
   profilePictureUrl: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("profile_picture_url")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.NullOr
   ),
   externalId: pipe(
-    S.NonEmptyTrimmedString,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("external_id")
+    S.Trimmed.check(S.isNonEmpty()),
+    S.NullOr
   ),
   lastSignInAt: pipe(
-    S.Date,
-    S.NullOr,
-    S.propertySignature,
-    S.fromKey("last_sign_in_at")
+    S.DateFromString,
+    S.NullOr
   ),
   locale: pipe(
-    S.NonEmptyTrimmedString,
+    S.Trimmed.check(S.isNonEmpty()),
     S.NullOr
   ),
 
   metadata: pipe(
-    S.Record({
-      key: S.String,
-      value: S.Unknown
-    }),
+    S.Record(
+      S.String,
+      S.Unknown
+    ),
     S.optional
   ),
 
-  createdAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("created_at")
-  ),
-  updatedAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("updated_at")
-  )
+  createdAt: S.DateFromString,
+  updatedAt: S.DateFromString
 }) {}
+
+export const UserFromWire = pipe(
+  User,
+  S.encodeKeys({
+    emailVerified: "email_verified",
+    firstName: "first_name",
+    lastName: "last_name",
+    profilePictureUrl: "profile_picture_url",
+    externalId: "external_id",
+    lastSignInAt: "last_sign_in_at",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
+  })
+)
 
 export class UserUpdatedEvent extends S.Class<UserUpdatedEvent>("@effect/auth-workos/UserUpdatedEvent")({
   _tag: pipe(
-    S.Literal("UserUpdatedEvent"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "UserUpdatedEvent" as const,
-      decoding: () => "UserUpdatedEvent" as const
-    })
+    S.tag("UserUpdatedEvent"),
+    S.withDecodingDefaultKey(Effect.succeed("UserUpdatedEvent" as const))
   ),
 
   id: EventId,
-  event: pipe(
-    EventType,
-    S.pickLiteral("user.updated")
-  ),
-  data: User,
+  event: EventType.pick(["user.updated"]),
+  data: UserFromWire,
 
-  createdAt: pipe(
-    S.Date,
-    S.propertySignature,
-    S.fromKey("created_at")
-  )
+  createdAt: S.DateFromString
 }) {}
 
-export const Event = S.Union(UserUpdatedEvent)
+export const UserUpdatedEventFromWire = pipe(
+  UserUpdatedEvent,
+  S.encodeKeys({
+    createdAt: "created_at"
+  })
+)
+
+export const Event = S.Union([UserUpdatedEvent])
 export type Event = typeof Event.Type
+
+export const EventFromWire = S.Union([UserUpdatedEventFromWire])

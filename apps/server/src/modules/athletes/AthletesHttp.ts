@@ -1,4 +1,3 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import { AthletesQueryModule } from "@one-kilo/core/modules/athletes/AthletesQueryModule"
 import { AthletesUseCases, RegisterAthleteOutcome } from "@one-kilo/core/processes/athletes/AthletesUseCases"
 import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
@@ -6,6 +5,7 @@ import { AthletesApi_RegisterSchemas } from "@one-kilo/server-api/modules/athlet
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 
@@ -50,5 +50,5 @@ export const AthletesHttp = pipe(
         )
     })
   ),
-  Layer.provide([AthletesUseCases.Default, AthletesQueryModule.Default])
+  Layer.provide([AthletesUseCases.layer, AthletesQueryModule.layer])
 )

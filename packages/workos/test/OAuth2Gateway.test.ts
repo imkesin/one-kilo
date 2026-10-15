@@ -1,8 +1,9 @@
-import * as NodeKeyValueStore from "@effect/platform-node/NodeKeyValueStore"
+import * as NodeServices from "@effect/platform-node/NodeServices"
 import { describe, layer } from "@effect/vitest"
 import * as Config from "effect/Config"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
+import * as KeyValueStore from "effect/persistence/KeyValueStore"
 import * as Redacted from "effect/Redacted"
 import { ApplicationClientId, OrganizationId } from "../src/domain/Ids.ts"
 import * as OAuth2Gateway from "../src/OAuth2Gateway.ts"
@@ -30,9 +31,12 @@ const store = pipe(
       secret: machineClientSecret
     }]
   }),
-  Layer.provide(NodeKeyValueStore.layerFileSystem("./test/data/oauth2")),
+  Layer.provide(pipe(
+    KeyValueStore.layerFileSystem("./test/data/oauth2"),
+    Layer.provide(NodeServices.layer)
+  )),
   Layer.provide(TokenGenerator.layerKeyPairTestConfig({
-    authKitDomain: Config.string("WORKOS_AUTHKIT_DOMAIN")
+    authKitDomain: Config.String("WORKOS_AUTHKIT_DOMAIN")
   }))
 )
 const oauth2Gateway = pipe(

@@ -1,4 +1,4 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
@@ -10,13 +10,10 @@ export class WebUnauthenticatedError extends S.TaggedError<WebUnauthenticatedErr
   "WebUnauthenticatedError",
   {
     message: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.withDefaults({
-        constructor: () => UNAUTHENTICATED_ERROR_MESSAGE,
-        decoding: () => UNAUTHENTICATED_ERROR_MESSAGE
-      })
+      S.Trimmed.check(S.isNonEmpty()),
+      S.withDecodingDefault(Effect.succeed(UNAUTHENTICATED_ERROR_MESSAGE)),
+      S.withConstructorDefault(Effect.succeed(UNAUTHENTICATED_ERROR_MESSAGE))
     )
   },
-  HttpApiSchema.annotations({ status: 401 })
+  { httpApiStatus: 401 }
 ) {}

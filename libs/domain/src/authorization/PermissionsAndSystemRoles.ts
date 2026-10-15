@@ -15,8 +15,8 @@ const resources = [allResource] as const
 const permissionsIdentifiers = resources.flatMap((resource) => resource.permissions)
 
 export const Permission = pipe(
-  S.Literal(...permissionsIdentifiers),
-  S.annotations({
+  S.Literals(permissionsIdentifiers),
+  S.annotate({
     identifier: "Permission",
     title: "Permission"
   })
@@ -38,8 +38,8 @@ const systemRoleIdentifiers = systemRoleConfigs.map((role) => role.name)
 export const systemRoleLookup = new Map(systemRoleConfigs.map((role) => [role.name, role] as const))
 
 export const SystemRole = pipe(
-  S.Literal(...systemRoleIdentifiers),
-  S.annotations({
+  S.Literals(systemRoleIdentifiers),
+  S.annotate({
     identifier: "SystemRole",
     title: "System Role"
   })

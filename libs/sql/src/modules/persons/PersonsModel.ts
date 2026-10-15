@@ -1,8 +1,7 @@
-import * as Model from "@effect/sql/Model"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
-import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import * as Model from "effect/schema/Model"
 import { LocalDateFromPgDate } from "../../utils/DateFields.ts"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
@@ -18,8 +17,8 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
 
   timezone: Model.Field({
     select: Timezone,
-    insert: S.optionalWith(Timezone, { exact: true }),
-    update: S.optionalWith(Timezone, { exact: true }),
+    insert: S.optionalKey(Timezone),
+    update: S.optionalKey(Timezone),
     json: Timezone
   }),
 
@@ -58,27 +57,12 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
   static partialUpdate = S.Struct({
     id: PersonId,
 
-    preferredName: pipe(
-      PreferredName,
-      S.optionalWith({ exact: true })
-    ),
-    fullName: pipe(
-      FullName,
-      S.optionalWith({ exact: true })
-    ),
+    preferredName: S.optionalKey(PreferredName),
+    fullName: S.optionalKey(FullName),
 
-    sex: pipe(
-      Sex,
-      S.optionalWith({ exact: true })
-    ),
-    dateOfBirth: pipe(
-      LocalDateFromPgDate,
-      S.optionalWith({ exact: true })
-    ),
-    timezone: pipe(
-      Timezone,
-      S.optionalWith({ exact: true })
-    ),
+    sex: S.optionalKey(Sex),
+    dateOfBirth: S.optionalKey(LocalDateFromPgDate),
+    timezone: S.optionalKey(Timezone),
 
     updatedAt: PersonsModel.update.fields.updatedAt,
     updatedByAccountId: PersonsModel.update.fields.updatedByAccountId

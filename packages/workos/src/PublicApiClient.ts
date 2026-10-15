@@ -1,5 +1,5 @@
 import * as Config from "effect/Config"
-import type { ConfigError } from "effect/ConfigError"
+import type { ConfigError } from "effect/Config"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -11,9 +11,9 @@ export interface Service {
   readonly userManagement: PublicApiClientUserManagementDefinitions.Client
 }
 
-export class PublicApiClient extends Context.Tag(
+export class PublicApiClient extends Context.Service<PublicApiClient, Service>()(
   "@effect/auth-workos/PublicApiClient"
-)<PublicApiClient, Service>() {}
+) {}
 
 export const make = (
   options: {

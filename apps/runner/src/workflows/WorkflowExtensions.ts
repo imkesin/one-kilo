@@ -1,7 +1,7 @@
-import { Workflow } from "@effect/workflow"
-import { WorkflowInstance } from "@effect/workflow/WorkflowEngine"
 import { WorkflowSuspensionsCreationModule } from "@one-kilo/core/modules/workflow-suspensions/WorkflowSuspensionsCreationModule"
 import * as Effect from "effect/Effect"
+import * as Workflow from "effect/workflow/Workflow"
+import { WorkflowInstance } from "effect/workflow/WorkflowEngine"
 
 const recordSuspension = Effect.fn(
   function*() {

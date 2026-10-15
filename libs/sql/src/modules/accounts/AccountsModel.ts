@@ -1,10 +1,10 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as Model from "@effect/sql/Model"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { AccountType } from "@one-kilo/domain/values/AccountValues"
 import * as S from "effect/Schema"
+import * as Model from "effect/schema/Model"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class AccountsModel extends Model.Class<AccountsModel>("AccountsModel")({

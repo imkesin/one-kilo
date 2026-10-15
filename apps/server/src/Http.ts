@@ -1,14 +1,15 @@
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as NodeHttpServer from "@effect/platform-node/NodeHttpServer"
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
-import type * as HttpApp from "@effect/platform/HttpApp"
-import * as HttpMiddleware from "@effect/platform/HttpMiddleware"
-import * as HttpServer from "@effect/platform/HttpServer"
-import * as WorkflowEngine from "@effect/workflow/WorkflowEngine"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
 import * as Config from "effect/Config"
+import type * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
+import * as HttpMiddleware from "effect/http/HttpMiddleware"
+import * as HttpRouter from "effect/http/HttpRouter"
+import type * as HttpServerResponse from "effect/http/HttpServerResponse"
 import * as Layer from "effect/Layer"
+import * as WorkflowEngine from "effect/workflow/WorkflowEngine"
 import { createServer } from "node:http"
 import { AuthenticationMiddlewareLayer } from "./infra/AuthenticationMiddleware.ts"
 import { WorkflowEngineLayer } from "./infra/Cluster.ts"
@@ -21,7 +22,7 @@ import { PersonsHttp } from "./modules/persons/PersonsHttp.ts"
 import { WhoAmIHttp } from "./modules/whoami/WhoAmIHttp.ts"
 
 const ServerApiLayer = pipe(
-  HttpApiBuilder.api(ServerApi),
+  HttpApiBuilder.layer(ServerApi),
   Layer.provide([
     AthletesHttp,
     AuthenticationHttp,
@@ -38,7 +39,10 @@ const ServerInfraLayer = pipe(
   Layer.provide(NodeHttpClient.layerUndici)
 )
 
-const middleware = (httpApp: HttpApp.Default) =>
+/*
+ * The logger is applied manually so that it runs inside `xForwardedHeaders` and records the forwarded address.
+ */
+const middleware = <E, R>(httpApp: Effect.Effect<HttpServerResponse.HttpServerResponse, E, R>) =>
   pipe(
     httpApp,
     HttpMiddleware.logger,
@@ -46,23 +50,20 @@ const middleware = (httpApp: HttpApp.Default) =>
   )
 
 export const HttpTestWithoutInfra = pipe(
-  HttpApiBuilder.serve(middleware),
-  Layer.provide(ServerApiLayer),
+  HttpRouter.serve(ServerApiLayer, { middleware, disableLogger: true, disableListenLog: true }),
   Layer.provide(WorkflowEngine.layerMemory),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 
 export const HttpLayer = pipe(
-  HttpApiBuilder.serve(middleware),
-  HttpServer.withLogAddress,
-  Layer.provide(ServerApiLayer),
+  HttpRouter.serve(ServerApiLayer, { middleware, disableLogger: true }),
   Layer.provide(ServerInfraLayer),
   Layer.provide(
     NodeHttpServer.layerConfig(
       createServer,
       {
         port: pipe(
-          Config.number("PORT"),
+          Config.Number("PORT"),
           Config.withDefault(10000)
         )
       }

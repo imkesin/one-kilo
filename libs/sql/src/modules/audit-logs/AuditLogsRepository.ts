@@ -1,15 +1,17 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type * as AuditLogDefinitions from "@one-kilo/domain/audit-logs/AuditLogDefinitions"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import type * as Brand from "effect/Brand"
+import * as Context from "effect/Context"
 import type * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { AuditLogsModel } from "./AuditLogsModel.ts"
 import { toAuditLog } from "./internal/AuditLogsModelTransformations.ts"
 
@@ -28,15 +30,14 @@ type InsertAuditLogParameters = {
   readonly timestamp?: DateTime.Utc
 }
 
-export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
+export class AuditLogsRepository extends Context.Service<AuditLogsRepository>()(
   "@one-kilo/sql/AuditLogsRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: AuditLogsModel.insert,
         Result: AuditLogsModel.select,
         execute: (request) => sql`INSERT INTO audit_logs ${sql.insert(request).returning("*")}`
@@ -75,7 +76,7 @@ export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
                   version
                 })
             ),
-            Effect.andThen(toAuditLog)
+            Effect.flatMap(toAuditLog)
           )
         },
         orDieWithUnexpectedError("Failed to insert audit log")
@@ -84,4 +85,9 @@ export class AuditLogsRepository extends Effect.Service<AuditLogsRepository>()(
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

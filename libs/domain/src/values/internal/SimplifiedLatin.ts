@@ -1,29 +1,26 @@
-import { pipe } from "effect/Function"
-import * as ParseResult from "effect/ParseResult"
+import { identity, pipe } from "effect/Function"
 import * as S from "effect/Schema"
+import * as SchemaTransformation from "effect/SchemaTransformation"
 
 const AlternateApostropheRegex = /[`‘’]/g
 const SimpleLatinRegex = /^[\p{Script=Latin}\p{M}0-9 .,'-]+$/u
 
 export const Name = pipe(
-  S.transformOrFail(
-    S.String,
-    S.typeSchema(S.String),
-    {
-      decode: (fromA, _options, ast) => {
-        const transformed = fromA
+  S.String,
+  S.decode(
+    SchemaTransformation.transform({
+      decode: (input) =>
+        input
           .trim()
           .normalize()
           .replace(/\s/g, " ")
           .replace(/ +/g, " ")
-          .replace(AlternateApostropheRegex, "'")
-
-        return transformed === ""
-          ? ParseResult.fail(new ParseResult.Type(ast, transformed, "Expected a nonempty string"))
-          : ParseResult.succeed(transformed)
-      },
-      encode: ParseResult.succeed
-    }
+          .replace(AlternateApostropheRegex, "'"),
+      encode: identity
+    })
   ),
-  S.pattern(SimpleLatinRegex)
+  S.check(
+    S.isNonEmpty(),
+    S.isPattern(SimpleLatinRegex)
+  )
 )

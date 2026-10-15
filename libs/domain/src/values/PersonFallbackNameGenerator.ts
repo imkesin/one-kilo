@@ -1,7 +1,9 @@
 import { UnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Arr from "effect/Array"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Random from "effect/Random"
 import * as Record from "effect/Record"
 import { FullName, PreferredName } from "./PersonValues.js"
@@ -29,13 +31,13 @@ const ANIMAL_ADJECTIVE_LOOKUP = {
   }
 } as const
 
-export class PersonFallbackNameGenerator extends Effect.Service<PersonFallbackNameGenerator>()(
+export class PersonFallbackNameGenerator extends Context.Service<PersonFallbackNameGenerator>()(
   "@one-kilo/domain/PersonFallbackNameGenerator",
   {
-    sync: () => {
+    make: Effect.sync(() => {
       const animalAdjectiveClusters = Record.values(ANIMAL_ADJECTIVE_LOOKUP)
 
-      if (!Arr.isNonEmptyReadonlyArray(animalAdjectiveClusters)) {
+      if (!Arr.isReadonlyArrayNonEmpty(animalAdjectiveClusters)) {
         throw UnexpectedError.make({ message: "No animal adjective clusters found" })
       }
 
@@ -64,6 +66,8 @@ export class PersonFallbackNameGenerator extends Effect.Service<PersonFallbackNa
       })
 
       return { generate }
-    }
+    })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

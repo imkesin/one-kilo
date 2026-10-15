@@ -4,9 +4,9 @@ import * as SimplifiedLatin from "./internal/SimplifiedLatin.ts"
 
 export const FullName = pipe(
   SimplifiedLatin.Name,
-  S.maxLength(128),
+  S.check(S.isMaxLength(128)),
   S.brand("@one-kilo/domain/FullName"),
-  S.annotations({
+  S.annotate({
     description: "The full name of a person",
     identifier: "FullName",
     title: "Full Name"
@@ -16,9 +16,9 @@ export type FullName = typeof FullName.Type
 
 export const PreferredName = pipe(
   SimplifiedLatin.Name,
-  S.maxLength(64),
+  S.check(S.isMaxLength(64)),
   S.brand("@one-kilo/domain/PreferredName"),
-  S.annotations({
+  S.annotate({
     description: "The preferred name of a person",
     identifier: "PreferredName",
     title: "Preferred Name"
@@ -27,8 +27,8 @@ export const PreferredName = pipe(
 export type PreferredName = typeof PreferredName.Type
 
 export const Sex = pipe(
-  S.Literal("Male", "Female"),
-  S.annotations({
+  S.Literals(["Male", "Female"]),
+  S.annotate({
     description: "The biological sex of a person, used for athletic calculations",
     identifier: "Sex",
     title: "Sex"
@@ -43,15 +43,12 @@ export type Sex = typeof Sex.Type
 const supportedTimezones = new Set([...Intl.supportedValuesOf("timeZone"), "UTC"])
 
 export const Timezone = pipe(
-  S.NonEmptyTrimmedString,
-  S.filter(
-    (timezone) => supportedTimezones.has(timezone),
-    {
-      message: (issue) => `${String(issue.actual)} is not a valid IANA time zone`
-    }
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(
+    S.makeFilter((timezone) => supportedTimezones.has(timezone) || `${timezone} is not a valid IANA time zone`)
   ),
   S.brand("@one-kilo/domain/Timezone"),
-  S.annotations({
+  S.annotate({
     description: "An IANA time zone identifier (e.g. \"America/New_York\")",
     identifier: "Timezone",
     title: "Timezone"

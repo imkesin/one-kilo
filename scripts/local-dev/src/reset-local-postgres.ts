@@ -1,8 +1,8 @@
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime"
-import * as SqlClient from "@effect/sql/SqlClient"
 import * as PgLayers from "@one-kilo/sql/PgLayers"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as SqlClient from "effect/sql/SqlClient"
 
 const MIGRATION_TABLE = "effect_sql_migrations"
 
@@ -31,6 +31,7 @@ const main = Effect.gen(function*() {
 
 pipe(
   main,
+  // oxlint-disable-next-line effecttsgo/strict-effect-provide -- script entry point
   Effect.provide(PgLayers.layer()),
   NodeRuntime.runMain
 )

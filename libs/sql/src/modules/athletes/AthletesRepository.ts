@@ -1,12 +1,15 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { AthleteEntity } from "@one-kilo/domain/entities/Athlete"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { AthleteId } from "@one-kilo/domain/ids/AthleteId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { AthletesModel } from "./AthletesModel.ts"
 
 type InsertAthleteParameters = {
@@ -16,15 +19,14 @@ type InsertAthleteParameters = {
   id?: AthleteId
 }
 
-export class AthletesRepository extends Effect.Service<AthletesRepository>()(
+export class AthletesRepository extends Context.Service<AthletesRepository>()(
   "@one-kilo/sql/AthletesRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: AthletesModel.insert,
         Result: AthletesModel.select,
         execute: (request) => sql`INSERT INTO athletes ${sql.insert(request).returning("*")}`
@@ -51,4 +53,9 @@ export class AthletesRepository extends Effect.Service<AthletesRepository>()(
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

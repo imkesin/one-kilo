@@ -19,7 +19,7 @@ type Policy<E = never, R = never> = Effect.Effect<
  * Creates a policy from a predicate function that evaluates the current actor.
  */
 export const policy = <E, R>(
-  predicate: (actor: Actor["Type"]) => Effect.Effect<boolean, E, R>,
+  predicate: (actor: Actor["Service"]) => Effect.Effect<boolean, E, R>,
   message?: string
 ): Policy<E, R> =>
   Effect.flatMap(Actor, (actor) =>

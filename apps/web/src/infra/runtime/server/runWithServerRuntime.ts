@@ -2,7 +2,7 @@ import { redirect } from "@tanstack/react-router"
 import * as Cause from "effect/Cause"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
-import * as Runtime from "effect/Runtime"
+import * as Option from "effect/Option"
 import { isRedirectError } from "~/lib/RedirectError"
 import { getManagedWebServerRuntime } from "./getManagedServerRuntime"
 import type { WebServerLayerSuccess } from "./webServerLayer"
@@ -16,9 +16,8 @@ export async function runWithWebServerRuntime<
   options?: { readonly signal?: AbortSignal }
 ) {
   const managedRuntime = getManagedWebServerRuntime()
-  const runtime = await managedRuntime.runtime()
 
-  const exit = await Runtime.runPromiseExit(runtime, effect, options)
+  const exit = await managedRuntime.runPromiseExit(effect, options)
 
   if (Exit.isSuccess(exit)) {
     return exit.value
@@ -26,19 +25,20 @@ export async function runWithWebServerRuntime<
 
   const { cause } = exit
 
-  if (cause._tag === "Fail" && isRedirectError(cause.error)) {
-    throw cause.error.redirect
+  const failure = Cause.findErrorOption(cause)
+  if (Option.isSome(failure) && isRedirectError(failure.value)) {
+    throw failure.value.redirect
   }
 
   /*
    * Client-cancelled requests surface as interrupts, not faults: there is no
    * one left to redirect and logging them as errors would be noise.
    */
-  if (Cause.isInterruptedOnly(cause)) {
+  if (Cause.hasInterruptsOnly(cause)) {
     throw Cause.squash(cause)
   }
 
-  Runtime.runSync(runtime, Effect.logError("Unhandled fatal server error", cause))
+  managedRuntime.runSync(Effect.logError("Unhandled fatal server error", cause))
 
   throw redirect({ href: "/error", statusCode: 303 })
 }

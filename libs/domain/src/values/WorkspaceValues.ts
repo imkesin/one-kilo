@@ -4,9 +4,9 @@ import * as SimplifiedLatin from "./internal/SimplifiedLatin.ts"
 
 export const WorkspaceName = pipe(
   SimplifiedLatin.Name,
-  S.maxLength(64),
+  S.check(S.isMaxLength(64)),
   S.brand("@one-kilo/domain/WorkspaceName"),
-  S.annotations({
+  S.annotate({
     description: "The name of a workspace",
     identifier: "WorkspaceName",
     title: "Workspace Name"
@@ -16,7 +16,7 @@ export type WorkspaceName = typeof WorkspaceName.Type
 
 export const WorkspaceType = pipe(
   S.Literal("Personal"),
-  S.annotations({
+  S.annotate({
     description: "The type of a workspace",
     identifier: "WorkspaceType",
     title: "Workspace Type"

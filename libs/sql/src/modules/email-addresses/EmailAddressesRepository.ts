@@ -1,12 +1,15 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { EmailAddressEntity } from "@one-kilo/domain/entities/EmailAddress"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import type { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { EmailAddressesModel } from "./EmailAddressesModel.ts"
 
 type InsertEmailAddressParameters = {
@@ -15,15 +18,14 @@ type InsertEmailAddressParameters = {
   performedByAccountId: AccountId
 }
 
-export class EmailAddressesRepository extends Effect.Service<EmailAddressesRepository>()(
+export class EmailAddressesRepository extends Context.Service<EmailAddressesRepository>()(
   "@one-kilo/sql/EmailAddressesRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: EmailAddressesModel.insert,
         Result: EmailAddressesModel.select,
         execute: (request) => sql`INSERT INTO email_addresses ${sql.insert(request).returning("*")}`
@@ -63,4 +65,9 @@ export class EmailAddressesRepository extends Effect.Service<EmailAddressesRepos
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

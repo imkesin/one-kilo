@@ -6,10 +6,10 @@ import * as Layer from "effect/Layer"
 
 const SERVICE_NAME = "runner"
 
-export const TelemetryLayer = Layer.unwrapEffect(
+export const TelemetryLayer = Layer.unwrap(
   Effect.gen(function*() {
     const serviceVersion = yield* pipe(
-      Config.string("SERVICE_VERSION"),
+      Config.String("SERVICE_VERSION"),
       Config.withDefault("dev")
     )
 

@@ -9,7 +9,7 @@ export const AuthenticationIdentity = pipe(
     accountId: AccountId,
     workspaceId: WorkspaceId
   }),
-  S.annotations({
+  S.annotate({
     description: "The unique combination of account and workspace that scopes an authentication",
     identifier: "AuthenticationIdentity",
     title: "Authentication Identity"
@@ -22,7 +22,7 @@ export const AuthenticationTokens = pipe(
     workosAccessToken: WorkOSValues.AccessToken,
     workosRefreshToken: WorkOSValues.RefreshToken
   }),
-  S.annotations({
+  S.annotate({
     description: "The tokens associated with an authenticated account",
     identifier: "AuthenticationTokens",
     title: "Authentication Tokens"
@@ -30,11 +30,11 @@ export const AuthenticationTokens = pipe(
 )
 
 export const AuthenticationContext = pipe(
-  S.extend(
-    AuthenticationIdentity,
-    AuthenticationTokens
-  ),
-  S.annotations({
+  S.Struct({
+    ...AuthenticationIdentity.fields,
+    ...AuthenticationTokens.fields
+  }),
+  S.annotate({
     description: "The base context for an authenticated account",
     identifier: "AuthenticationContext",
     title: "Authentication Context"

@@ -1,4 +1,4 @@
-import { NoSuchElementException } from "effect/Cause"
+import { NoSuchElementError } from "effect/Cause"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
@@ -11,7 +11,7 @@ const nearestNamedSpan = pipe(
 
     while (activeSpan.traceId === "noop") {
       if (activeSpan._tag === "ExternalSpan" || Option.isNone(activeSpan.parent)) {
-        return Effect.fail(new NoSuchElementException())
+        return Effect.fail(new NoSuchElementError())
       }
 
       activeSpan = activeSpan.parent.value
@@ -19,7 +19,7 @@ const nearestNamedSpan = pipe(
 
     return activeSpan._tag === "Span"
       ? Effect.succeed(activeSpan)
-      : Effect.fail(new NoSuchElementException())
+      : Effect.fail(new NoSuchElementError())
   }),
   Effect.flatten,
   orDieWithUnexpectedError("Failed to find nearest named span")

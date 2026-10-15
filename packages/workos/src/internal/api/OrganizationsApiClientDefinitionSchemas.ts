@@ -8,41 +8,43 @@ import { OrganizationDomainState } from "../../domain/Values.ts"
  * This is a simplified version used in the create request,
  * not the full OrganizationDomain entity returned in responses.
  */
-export class CreateOrganizationDomainData extends S.Class<CreateOrganizationDomainData>(
-  "CreateOrganizationDomainData"
-)({
-  domain: S.NonEmptyTrimmedString,
+export const CreateOrganizationDomainData = S.Struct({
+  domain: S.Trimmed.check(S.isNonEmpty()),
   state: pipe(
     OrganizationDomainState,
     S.optional
   )
-}) {}
+})
+export type CreateOrganizationDomainData = typeof CreateOrganizationDomainData.Type
 
-export class CreateOrganizationParameters extends S.Class<CreateOrganizationParameters>(
-  "CreateOrganizationParameters"
-)({
-  name: S.NonEmptyTrimmedString,
+export const CreateOrganizationParameters = pipe(
+  S.Struct({
+    name: S.Trimmed.check(S.isNonEmpty()),
 
-  domainData: pipe(
-    S.Array(CreateOrganizationDomainData),
-    S.optional,
-    S.fromKey("domain_data")
-  ),
+    domainData: pipe(
+      S.Array(CreateOrganizationDomainData),
+      S.optional
+    ),
 
-  externalId: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("external_id")
-  ),
+    externalId: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
 
-  metadata: pipe(
-    S.Record({
-      key: S.String,
-      value: S.Unknown
-    }),
-    S.optional
-  )
-}) {}
+    metadata: pipe(
+      S.Record(
+        S.String,
+        S.Unknown
+      ),
+      S.optional
+    )
+  }),
+  S.encodeKeys({
+    domainData: "domain_data",
+    externalId: "external_id"
+  })
+)
+export type CreateOrganizationParameters = typeof CreateOrganizationParameters.Type
 
 export type DeleteOrganizationOutcome = Data.TaggedEnum<{
   Success: Record<never, never>

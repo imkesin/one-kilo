@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const WorkspaceMembershipId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/WorkspaceMembershipId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a workspace membership",
     identifier: "WorkspaceMembershipId",
     title: "Workspace Membership ID"
@@ -17,10 +17,10 @@ export type WorkspaceMembershipId = typeof WorkspaceMembershipId.Type
 const WORKSPACE_MEMBERSHIP_PREFIX = "workspace_membership_"
 
 export const PrefixedWorkspaceMembershipId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(WORKSPACE_MEMBERSHIP_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(WORKSPACE_MEMBERSHIP_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedWorkspaceMembershipId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a workspace membership",
     identifier: "PrefixedWorkspaceMembershipId",
     title: "Workspace Membership ID (Prefixed)"

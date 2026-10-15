@@ -1,5 +1,4 @@
-import * as HttpApi from "@effect/platform/HttpApi"
-import * as HttpApiError from "@effect/platform/HttpApiError"
+import * as HttpApi from "effect/http-api/HttpApi"
 import { AuthenticationMiddleware } from "./infra/AuthenticationSecurity.ts"
 import { AthletesApi } from "./modules/athletes/AthletesApi.ts"
 import { AuthenticationApi as AuthenticationApiGroup } from "./modules/authentication/AuthenticationApi.ts"
@@ -12,11 +11,9 @@ export const ApplicationApi = HttpApi.make("@one-kilo/ApplicationApi")
   .add(PersonsApi)
   .add(WhoAmIApi)
   .middleware(AuthenticationMiddleware)
-  .addError(HttpApiError.InternalServerError)
 
 export const AuthenticationApi = HttpApi.make("@one-kilo/AuthenticationApi")
   .add(AuthenticationApiGroup)
-  .addError(HttpApiError.InternalServerError)
 
 export const PublicApi = HttpApi.make("@one-kilo/PublicApi")
   .add(HealthApi)

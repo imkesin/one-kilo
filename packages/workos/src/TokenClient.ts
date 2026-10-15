@@ -1,10 +1,10 @@
-import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as Config from "effect/Config"
-import type { ConfigError } from "effect/ConfigError"
+import type { ConfigError } from "effect/Config"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
 import * as Layer from "effect/Layer"
 import * as Jose from "jose"
 import type { EnvironmentClientId } from "./domain/Ids.ts"
@@ -13,9 +13,9 @@ import * as TokenClientDefinitions from "./internal/TokenClientDefinitions.ts"
 
 export type Service = TokenClientDefinitions.Client
 
-export class TokenClient extends Context.Tag(
+export class TokenClient extends Context.Service<TokenClient, Service>()(
   "@effect/auth-workos/TokenClient"
-)<TokenClient, Service>() {}
+) {}
 
 export const makeTest = (
   options: {
@@ -45,8 +45,8 @@ export const layerKeyPairTest = () =>
 
       return layerTest({ publicKey })
     }),
-    Layer.unwrapEffect,
-    Layer.provide(KeyPairTest.Default)
+    Layer.unwrap,
+    Layer.provide(KeyPairTest.layer)
   )
 
 export const make = (
@@ -64,7 +64,7 @@ export const make = (
       HttpClientRequest.get(`https://api.workos.com/sso/jwks/${options.clientId}`),
       httpClient.execute,
       Effect.flatMap((_) => _.json),
-      Effect.map((jwks) => Jose.createLocalJWKSet(jwks as Jose.JSONWebKeySet)),
+      Effect.map((jwks) => Jose.createLocalJWKSet(jwks as unknown as Jose.JSONWebKeySet)),
       Effect.cachedWithTTL("5 minutes")
     )
 

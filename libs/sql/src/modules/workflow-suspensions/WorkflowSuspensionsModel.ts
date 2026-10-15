@@ -1,6 +1,6 @@
-import * as Model from "@effect/sql/Model"
 import { WorkflowSuspensionId } from "@one-kilo/domain/ids/WorkflowSuspensionId"
 import * as S from "effect/Schema"
+import * as Model from "effect/schema/Model"
 import * as ModelExtensions from "../../utils/ModelExtensions.ts"
 
 export class WorkflowSuspensionsModel extends Model.Class<WorkflowSuspensionsModel>(
@@ -8,8 +8,8 @@ export class WorkflowSuspensionsModel extends Model.Class<WorkflowSuspensionsMod
 )({
   id: Model.GeneratedByApp(WorkflowSuspensionId),
 
-  executionId: S.NonEmptyTrimmedString,
-  workflowName: S.NonEmptyTrimmedString,
+  executionId: S.Trimmed.check(S.isNonEmpty()),
+  workflowName: S.Trimmed.check(S.isNonEmpty()),
 
   occurredAt: Model.DateTimeInsert,
   resumedAt: ModelExtensions.DateTimeNullable,

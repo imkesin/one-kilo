@@ -1,5 +1,4 @@
 import type * as PgClient from "@effect/sql-pg/PgClient"
-import * as SqlClient from "@effect/sql/SqlClient"
 import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import type * as Arr from "effect/Array"
 import * as Duration from "effect/Duration"
@@ -7,16 +6,11 @@ import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import * as Schedule from "effect/Schedule"
-import * as S from "effect/Schema"
+import type * as SqlClient from "effect/sql/SqlClient"
+import * as SqlError from "effect/sql/SqlError"
 
-const PgSerializationError = S.Struct({
-  code: S.Literal("40001")
-})
-const RetryablePgError = S.Union(PgSerializationError)
-
-const SqlErrorWithRetryableCause = S.Struct({
-  cause: RetryablePgError
-})
+const isSerializationFailure = (error: unknown) =>
+  SqlError.isSqlError(error) && error.reason._tag === "SerializationError"
 
 export const withDeferredConstraints =
   (...constraints: Arr.NonEmptyArray<string>) =>
@@ -42,7 +36,7 @@ export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(
     Effect.retry(
       serializableTransaction,
       {
-        while: S.is(SqlErrorWithRetryableCause),
+        while: isSerializationFailure,
         times: 3,
         schedule: pipe(
           Schedule.exponential(Duration.millis(10)),
@@ -57,7 +51,7 @@ export const withSerializableTransaction = (pg: PgClient.PgClient) => <A, E, R>(
   )
 
   return pipe(
-    Effect.serviceOption(SqlClient.TransactionConnection),
+    Effect.serviceOption(pg.transactionService),
     Effect.flatMap(
       Option.match({
         onNone: () => retriedTransaction,

@@ -1,6 +1,6 @@
-import * as RunnerAddress from "@effect/cluster/RunnerAddress"
 import * as NodeClusterHttp from "@effect/platform-node/NodeClusterHttp"
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime"
+import * as RunnerAddress from "effect/cluster/RunnerAddress"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -11,11 +11,11 @@ import { makeRunnerLayer } from "./Runner.ts"
 const RunnerConfig = pipe(
   Config.all({
     host: pipe(
-      Config.string("HOST"),
+      Config.String("HOST"),
       Config.withDefault("localhost")
     ),
     port: pipe(
-      Config.number("PORT"),
+      Config.Number("PORT"),
       Config.withDefault(12000)
     )
   }),
@@ -28,7 +28,7 @@ const ClusterLayer = pipe(
 
     return NodeClusterHttp.layer({
       transport: "http",
-      serialization: "msgpack",
+      serialization: "binary",
       storage: "sql",
       runnerHealth: "ping",
       shardingConfig: {
@@ -36,7 +36,7 @@ const ClusterLayer = pipe(
       }
     })
   }),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 const RunnerLayer = makeRunnerLayer(ClusterLayer)

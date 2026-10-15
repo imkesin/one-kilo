@@ -1,4 +1,3 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import type { Account } from "@one-kilo/domain/entities/Account"
 import type { WorkspaceEntity } from "@one-kilo/domain/entities/Workspace"
 import * as S from "effect/Schema"
@@ -20,7 +19,7 @@ class WhoAmIApi_Success extends S.TaggedClass<WhoAmIApi_Success>("@one-kilo/serv
     account: Api_Account,
     workspace: Api_Workspace
   },
-  HttpApiSchema.annotations({ status: 200 })
+  { httpApiStatus: 200 }
 ) {
   static fromDomain = ({ account, workspace }: WhoAmIApi_Domain) =>
     WhoAmIApi_Success.make({

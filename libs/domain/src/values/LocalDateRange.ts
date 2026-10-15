@@ -10,8 +10,8 @@ export const LocalDateRange = pipe(
     start: LocalDate,
     end: S.NullOr(LocalDate)
   }),
-  S.filter((range) => range.end === null || Temporal.PlainDate.compare(range.start, range.end) <= 0),
-  S.annotations({
+  S.check(S.makeFilter((range) => range.end === null || Temporal.PlainDate.compare(range.start, range.end) <= 0)),
+  S.annotate({
     description: "A calendar date range, inclusive of both `start` and `end`. A null `end` means ongoing.",
     identifier: "LocalDateRange",
     title: "Local Date Range"

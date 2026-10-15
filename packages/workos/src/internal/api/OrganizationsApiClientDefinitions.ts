@@ -1,9 +1,9 @@
-import type * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
-import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import { Organization } from "../../domain/Entities.ts"
+import type * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
+import * as HttpClientResponse from "effect/http/HttpClientResponse"
+import { type Organization, OrganizationFromWire } from "../../domain/Entities.ts"
 import * as WorkOSError from "../../domain/Errors.ts"
 import type { OrganizationId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
@@ -56,19 +56,19 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/"),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(Organization),
+            "2xx": HttpResponseExtensions.decodeExpected(OrganizationFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
       ),
     deleteOrganization: (organizationId) =>
       pipe(
-        HttpClientRequest.del(`/${organizationId}`),
+        HttpClientRequest.delete(`/${organizationId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": () => Effect.succeed(DeleteOrganizationOutcome.Success()),
@@ -82,7 +82,7 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         HttpClientRequest.get(`/${organizationId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(Organization),
+            "2xx": HttpResponseExtensions.decodeExpected(OrganizationFromWire),
             "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })

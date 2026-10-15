@@ -11,15 +11,14 @@ export interface TestSuiteContext {
   readonly machineClientSecret: Redacted.Redacted
 }
 
-export class OAuth2TestSuiteContext extends Context.Tag(
+export class OAuth2TestSuiteContext extends Context.Service<OAuth2TestSuiteContext, TestSuiteContext>()(
   "@effect/auth-workos/OAuth2TestSuiteContext"
-)<OAuth2TestSuiteContext, TestSuiteContext>() {}
+) {}
 
 export const makeOAuth2Tests = () =>
 (
   it: Vitest.MethodsNonLive<
-    OAuth2Gateway.OAuth2Gateway | TokenClient.TokenClient | OAuth2TestSuiteContext,
-    boolean
+    OAuth2Gateway.OAuth2Gateway | TokenClient.TokenClient | OAuth2TestSuiteContext
   >
 ) => {
   it.effect("a live token can be decoded and verified", () =>

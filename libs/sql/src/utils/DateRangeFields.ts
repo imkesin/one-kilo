@@ -1,19 +1,20 @@
 import { LocalDateRange } from "@one-kilo/domain/values/LocalDateRange"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import * as ParseResult from "effect/ParseResult"
 import * as S from "effect/Schema"
+import * as SchemaIssue from "effect/SchemaIssue"
+import * as SchemaTransformation from "effect/SchemaTransformation"
 
 /**
  * Maps a Postgres `DATERANGE` (canonically `[inclusive-lower, exclusive-upper)`) to a
  * `LocalDateRange`, which is inclusive on both bounds. A `null`/unbounded upper means ongoing.
  */
 export const LocalDateRangeFromPgDateRange = pipe(
-  S.NonEmptyTrimmedString,
-  S.transformOrFail(
-    S.typeSchema(LocalDateRange),
-    {
-      decode: (text, _options, ast) =>
+  S.Trimmed.check(S.isNonEmpty()),
+  S.decodeTo(
+    S.toType(LocalDateRange),
+    SchemaTransformation.transformEffect({
+      decode: (text) =>
         /*
          * Effect.try` because `Temporal.PlainDate.from` throws `RangeError` on malformed input
          */
@@ -31,12 +32,16 @@ export const LocalDateRangeFromPgDateRange = pipe(
 
             return { start, end }
           },
-          catch: (error) => new ParseResult.Type(ast, text, error instanceof Error ? error.message : String(error))
+          catch: (error) =>
+            new SchemaIssue.InvalidValue(
+              { message: error instanceof Error ? error.message : String(error) },
+              text
+            )
         }),
       encode: ({ end, start }) =>
-        ParseResult.succeed(
+        Effect.succeed(
           `[${start.toString()},${end === null ? "" : end.add({ days: 1 }).toString()})`
         )
-    }
+    })
   )
 )

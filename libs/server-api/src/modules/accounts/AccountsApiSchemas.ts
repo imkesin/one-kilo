@@ -5,7 +5,6 @@ import { PersonIdFromPrefixed } from "@one-kilo/domain/ids/PersonId"
 import { AccountType } from "@one-kilo/domain/values/AccountValues"
 import { MachineClientName } from "@one-kilo/domain/values/MachineClientValues"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
-import { pipe } from "effect/Function"
 import * as Match from "effect/Match"
 import * as S from "effect/Schema"
 import { ApiAuditFields } from "../../internal/ApiFields.ts"
@@ -24,10 +23,7 @@ export class Api_MachineClientAccount extends S.TaggedClass<Api_MachineClientAcc
   "Account:MachineClient",
   {
     id: AccountIdFromPrefixed,
-    type: pipe(
-      AccountType,
-      S.pickLiteral("MachineClient")
-    ),
+    type: AccountType.pick(["MachineClient"]),
     machineClient: Api_MachineClientOnAccount,
 
     ...ApiAuditFields
@@ -51,10 +47,7 @@ export class Api_PersonAccount extends S.TaggedClass<Api_PersonAccount>(
   "Account:Person",
   {
     id: AccountIdFromPrefixed,
-    type: pipe(
-      AccountType,
-      S.pickLiteral("Person")
-    ),
+    type: AccountType.pick(["Person"]),
     person: Api_PersonOnAccount,
 
     ...ApiAuditFields
@@ -63,10 +56,10 @@ export class Api_PersonAccount extends S.TaggedClass<Api_PersonAccount>(
   static fromDomain = (account: PersonAccount) => Api_PersonAccount.make(account)
 }
 
-export const Api_Account = S.Union(
+export const Api_Account = S.Union([
   Api_PersonAccount,
   Api_MachineClientAccount
-)
+])
 export type Api_Account = typeof Api_Account.Type
 
 export const toApi_Account = (account: Account): Api_Account =>

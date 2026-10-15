@@ -11,7 +11,7 @@ import { generateRandomString } from "./lib/RandomString.ts"
 class GenerateTokenError extends S.TaggedError<GenerateTokenError>("@effect/auth-workos/GenerateTokenError")(
   "GenerateTokenError",
   {
-    cause: S.Defect
+    cause: S.Defect()
   }
 ) {}
 

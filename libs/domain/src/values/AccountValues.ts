@@ -2,8 +2,8 @@ import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 
 export const AccountType = pipe(
-  S.Literal("MachineClient", "Person"),
-  S.annotations({
+  S.Literals(["MachineClient", "Person"]),
+  S.annotate({
     description: "The type of account",
     identifier: "AccountType",
     title: "Account Type"

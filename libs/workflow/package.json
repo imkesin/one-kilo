@@ -2,9 +2,8 @@
   "name": "@one-kilo/workflow",
   "version": "0.1.0",
   "dependencies": {
-    "@effect/workflow": "^0.18.0",
     "@one-kilo/domain": "workspace:*",
-    "effect": "^3.21.2"
+    "effect": "^4.0.3"
   },
   "exports": {
     "./*": "./dist/src/*.js",

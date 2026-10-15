@@ -1,15 +1,15 @@
 import type { AccessToken } from "@effect/auth-workos/domain/Values"
-import * as HttpApiMiddleware from "@effect/platform/HttpApiMiddleware"
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
-import * as HttpApiSecurity from "@effect/platform/HttpApiSecurity"
-import { Actor } from "@one-kilo/domain/tags/Actor"
+import type { Actor } from "@one-kilo/domain/tags/Actor"
+import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiMiddleware from "effect/http-api/HttpApiMiddleware"
+import * as HttpApiSecurity from "effect/http-api/HttpApiSecurity"
 import * as S from "effect/Schema"
 
 export class AuthenticationHeaders extends S.Class<AuthenticationHeaders>(
   "@one-kilo/server-api/AuthenticationHeaders"
 )({
-  authorization: S.NonEmptyTrimmedString
+  authorization: S.Trimmed.check(S.isNonEmpty())
 }) {
   static fromAccessToken(accessToken: AccessToken) {
     return AuthenticationHeaders.make({ authorization: `Bearer ${accessToken}` })
@@ -24,22 +24,20 @@ export class UnauthenticatedError extends S.TaggedError<UnauthenticatedError>(
   "UnauthenticatedError",
   {
     message: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.withDefaults({
-        constructor: () => UNAUTHENTICATED_ERROR_MESSAGE,
-        decoding: () => UNAUTHENTICATED_ERROR_MESSAGE
-      })
+      S.Trimmed.check(S.isNonEmpty()),
+      S.withDecodingDefault(Effect.succeed(UNAUTHENTICATED_ERROR_MESSAGE)),
+      S.withConstructorDefault(Effect.succeed(UNAUTHENTICATED_ERROR_MESSAGE))
     )
   },
-  HttpApiSchema.annotations({ status: 401 })
+  { httpApiStatus: 401 }
 ) {}
 
-export class AuthenticationMiddleware extends HttpApiMiddleware.Tag<AuthenticationMiddleware>()(
+export class AuthenticationMiddleware extends HttpApiMiddleware.Service<AuthenticationMiddleware, {
+  provides: Actor
+}>()(
   "@one-kilo/server-api/AuthenticationMiddleware",
   {
-    failure: UnauthenticatedError,
-    provides: Actor,
+    error: UnauthenticatedError,
     security: {
       jwt: HttpApiSecurity.bearer
     }

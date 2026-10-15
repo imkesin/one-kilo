@@ -8,8 +8,10 @@ import { AccountsRepository } from "@one-kilo/sql/modules/accounts/AccountsRepos
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { EmailAddressesRepository } from "@one-kilo/sql/modules/email-addresses/EmailAddressesRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 
 type CreateAccountForPersonParameters = {
   id: AccountId
@@ -19,17 +21,10 @@ type CreateAccountForPersonParameters = {
   workosUserId: WorkOSIds.UserId
 }
 
-export class AccountsCreationModule extends Effect.Service<AccountsCreationModule>()(
+export class AccountsCreationModule extends Context.Service<AccountsCreationModule>()(
   "@one-kilo/core/AccountsCreationModule",
   {
-    dependencies: [
-      AuditLogsRepository.Default,
-      DomainIdGenerator.Default,
-      EmailAddressesRepository.Default,
-      PersonsRepository.Default,
-      AccountsRepository.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const auditLogsRepository = yield* AuditLogsRepository
       const emailAddressesRepository = yield* EmailAddressesRepository
       const idGenerator = yield* DomainIdGenerator
@@ -84,4 +79,15 @@ export class AccountsCreationModule extends Effect.Service<AccountsCreationModul
       return { createAccountForPerson }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      AuditLogsRepository.layer,
+      DomainIdGenerator.layer,
+      EmailAddressesRepository.layer,
+      PersonsRepository.layer,
+      AccountsRepository.layer
+    ])
+  )
+}

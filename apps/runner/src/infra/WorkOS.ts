@@ -7,13 +7,10 @@ import * as Layer from "effect/Layer"
 
 const DirectApiClientLayer = WorkOSApiClient.layerConfig({
   clientId: pipe(
-    Config.string("WORKOS_CLIENT_ID"),
+    Config.String("WORKOS_CLIENT_ID"),
     Config.map(WorkOSIds.EnvironmentClientId.make)
   ),
-  clientSecret: pipe(
-    Config.string("WORKOS_API_KEY"),
-    (_) => Config.redacted(_)
-  )
+  clientSecret: Config.Redacted("WORKOS_API_KEY")
 })
 
 export const WorkOSLayer = pipe(

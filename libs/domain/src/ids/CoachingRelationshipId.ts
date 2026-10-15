@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const CoachingRelationshipId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/CoachingRelationshipId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a coaching relationship.",
     identifier: "CoachingRelationshipId",
     title: "Coaching Relationship ID"
@@ -17,10 +17,10 @@ export type CoachingRelationshipId = typeof CoachingRelationshipId.Type
 const COACHING_RELATIONSHIP_PREFIX = "coaching_relationship_"
 
 export const PrefixedCoachingRelationshipId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(COACHING_RELATIONSHIP_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(COACHING_RELATIONSHIP_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedCoachingRelationshipId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a coaching relationship.",
     identifier: "PrefixedCoachingRelationshipId",
     title: "Coaching Relationship ID (Prefixed)"

@@ -1,35 +1,25 @@
-import * as VariantSchema from "@effect/experimental/VariantSchema"
-import * as Model from "@effect/sql/Model"
-import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
-import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import * as Model from "effect/schema/Model"
+import * as VariantSchema from "effect/schema/VariantSchema"
 
 const DateTimeWithDefaultNull = VariantSchema.Overrideable(
-  S.NullOr(S.String),
-  S.NullOr(S.DateTimeUtcFromSelf),
-  {
-    generate: Option.match({
-      onNone: () => Effect.succeed(null),
-      onSome: (dt) => Effect.succeed(dt ? DateTime.formatIso(dt) : null)
-    }),
-    decode: S.NullOr(S.DateTimeUtc),
-    constructorDefault: () => null
-  }
+  S.NullOr(S.DateTimeUtcFromString),
+  { defaultValue: Effect.succeed(null) }
 )
 
 export const DateTimeArchived = Model.Field({
-  select: S.NullOr(S.DateTimeUtc),
+  select: S.NullOr(S.DateTimeUtcFromString),
   insert: DateTimeWithDefaultNull,
   update: DateTimeWithDefaultNull,
-  json: S.NullOr(S.DateTimeUtc)
+  json: S.NullOr(S.DateTimeUtcFromString)
 })
 
 export const DateTimeNullable = Model.Field({
-  select: S.NullOr(S.DateTimeUtc),
+  select: S.NullOr(S.DateTimeUtcFromString),
   insert: DateTimeWithDefaultNull,
   update: DateTimeWithDefaultNull,
-  json: S.NullOr(S.DateTimeUtc)
+  json: S.NullOr(S.DateTimeUtcFromString)
 })
 
 /**
@@ -40,15 +30,8 @@ export const DateTimeNullable = Model.Field({
  *
  * @see Model.JsonFromString
  */
-export const JsonFromStringOnWrite = <
-  A,
-  I
->(
-  schema:
-    | S.Schema<A, I>
-    | S.Annotable<S.Schema<A, I>, A, I>
-) => {
-  const parsed = S.parseJson(schema)
+export const JsonFromStringOnWrite = <Schema extends S.Top>(schema: Schema) => {
+  const parsed = S.fromJsonString(schema)
 
   return Model.Field({
     select: schema,

@@ -1,5 +1,5 @@
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint"
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup"
+import * as HttpApiEndpoint from "effect/http-api/HttpApiEndpoint"
+import * as HttpApiGroup from "effect/http-api/HttpApiGroup"
 import { AuthenticationHeaders } from "../../infra/AuthenticationSecurity.ts"
 import { WhoAmIApiSchemas } from "./WhoAmIApiSchemas.ts"
 
@@ -9,8 +9,9 @@ import { WhoAmIApiSchemas } from "./WhoAmIApiSchemas.ts"
  */
 export class WhoAmIApi extends HttpApiGroup.make("whoami", { topLevel: true })
   .add(
-    HttpApiEndpoint.get("whoami", "/whoami")
-      .setHeaders(AuthenticationHeaders)
-      .addSuccess(WhoAmIApiSchemas.Success)
+    HttpApiEndpoint.get("whoami", "/whoami", {
+      headers: AuthenticationHeaders,
+      success: WhoAmIApiSchemas.Success
+    })
   )
 {}

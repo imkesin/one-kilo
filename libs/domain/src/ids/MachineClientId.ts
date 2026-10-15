@@ -6,7 +6,7 @@ import { makeIdFromPrefixed } from "./internal/makeIdFromPrefixed.js"
 export const MachineClientId = pipe(
   UUIDv7.UUIDv7,
   S.brand("@one-kilo/domain/MachineClientId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a machine client",
     identifier: "MachineClientId",
     title: "Machine Client ID"
@@ -17,10 +17,10 @@ export type MachineClientId = typeof MachineClientId.Type
 const MACHINE_CLIENT_PREFIX = "machine_client_"
 
 export const PrefixedMachineClientId = pipe(
-  S.NonEmptyTrimmedString,
-  S.startsWith(MACHINE_CLIENT_PREFIX),
+  S.Trimmed.check(S.isNonEmpty()),
+  S.check(S.isStartingWith(MACHINE_CLIENT_PREFIX)),
   S.brand("@one-kilo/domain/PrefixedMachineClientId"),
-  S.annotations({
+  S.annotate({
     description: "The unique identifier for a machine client.",
     identifier: "PrefixedMachineClientId",
     title: "Machine Client ID (Prefixed)"

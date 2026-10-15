@@ -1,10 +1,11 @@
-import { Hydration, Registry } from "@effect-atom/atom-react"
-import * as ReactHydration from "@effect-atom/atom-react/ReactHydration"
+import * as ReactHydration from "@effect/atom-react/ReactHydration"
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest } from "@tanstack/react-start/server"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as AtomRegistry from "effect/reactivity/AtomRegistry"
+import * as Hydration from "effect/reactivity/Hydration"
 import { runWithWebServerRuntime } from "~/infra/runtime/server/runWithServerRuntime"
 import { RedirectError } from "~/lib/RedirectError"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
@@ -31,7 +32,7 @@ const handleLoadAuthedData = Effect.gen(function*() {
   const whoamiWebProxy = yield* WhoAmIWebProxy
   const whoami = yield* whoamiWebProxy.whoami()
 
-  const registry = Registry.make({ initialValues: [whoamiAtomInitialValue(whoami)] })
+  const registry = AtomRegistry.make({ initialValues: [whoamiAtomInitialValue(whoami)] })
 
   return Hydration.dehydrate(registry)
 })

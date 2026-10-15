@@ -42,9 +42,9 @@ const listUserUpdatedEventsSince = Effect.fn(function*(rangeStart: Date) {
   }
 })
 
-export const makeEventsTests = () => (it: Vitest.MethodsNonLive<ApiClient.ApiClient, boolean>) => {
+export const makeEventsTests = () => (it: Vitest.MethodsNonLive<ApiClient.ApiClient>) => {
   describe("Events", () => {
-    it.scoped("can list a `user.updated` event after updating a user", () =>
+    it.effect("can list a `user.updated` event after updating a user", () =>
       Effect.gen(function*() {
         const client = yield* ApiClient.ApiClient
 
@@ -60,7 +60,7 @@ export const makeEventsTests = () => (it: Vitest.MethodsNonLive<ApiClient.ApiCli
         yield* Effect.addFinalizer(() =>
           pipe(
             client.userManagement.deleteUser(user.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
@@ -84,11 +84,15 @@ export const makeEventsTests = () => (it: Vitest.MethodsNonLive<ApiClient.ApiCli
 
         const event = yield* pipe(
           listUserUpdatedEventsSince(rangeStart),
-          Effect.flatMap(Arr.findLast(({ data }) => data.id === user.id)),
+          Effect.flatMap((events) =>
+            Effect.fromOption(
+              Arr.findLast(events, ({ data }) => data.id === user.id)
+            )
+          ),
           Effect.retry({
             schedule: Schedule.spaced("500 millis"),
             times: 3,
-            while: Cause.isNoSuchElementException
+            while: Cause.isNoSuchElementError
           })
         )
 

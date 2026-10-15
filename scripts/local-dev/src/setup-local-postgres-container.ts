@@ -1,12 +1,21 @@
-import * as NodeContext from "@effect/platform-node/NodeContext"
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime"
-import * as Command from "@effect/platform/Command"
+import * as NodeServices from "@effect/platform-node/NodeServices"
 import { PostgresDefaults } from "@one-kilo/sql/configs/Defaults"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as ChildProcess from "effect/process/ChildProcess"
+import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner"
 import * as Schedule from "effect/Schedule"
 import * as S from "effect/Schema"
+
+const docker = (...args: Array<string>) => ChildProcess.make("docker", args)
+
+const exitCode = (command: ChildProcess.Command) =>
+  Effect.flatMap(ChildProcessSpawner.ChildProcessSpawner, (spawner) => spawner.exitCode(command))
+
+const outputString = (command: ChildProcess.Command) =>
+  Effect.flatMap(ChildProcessSpawner.ChildProcessSpawner, (spawner) => spawner.string(command))
 
 const POSTGRES_IMAGE = "postgres:18.2"
 const CONTAINER_NAME = "local-one-kilo-postgres"
@@ -20,23 +29,23 @@ class DockerCommandError extends S.TaggedError<DockerCommandError>("@one-kilo/lo
 ) {}
 
 const isContainerRunning = Effect.gen(function*() {
-  const cmd = Command.make("docker", "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME)
-  const code = yield* pipe(cmd, Command.exitCode)
+  const cmd = docker("inspect", "--format", "{{.State.Running}}", CONTAINER_NAME)
+  const code = yield* pipe(cmd, exitCode)
   if (code !== 0) return false
-  const output = yield* pipe(cmd, Command.string())
+  const output = yield* pipe(cmd, outputString)
   return output.trim() === "true"
 }).pipe(Effect.orElseSucceed(() => false))
 
 const doesContainerExist = pipe(
-  Command.make("docker", "inspect", CONTAINER_NAME),
-  Command.exitCode,
+  docker("inspect", CONTAINER_NAME),
+  exitCode,
   Effect.map((code) => code === 0)
 )
 
 const startExistingContainer = Effect.gen(function*() {
   const code = yield* pipe(
-    Command.make("docker", "start", CONTAINER_NAME),
-    Command.exitCode
+    docker("start", CONTAINER_NAME),
+    exitCode
   )
   if (code !== 0) {
     return yield* Effect.fail(
@@ -51,14 +60,14 @@ const startExistingContainer = Effect.gen(function*() {
 
 const ensureImagePulled = Effect.gen(function*() {
   const inspectCode = yield* pipe(
-    Command.make("docker", "image", "inspect", POSTGRES_IMAGE),
-    Command.exitCode
+    docker("image", "inspect", POSTGRES_IMAGE),
+    exitCode
   )
   if (inspectCode === 0) return
   yield* Effect.log(`Pulling ${POSTGRES_IMAGE}...`)
   const pullCode = yield* pipe(
-    Command.make("docker", "pull", POSTGRES_IMAGE),
-    Command.exitCode
+    docker("pull", POSTGRES_IMAGE),
+    exitCode
   )
   if (pullCode !== 0) {
     return yield* Effect.fail(
@@ -73,8 +82,7 @@ const ensureImagePulled = Effect.gen(function*() {
 const createContainer = Effect.gen(function*() {
   yield* ensureImagePulled
   const code = yield* pipe(
-    Command.make(
-      "docker",
+    docker(
       "run",
       "--name",
       CONTAINER_NAME,
@@ -89,7 +97,7 @@ const createContainer = Effect.gen(function*() {
       "--detach",
       POSTGRES_IMAGE
     ),
-    Command.exitCode
+    exitCode
   )
   if (code !== 0) {
     return yield* Effect.fail(
@@ -103,8 +111,8 @@ const createContainer = Effect.gen(function*() {
 })
 
 const waitForPostgres = pipe(
-  Command.make("docker", "exec", CONTAINER_NAME, "pg_isready", "--username", PostgresDefaults.user),
-  Command.exitCode,
+  docker("exec", CONTAINER_NAME, "pg_isready", "--username", PostgresDefaults.user),
+  exitCode,
   Effect.flatMap((code) =>
     code === 0
       ? Effect.void
@@ -119,8 +127,7 @@ const waitForPostgres = pipe(
 
 const createDatabase = (name: string) =>
   pipe(
-    Command.make(
-      "docker",
+    docker(
       "exec",
       CONTAINER_NAME,
       "psql",
@@ -129,7 +136,7 @@ const createDatabase = (name: string) =>
       "--command",
       `CREATE DATABASE ${name};`
     ),
-    Command.exitCode,
+    exitCode,
     Effect.flatMap((code) =>
       code === 0
         ? Effect.log(`Created '${name}' database`)
@@ -159,6 +166,7 @@ const main = Effect.gen(function*() {
 
 pipe(
   main,
-  Effect.provide(NodeContext.layer),
+  // oxlint-disable-next-line effecttsgo/strict-effect-provide -- script entry point
+  Effect.provide(NodeServices.layer),
   NodeRuntime.runMain
 )

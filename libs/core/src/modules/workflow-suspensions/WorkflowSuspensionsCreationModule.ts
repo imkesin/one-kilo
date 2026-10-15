@@ -1,16 +1,18 @@
 import { WorkflowSuspensionsRepository } from "@one-kilo/sql/modules/workflow-suspensions/WorkflowSuspensionsRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 
 type CreateWorkflowSuspensionParameters = {
   readonly executionId: string
   readonly workflowName: string
 }
 
-export class WorkflowSuspensionsCreationModule extends Effect.Service<WorkflowSuspensionsCreationModule>()(
+export class WorkflowSuspensionsCreationModule extends Context.Service<WorkflowSuspensionsCreationModule>()(
   "@one-kilo/core/WorkflowSuspensionsCreationModule",
   {
-    dependencies: [WorkflowSuspensionsRepository.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const workflowSuspensionsRepository = yield* WorkflowSuspensionsRepository
 
       const createWorkflowSuspension = Effect.fn("WorkflowSuspensionsCreationModule.createWorkflowSuspension")(
@@ -25,4 +27,9 @@ export class WorkflowSuspensionsCreationModule extends Effect.Service<WorkflowSu
       return { createWorkflowSuspension }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(WorkflowSuspensionsRepository.layer)
+  )
+}

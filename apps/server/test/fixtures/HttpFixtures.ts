@@ -10,8 +10,8 @@ export const layerTest = (options: {
   readonly suiteName: string
 }) => {
   const TestOnlyLayer = Layer.merge(
-    TestApplicationApiClient.Default,
-    TestAccountFactory.Default
+    TestApplicationApiClient.layer,
+    TestAccountFactory.layer
   )
 
   return pipe(

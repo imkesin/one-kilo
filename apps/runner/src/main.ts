@@ -1,6 +1,6 @@
-import * as RunnerAddress from "@effect/cluster/RunnerAddress"
 import * as NodeClusterHttp from "@effect/platform-node/NodeClusterHttp"
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime"
+import * as RunnerAddress from "effect/cluster/RunnerAddress"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -11,14 +11,14 @@ import { makeRunnerLayer } from "./Runner.ts"
 
 const RunnerConfig = pipe(
   Config.all({
-    host: Config.string("HOST"),
+    host: Config.String("HOST"),
     port: pipe(
-      Config.number("PORT"),
+      Config.Number("PORT"),
       Config.withDefault(12000)
     ),
-    k8sNamespace: Config.string("K8S_NAMESPACE"),
+    k8sNamespace: Config.String("K8S_NAMESPACE"),
     k8sLabelSelector: pipe(
-      Config.string("K8S_LABEL_SELECTOR"),
+      Config.String("K8S_LABEL_SELECTOR"),
       Config.withDefault("app=runner")
     )
   }),
@@ -31,7 +31,7 @@ const ClusterLayer = pipe(
 
     return NodeClusterHttp.layer({
       transport: "http",
-      serialization: "msgpack",
+      serialization: "binary",
       storage: "sql",
       runnerHealth: "k8s",
       runnerHealthK8s: {
@@ -43,7 +43,7 @@ const ClusterLayer = pipe(
       }
     })
   }),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 const RunnerLayer = makeRunnerLayer(ClusterLayer)

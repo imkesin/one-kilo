@@ -1,13 +1,15 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { WorkspaceEntity } from "@one-kilo/domain/entities/Workspace"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 import * as WorkspaceMembershipsTransformations from "./internal/WorkspaceMembershipsTransformations.ts"
 import { WorkspaceMembershipsModel } from "./WorkspaceMembershipsModel.ts"
 import { WorkspacesModel } from "./WorkspacesModel.ts"
@@ -22,19 +24,18 @@ type FindWorkspaceEntityByWorkOSOrganizationIdParameters = {
   workosOrganizationId: WorkOSIds.OrganizationId
 }
 
-export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRepository>()(
+export class WorkspacesQueryRepository extends Context.Service<WorkspacesQueryRepository>()(
   "@one-kilo/sql/WorkspacesQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findPersonalWorkspaceAndMembershipEntitiesByAccountIdSchema = SqlSchema.findOne({
+      const findPersonalWorkspaceAndMembershipEntitiesByAccountIdSchema = SqlSchema.findOneOption({
         Request: AccountId,
-        Result: S.extend(
-          WorkspacesModel.select,
-          S.Struct({ workspaceMemberships: S.Tuple(WorkspaceMembershipsModel.select) })
-        ),
+        Result: S.Struct({
+          ...WorkspacesModel.select.fields,
+          workspaceMemberships: S.Tuple([WorkspaceMembershipsModel.select])
+        }),
         execute: (accountId) =>
           sql`
             SELECT
@@ -66,7 +67,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
       )
 
-      const findWorkspaceEntityByIdSchema = SqlSchema.findOne({
+      const findWorkspaceEntityByIdSchema = SqlSchema.findOneOption({
         Request: WorkspaceId,
         Result: WorkspacesModel.select,
         execute: (workspaceId) =>
@@ -89,7 +90,7 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
         orDieWithUnexpectedError("An unexpected error occurred while finding a workspace")
       )
 
-      const findWorkspaceEntityByWorkOSOrganizationIdSchema = SqlSchema.findOne({
+      const findWorkspaceEntityByWorkOSOrganizationIdSchema = SqlSchema.findOneOption({
         Request: WorkOSIds.OrganizationId,
         Result: WorkspacesModel.select,
         execute: (workosOrganizationId) =>
@@ -121,4 +122,6 @@ export class WorkspacesQueryRepository extends Effect.Service<WorkspacesQueryRep
       }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

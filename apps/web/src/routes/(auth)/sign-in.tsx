@@ -11,7 +11,7 @@ const handleAuthkitRedirect = Effect.fn(function*() {
   const workosPublicClient = yield* WorkOSPublicApiClient.PublicApiClient
 
   const baseUrl = yield* pipe(
-    Config.url("WEB_PUBLIC_BASE_URL"),
+    Config.URL("WEB_PUBLIC_BASE_URL"),
     Config.withDefault(new URL("http://localhost:11000"))
   )
   const redirectUri = new URL("/sign-in/callback", baseUrl).toString()

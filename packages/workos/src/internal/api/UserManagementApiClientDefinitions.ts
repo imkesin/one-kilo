@@ -1,10 +1,15 @@
-import type * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
-import * as HttpClientResponse from "@effect/platform/HttpClientResponse"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import type * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
+import * as HttpClientResponse from "effect/http/HttpClientResponse"
 import * as Redacted from "effect/Redacted"
-import { OrganizationMembership, User } from "../../domain/Entities.ts"
+import {
+  type OrganizationMembership,
+  OrganizationMembershipFromWire,
+  type User,
+  UserFromWire
+} from "../../domain/Entities.ts"
 import * as WorkOSError from "../../domain/Errors.ts"
 import type { EnvironmentClientId, OrganizationMembershipId, UserId } from "../../domain/Ids.ts"
 import * as HttpResponseExtensions from "../http/HttpResponseExtensions.ts"
@@ -12,9 +17,11 @@ import * as SchemaExtensions from "../schema/SchemaExtensions.ts"
 import {
   AuthenticateWithCodeError,
   AuthenticateWithCodeParameters,
-  AuthenticateWithCodeResponse,
+  type AuthenticateWithCodeResponse,
+  AuthenticateWithCodeResponseFromWire,
   AuthenticateWithRefreshTokenParameters,
-  AuthenticateWithRefreshTokenResponse,
+  type AuthenticateWithRefreshTokenResponse,
+  AuthenticateWithRefreshTokenResponseFromWire,
   CreateOrganizationMembershipParameters,
   CreateUserParameters,
   DeleteOrganizationMembershipOutcome,
@@ -115,20 +122,20 @@ export const make = (
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/authenticate"),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithCodeResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithCodeResponseFromWire),
             "400": (response) =>
               pipe(
                 response,
                 HttpClientResponse.schemaBodyJson(AuthenticateWithCodeError.InvalidGrant),
                 Effect.flatMap(() => WorkOSError.InvalidAuthenticationCodeError.make({ code: parameters.code })),
                 Effect.catchTags({
-                  "ParseError": () => HttpResponseExtensions.unexpectedStatus(response),
-                  "ResponseError": () => HttpResponseExtensions.unexpectedStatus(response)
+                  "SchemaError": () => HttpResponseExtensions.unexpectedStatus(response),
+                  "HttpClientError": () => HttpResponseExtensions.unexpectedStatus(response)
                 })
               ),
             orElse: HttpResponseExtensions.unexpectedStatus
@@ -146,12 +153,12 @@ export const make = (
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/authenticate"),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithRefreshTokenResponse),
+            "2xx": HttpResponseExtensions.decodeExpected(AuthenticateWithRefreshTokenResponseFromWire),
             "400": (response) =>
               pipe(
                 response,
@@ -160,8 +167,8 @@ export const make = (
                   new WorkOSError.InvalidRefreshTokenError({ refreshToken: parameters.refreshToken })
                 ),
                 Effect.catchTags({
-                  "ParseError": () => HttpResponseExtensions.unexpectedStatus(response),
-                  "ResponseError": () => HttpResponseExtensions.unexpectedStatus(response)
+                  "SchemaError": () => HttpResponseExtensions.unexpectedStatus(response),
+                  "HttpClientError": () => HttpResponseExtensions.unexpectedStatus(response)
                 })
               ),
             orElse: HttpResponseExtensions.unexpectedStatus
@@ -176,12 +183,12 @@ export const make = (
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/users"),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "2xx": HttpResponseExtensions.decodeExpected(UserFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
@@ -191,7 +198,7 @@ export const make = (
         HttpClientRequest.get(`/users/${userId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "2xx": HttpResponseExtensions.decodeExpected(UserFromWire),
             "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
@@ -204,12 +211,12 @@ export const make = (
         Effect.map((_) =>
           pipe(
             HttpClientRequest.put(`/users/${userId}`),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(User),
+            "2xx": HttpResponseExtensions.decodeExpected(UserFromWire),
             "404": () => Effect.fail(WorkOSError.ResourceNotFoundError.make()),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
@@ -217,7 +224,7 @@ export const make = (
       ),
     deleteUser: (userId) =>
       pipe(
-        HttpClientRequest.del(`/users/${userId}`),
+        HttpClientRequest.delete(`/users/${userId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": () => Effect.succeed(DeleteUserOutcome.Success()),
@@ -234,19 +241,19 @@ export const make = (
         Effect.map((_) =>
           pipe(
             HttpClientRequest.post("/organization_memberships"),
-            HttpClientRequest.bodyUnsafeJson(_)
+            HttpClientRequest.bodyJsonUnsafe(_)
           )
         ),
         flatMapResponse(
           HttpClientResponse.matchStatus({
-            "2xx": HttpResponseExtensions.decodeExpected(OrganizationMembership),
+            "2xx": HttpResponseExtensions.decodeExpected(OrganizationMembershipFromWire),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
         )
       ),
     deleteOrganizationMembership: (organizationMembershipId) =>
       pipe(
-        HttpClientRequest.del(`/organization_memberships/${organizationMembershipId}`),
+        HttpClientRequest.delete(`/organization_memberships/${organizationMembershipId}`),
         mapResponse(
           HttpClientResponse.matchStatus({
             "2xx": () => Effect.succeed(DeleteOrganizationMembershipOutcome.Success()),

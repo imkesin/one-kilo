@@ -1,7 +1,7 @@
-import type * as KeyValueStore from "@effect/platform/KeyValueStore"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
+import type * as KeyValueStore from "effect/persistence/KeyValueStore"
 import * as StoreDefinitions from "./internal/StoreDefinitions.ts"
 import type * as TokenGenerator from "./TokenGenerator.ts"
 
@@ -10,9 +10,9 @@ export interface Service {
   readonly oauth2Client: StoreDefinitions.OAuth2Client
 }
 
-export class Store extends Context.Tag(
+export class Store extends Context.Service<Store, Service>()(
   "@effect/auth-workos/Store"
-)<Store, Service>() {}
+) {}
 
 export const makeTest = (options?: StoreDefinitions.MakeOptions): Effect.Effect<
   Service,

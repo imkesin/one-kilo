@@ -8,9 +8,9 @@ import * as Store from "./Store.ts"
 
 export type Service = StoreDefinitions.OAuth2Client
 
-export class OAuth2Gateway extends Context.Tag(
+export class OAuth2Gateway extends Context.Service<OAuth2Gateway, Service>()(
   "@effect/auth-workos/OAuth2Gateway"
-)<OAuth2Gateway, Service>() {}
+) {}
 
 export const makeTest = (): Effect.Effect<Service, never, Store.Store> =>
   Effect.gen(function*() {

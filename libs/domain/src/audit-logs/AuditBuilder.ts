@@ -9,22 +9,22 @@ type TypeId = typeof TypeId
 
 type Version = 1 | 2 | 3
 
-type AuditMetadataFields<Type extends string, Targets extends S.Schema.All = S.Schema.All> = {
+type AuditMetadataFields<Type extends string, Targets extends S.Top = S.Top> = {
   // Inputs
   readonly id: typeof AuditLogId
   readonly performedByAccountId: typeof AccountId
   readonly targets: Targets
 
   // Derived
-  readonly timestamp: typeof S.DateTimeUtc
-  readonly traceId: typeof S.NonEmptyTrimmedString
+  readonly timestamp: typeof S.DateTimeUtcFromString
+  readonly traceId: S.Trimmed
 
   // Inferred
   readonly type: S.tag<Type>
   readonly version: S.tag<Version>
 }
 
-interface AuditBuilder<Targets extends S.Schema.All> {
+interface AuditBuilder<Targets extends S.Top> {
   readonly [TypeId]: TypeId
 
   Audit: <Type extends string>(
@@ -34,7 +34,7 @@ interface AuditBuilder<Targets extends S.Schema.All> {
     }
   ) => AuditMetadataFields<Type, Targets>
 
-  AuditWithContext: <Type extends string, Context extends S.Schema.All>(
+  AuditWithContext: <Type extends string, Context extends S.Top>(
     parameters: {
       type: Type
       context: Context
@@ -96,27 +96,27 @@ export function make(
   targetB?: Target,
   targetC?: Target
 ): unknown {
-  let targets: S.Schema.All
+  let targets: S.Top
   switch (arguments.length) {
     case 1: {
-      targets = S.Tuple(S.Struct({ id: targetA.id, type: S.tag(targetA.type) }))
+      targets = S.Tuple([S.Struct({ id: targetA.id, type: S.tag(targetA.type) })])
 
       break
     }
     case 2: {
-      targets = S.Tuple(
+      targets = S.Tuple([
         S.Struct({ id: targetA.id, type: S.tag(targetA.type) }),
         S.Struct({ id: targetB!.id, type: S.tag(targetB!.type) })
-      )
+      ])
 
       break
     }
     case 3: {
-      targets = S.Tuple(
+      targets = S.Tuple([
         S.Struct({ id: targetA.id, type: S.tag(targetA.type) }),
         S.Struct({ id: targetB!.id, type: S.tag(targetB!.type) }),
         S.Struct({ id: targetC!.id, type: S.tag(targetC!.type) })
-      )
+      ])
 
       break
     }
@@ -138,13 +138,13 @@ export function make(
       performedByAccountId: AccountId,
       targets,
 
-      timestamp: S.DateTimeUtc,
-      traceId: S.NonEmptyTrimmedString,
+      timestamp: S.DateTimeUtcFromString,
+      traceId: S.Trimmed.check(S.isNonEmpty()),
 
       type: S.tag(parameters.type),
       version: S.tag(parameters.version ?? 1)
     }),
-    AuditWithContext: <Type extends string, Context extends S.Schema.All>(
+    AuditWithContext: <Type extends string, Context extends S.Top>(
       parameters: {
         type: Type
         context: Context
@@ -156,8 +156,8 @@ export function make(
       context: parameters.context,
       targets,
 
-      timestamp: S.DateTimeUtc,
-      traceId: S.NonEmptyTrimmedString,
+      timestamp: S.DateTimeUtcFromString,
+      traceId: S.Trimmed.check(S.isNonEmpty()),
 
       type: S.tag(parameters.type),
       version: S.tag(parameters.version ?? 1)

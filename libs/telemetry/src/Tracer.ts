@@ -1,17 +1,17 @@
-import * as OtlpSerialization from "@effect/opentelemetry/OtlpSerialization"
-import * as OtlpTracer from "@effect/opentelemetry/OtlpTracer"
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
+import * as OtlpSerialization from "effect/observability/OtlpSerialization"
+import * as OtlpTracer from "effect/observability/OtlpTracer"
 
 const DEFAULT_LOCAL_BASE_URL = "http://localhost:4318"
 
 const OtelConfig = pipe(
   Config.all({
     baseUrl: pipe(
-      Config.string("EXPORTER_OTLP_ENDPOINT"),
+      Config.String("EXPORTER_OTLP_ENDPOINT"),
       Config.withDefault(DEFAULT_LOCAL_BASE_URL)
     )
   }),
@@ -28,7 +28,7 @@ export const layer = ({
   serviceVersion
 }: TracerLayerParameters): Layer.Layer<never> =>
   pipe(
-    Layer.unwrapEffect(
+    Layer.unwrap(
       Effect.gen(function*() {
         const { baseUrl } = yield* OtelConfig
 

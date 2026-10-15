@@ -1,11 +1,13 @@
 import { AthletesQueryRepository } from "@one-kilo/sql/modules/athletes/AthletesQueryRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 
-export class AthletesQueryModule extends Effect.Service<AthletesQueryModule>()(
+export class AthletesQueryModule extends Context.Service<AthletesQueryModule>()(
   "@one-kilo/core/AthletesQueryModule",
   {
-    dependencies: [AthletesQueryRepository.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const athletesQueryRepository = yield* AthletesQueryRepository
 
       return {
@@ -14,4 +16,9 @@ export class AthletesQueryModule extends Effect.Service<AthletesQueryModule>()(
       }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(AthletesQueryRepository.layer)
+  )
+}

@@ -1,8 +1,11 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { WorkflowSuspensionsModel } from "./WorkflowSuspensionsModel.ts"
 
 type InsertWorkflowSuspensionParameters = {
@@ -10,15 +13,14 @@ type InsertWorkflowSuspensionParameters = {
   readonly workflowName: string
 }
 
-export class WorkflowSuspensionsRepository extends Effect.Service<WorkflowSuspensionsRepository>()(
+export class WorkflowSuspensionsRepository extends Context.Service<WorkflowSuspensionsRepository>()(
   "@one-kilo/sql/WorkflowSuspensionsRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: WorkflowSuspensionsModel.insert,
         Result: WorkflowSuspensionsModel.select,
         execute: (request) => sql`INSERT INTO workflow_suspensions ${sql.insert(request).returning("*")}`
@@ -48,4 +50,9 @@ export class WorkflowSuspensionsRepository extends Effect.Service<WorkflowSuspen
       return { insert }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

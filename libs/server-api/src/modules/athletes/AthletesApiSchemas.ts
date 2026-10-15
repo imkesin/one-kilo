@@ -1,4 +1,3 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import type { Athlete } from "@one-kilo/domain/entities/Athlete"
 import { AthleteIdFromPrefixed } from "@one-kilo/domain/ids/AthleteId"
 import { CoachIdFromPrefixed } from "@one-kilo/domain/ids/CoachId"
@@ -53,7 +52,7 @@ class AthletesApi_Register_Registered extends S.TaggedClass<AthletesApi_Register
   {
     athlete: Api_Athlete
   },
-  HttpApiSchema.annotations({ status: 201 })
+  { httpApiStatus: 201 }
 ) {
   static fromDomain = (athlete: Athlete) => AthletesApi_Register_Registered.make({ athlete })
 }
@@ -65,7 +64,7 @@ class AthletesApi_Register_AlreadyRegistered extends S.TaggedClass<AthletesApi_R
   {
     athlete: Api_Athlete
   },
-  HttpApiSchema.annotations({ status: 200 })
+  { httpApiStatus: 200 }
 ) {
   static fromDomain = (athlete: Athlete) => AthletesApi_Register_AlreadyRegistered.make({ athlete })
 }

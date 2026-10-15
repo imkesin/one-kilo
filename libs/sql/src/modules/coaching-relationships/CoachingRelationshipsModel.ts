@@ -1,7 +1,7 @@
-import * as Model from "@effect/sql/Model"
 import { AthleteId } from "@one-kilo/domain/ids/AthleteId"
 import { CoachId } from "@one-kilo/domain/ids/CoachId"
 import { CoachingRelationshipId } from "@one-kilo/domain/ids/CoachingRelationshipId"
+import * as Model from "effect/schema/Model"
 import { LocalDateRangeFromPgDateRange } from "../../utils/DateRangeFields.ts"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 

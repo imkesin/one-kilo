@@ -1,6 +1,6 @@
 # Server
 
-Effect HTTP server using `@effect/platform`.
+Effect HTTP server using `effect/http` + `effect/http-api`.
 
 ## Commands
 

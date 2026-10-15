@@ -1,5 +1,4 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { AccountId } from "../ids/AccountId.ts"
 import { MachineClientId } from "../ids/MachineClientId.ts"
@@ -17,7 +16,7 @@ const EntityBaseFields = {
 const MachineClientAccountEntityFields = {
   ...EntityBaseFields,
 
-  type: pipe(AccountType, S.pickLiteral("MachineClient")),
+  type: AccountType.pick(["MachineClient"]),
   workosClientId: WorkOSIds.ApplicationClientId
 } as const
 
@@ -52,7 +51,7 @@ export class MachineClientAccount extends S.TaggedClass<MachineClientAccount>("@
 const PersonAccountEntityFields = {
   ...EntityBaseFields,
 
-  type: pipe(AccountType, S.pickLiteral("Person")),
+  type: AccountType.pick(["Person"]),
   workosUserId: WorkOSIds.UserId
 } as const
 

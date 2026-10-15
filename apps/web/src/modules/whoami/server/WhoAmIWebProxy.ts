@@ -1,16 +1,15 @@
 import { AuthenticationHeaders } from "@one-kilo/server-api/infra/AuthenticationSecurity"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import { ApplicationServerApiClient } from "~/infra/api/server/ServerApiClients"
 import { AuthenticationWebModule } from "~/modules/authentication/server/AuthenticationWebModule"
 
-export class WhoAmIWebProxy extends Effect.Service<WhoAmIWebProxy>()(
+export class WhoAmIWebProxy extends Context.Service<WhoAmIWebProxy>()(
   "@one-kilo/web/WhoAmIWebProxy",
   {
-    dependencies: [
-      ApplicationServerApiClient.Default,
-      AuthenticationWebModule.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const applicationClient = yield* ApplicationServerApiClient
       const authentication = yield* AuthenticationWebModule
 
@@ -25,4 +24,12 @@ export class WhoAmIWebProxy extends Effect.Service<WhoAmIWebProxy>()(
       return { whoami }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      ApplicationServerApiClient.layer,
+      AuthenticationWebModule.layer
+    ])
+  )
+}

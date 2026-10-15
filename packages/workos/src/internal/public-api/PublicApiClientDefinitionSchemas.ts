@@ -1,75 +1,63 @@
 import { pipe } from "effect/Function"
-import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { EnvironmentClientId, OrganizationId } from "../../domain/Ids.ts"
+import { LiteralWithEncodingDefault } from "../CommonDefinitions.ts"
 
-export class BuildAuthorizationUrlParameters
-  extends S.Class<BuildAuthorizationUrlParameters>("BuildAuthorizationUrlParameters")({
-    clientId: pipe(
-      EnvironmentClientId,
-      S.propertySignature,
-      S.fromKey("client_id")
-    ),
-    redirectUri: pipe(
-      S.NonEmptyTrimmedString,
-      S.propertySignature,
-      S.fromKey("redirect_uri")
-    ),
+export const BuildAuthorizationUrlParameters = pipe(
+  S.Struct({
+    clientId: EnvironmentClientId,
+    redirectUri: S.Trimmed.check(S.isNonEmpty()),
 
-    responseType: pipe(
-      S.requiredToOptional(
-        S.Literal("code"),
-        S.Literal("code"),
-        {
-          decode: () => Option.some("code" as const),
-          encode: () => "code" as const
-        }
-      ),
-      S.fromKey("response_type")
-    ),
+    responseType: LiteralWithEncodingDefault("code"),
 
     codeChallenge: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.fromKey("code_challenge")
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
     ),
     codeChallengeMethod: pipe(
       S.Literal("S256"),
-      S.optional,
-      S.fromKey("code_challenge_method")
+      S.optional
     ),
     connectionId: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.fromKey("connection_id")
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
     ),
     domainHint: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.fromKey("domain_hint")
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
     ),
     loginHint: pipe(
-      S.NonEmptyTrimmedString,
-      S.optional,
-      S.fromKey("login_hint")
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
     ),
     organizationId: pipe(
       OrganizationId,
-      S.optional,
-      S.fromKey("organization_id")
+      S.optional
     ),
     provider: pipe(
-      S.Literal("authkit", "AppleOAuth", "GitHubOAuth", "GoogleOAuth", "MicrosoftOAuth"),
+      S.Literals(["authkit", "AppleOAuth", "GitHubOAuth", "GoogleOAuth", "MicrosoftOAuth"]),
       S.optional
     ),
     screenHint: pipe(
-      S.Literal("sign-up", "sign-in"),
-      S.optional,
-      S.fromKey("screen_hint")
+      S.Literals(["sign-up", "sign-in"]),
+      S.optional
     ),
     state: pipe(
       S.StringFromBase64Url,
       S.optional
     )
+  }),
+  S.encodeKeys({
+    clientId: "client_id",
+    redirectUri: "redirect_uri",
+    responseType: "response_type",
+    codeChallenge: "code_challenge",
+    codeChallengeMethod: "code_challenge_method",
+    connectionId: "connection_id",
+    domainHint: "domain_hint",
+    loginHint: "login_hint",
+    organizationId: "organization_id",
+    screenHint: "screen_hint"
   })
-{}
+)
+export type BuildAuthorizationUrlParameters = typeof BuildAuthorizationUrlParameters.Type

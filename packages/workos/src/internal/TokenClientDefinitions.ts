@@ -1,44 +1,41 @@
-import type * as HttpClientError from "@effect/platform/HttpClientError"
 import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import type { ParseError } from "effect/ParseResult"
+import type * as HttpClientError from "effect/http/HttpClientError"
 import * as S from "effect/Schema"
+import * as SchemaTransformation from "effect/SchemaTransformation"
 import * as Jose from "jose"
 import { ApplicationClientId, OrganizationId, UserId } from "../domain/Ids.ts"
 import { type AccessToken, EmailAddress, type IdToken } from "../domain/Values.ts"
-import { OAuthUserInfoFields } from "./CommonDefinitions.ts"
+import { OAuthUserInfoFields, OAuthUserInfoKeys } from "./CommonDefinitions.ts"
 
-const DateFromSeconds = S.transform(
+const DateFromSeconds = pipe(
   S.Int,
-  S.DateFromSelf,
-  {
-    strict: true,
-    decode: (fromA) => new Date(fromA * 1000),
-    encode: (toI) => Math.floor(toI.getTime() / 1000)
-  }
+  S.decodeTo(
+    S.Date,
+    SchemaTransformation.transform({
+      decode: (seconds) => new Date(seconds * 1000),
+      encode: (date) => Math.floor(date.getTime() / 1000)
+    })
+  )
 )
 
 const DecodedAccessTokenCommonFields = {
-  iss: S.NonEmptyTrimmedString,
+  iss: S.Trimmed.check(S.isNonEmpty()),
   exp: DateFromSeconds,
   iat: DateFromSeconds,
-  orgId: pipe(
-    OrganizationId,
-    S.optionalWith({ as: "Option" }),
-    S.fromKey("org_id")
-  ),
-  jti: S.NonEmptyTrimmedString
+  orgId: S.OptionFromOptional(OrganizationId),
+  jti: S.Trimmed.check(S.isNonEmpty())
+} as const
+
+const DecodedAccessTokenCommonKeys = {
+  orgId: "org_id"
 } as const
 
 class DecodedMachineAccessToken extends S.Class<DecodedMachineAccessToken>("DecodedMachineAccessToken")({
   _tag: pipe(
-    S.Literal("DecodedMachineAccessToken"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "DecodedMachineAccessToken" as const,
-      decoding: () => "DecodedMachineAccessToken" as const
-    })
+    S.tag("DecodedMachineAccessToken"),
+    S.withDecodingDefaultKey(Effect.succeed("DecodedMachineAccessToken" as const))
   ),
 
   ...DecodedAccessTokenCommonFields,
@@ -50,22 +47,18 @@ const DecodedOAuthTokenCommonFields = {
   ...DecodedAccessTokenCommonFields,
 
   sub: UserId,
-  aud: S.NonEmptyTrimmedString
+  aud: S.Trimmed.check(S.isNonEmpty())
 } as const
 
 class DecodedOAuthAccessToken extends S.Class<DecodedOAuthAccessToken>("DecodedOAuthAccessToken")({
   _tag: pipe(
-    S.Literal("DecodedOAuthAccessToken"),
-    S.optional,
-    S.withDefaults({
-      constructor: () => "DecodedOAuthAccessToken" as const,
-      decoding: () => "DecodedOAuthAccessToken" as const
-    })
+    S.tag("DecodedOAuthAccessToken"),
+    S.withDecodingDefaultKey(Effect.succeed("DecodedOAuthAccessToken" as const))
   ),
 
   ...DecodedOAuthTokenCommonFields,
 
-  sid: S.NonEmptyTrimmedString
+  sid: S.Trimmed.check(S.isNonEmpty())
 }) {}
 
 class DecodedOAuthIdToken extends S.TaggedClass<DecodedOAuthIdToken>()(
@@ -79,12 +72,8 @@ class DecodedOAuthIdToken extends S.TaggedClass<DecodedOAuthIdToken>()(
 class DecodedSessionAccessToken extends S.Class<DecodedSessionAccessToken>("DecodedSessionAccessToken")(
   {
     _tag: pipe(
-      S.Literal("DecodedSessionAccessToken"),
-      S.optional,
-      S.withDefaults({
-        constructor: () => "DecodedSessionAccessToken" as const,
-        decoding: () => "DecodedSessionAccessToken" as const
-      })
+      S.tag("DecodedSessionAccessToken"),
+      S.withDecodingDefaultKey(Effect.succeed("DecodedSessionAccessToken" as const))
     ),
 
     ...DecodedAccessTokenCommonFields,
@@ -94,31 +83,45 @@ class DecodedSessionAccessToken extends S.Class<DecodedSessionAccessToken>("Deco
       S.Struct({ sub: EmailAddress }),
       S.optional
     ),
-    roles: S.NonEmptyArray(S.NonEmptyTrimmedString),
+    roles: S.NonEmptyArray(S.Trimmed.check(S.isNonEmpty())),
     permissions: pipe(
-      S.Array(S.NonEmptyTrimmedString),
+      S.Array(S.Trimmed.check(S.isNonEmpty())),
       S.optional
     ),
     entitlements: pipe(
-      S.Array(S.NonEmptyTrimmedString),
+      S.Array(S.Trimmed.check(S.isNonEmpty())),
       S.optional
     ),
-    sid: S.NonEmptyTrimmedString
+    sid: S.Trimmed.check(S.isNonEmpty())
   }
 ) {}
+
+const DecodedAccessTokenFromWire = S.Union([
+  pipe(DecodedMachineAccessToken, S.encodeKeys(DecodedAccessTokenCommonKeys)),
+  pipe(DecodedOAuthAccessToken, S.encodeKeys(DecodedAccessTokenCommonKeys)),
+  pipe(DecodedSessionAccessToken, S.encodeKeys(DecodedAccessTokenCommonKeys))
+])
+
+const DecodedOAuthIdTokenFromWire = pipe(
+  DecodedOAuthIdToken,
+  S.encodeKeys({
+    ...DecodedAccessTokenCommonKeys,
+    ...OAuthUserInfoKeys
+  })
+)
 
 class ExpiredTokenError extends S.TaggedError<ExpiredTokenError>("@effect/auth-workos/ExpiredTokenError")(
   "ExpiredTokenError",
   {
-    cause: S.Defect,
-    token: S.NonEmptyTrimmedString
+    cause: S.Defect(),
+    token: S.Trimmed.check(S.isNonEmpty())
   }
 ) {}
 class InvalidTokenError extends S.TaggedError<InvalidTokenError>("@effect/auth-workos/InvalidUrlError")(
   "InvalidTokenError",
   {
-    cause: S.Defect,
-    token: S.NonEmptyTrimmedString
+    cause: S.Defect(),
+    token: S.Trimmed.check(S.isNonEmpty())
   }
 ) {}
 
@@ -134,28 +137,28 @@ export interface Client {
     token: AccessToken
   ) => Effect.Effect<
     DecodedMachineAccessToken | DecodedOAuthAccessToken | DecodedSessionAccessToken,
-    HttpClientError.HttpClientError | InvalidTokenError | ParseError
+    HttpClientError.HttpClientError | InvalidTokenError | S.SchemaError
   >
 
   readonly decodeIdToken: (
     token: IdToken
   ) => Effect.Effect<
     DecodedOAuthIdToken,
-    HttpClientError.HttpClientError | InvalidTokenError | ParseError
+    HttpClientError.HttpClientError | InvalidTokenError | S.SchemaError
   >
 
   readonly verifyAccessToken: (
     token: AccessToken
   ) => Effect.Effect<
     DecodedMachineAccessToken | DecodedOAuthAccessToken | DecodedSessionAccessToken,
-    HttpClientError.HttpClientError | ExpiredTokenError | InvalidTokenError | ParseError
+    HttpClientError.HttpClientError | ExpiredTokenError | InvalidTokenError | S.SchemaError
   >
 
   readonly verifyIdToken: (
     token: IdToken
   ) => Effect.Effect<
     DecodedOAuthIdToken,
-    HttpClientError.HttpClientError | ExpiredTokenError | InvalidTokenError | ParseError
+    HttpClientError.HttpClientError | ExpiredTokenError | InvalidTokenError | S.SchemaError
   >
 }
 
@@ -169,13 +172,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           catch: (e) => InvalidTokenError.make({ cause: e, token })
         }),
         Effect.andThen(
-          S.decodeUnknown(
-            S.Union(
-              DecodedMachineAccessToken,
-              DecodedOAuthAccessToken,
-              DecodedSessionAccessToken
-            )
-          )
+          S.decodeUnknownEffect(DecodedAccessTokenFromWire)
         )
       ),
     decodeIdToken: (token: IdToken) =>
@@ -184,7 +181,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           try: () => Jose.decodeJwt(token),
           catch: (e) => InvalidTokenError.make({ cause: e, token })
         }),
-        Effect.andThen(S.decodeUnknown(DecodedOAuthIdToken))
+        Effect.andThen(S.decodeUnknownEffect(DecodedOAuthIdTokenFromWire))
       ),
     verifyAccessToken: Effect.fnUntraced(function*(token: AccessToken) {
       const now = yield* DateTime.nowAsDate
@@ -205,13 +202,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
         ),
         Effect.map(({ payload }) => payload),
         Effect.andThen(
-          S.decodeUnknown(
-            S.Union(
-              DecodedMachineAccessToken,
-              DecodedOAuthAccessToken,
-              DecodedSessionAccessToken
-            )
-          )
+          S.decodeUnknownEffect(DecodedAccessTokenFromWire)
         )
       )
     }),
@@ -233,7 +224,7 @@ export const make = (jwks: JWKsAsEffect): Client => {
           })
         ),
         Effect.map(({ payload }) => payload),
-        Effect.andThen(S.decodeUnknown(DecodedOAuthIdToken))
+        Effect.andThen(S.decodeUnknownEffect(DecodedOAuthIdTokenFromWire))
       )
     })
   }

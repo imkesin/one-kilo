@@ -1,10 +1,12 @@
 import * as WorkOSIds from "@effect/auth-workos/domain/Ids"
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import { AuthenticationIdentity } from "@one-kilo/domain/values/AuthenticationContext"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import * as Layer from "effect/Layer"
 import * as S from "effect/Schema"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 
 type FindAuthenticationIdentityParameters = {
   readonly workosUserId: WorkOSIds.UserId
@@ -14,14 +16,13 @@ type FindDefaultAuthenticationIdentityParameters = {
   readonly workosUserId: WorkOSIds.UserId
 }
 
-export class AuthenticationQueryRepository extends Effect.Service<AuthenticationQueryRepository>()(
+export class AuthenticationQueryRepository extends Context.Service<AuthenticationQueryRepository>()(
   "@one-kilo/sql/AuthenticationQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findAuthenticationIdentitySchema = SqlSchema.findOne({
+      const findAuthenticationIdentitySchema = SqlSchema.findOneOption({
         Request: S.Struct({
           workosUserId: WorkOSIds.UserId,
           workosOrganizationId: WorkOSIds.OrganizationId
@@ -51,14 +52,14 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
         orDieWithUnexpectedError("An unexpected error occurred while finding authentication identity")
       )
 
-      const findDefaultAuthenticationIdentitySchema = SqlSchema.findOne({
+      const findDefaultAuthenticationIdentitySchema = SqlSchema.findOneOption({
         Request: S.Struct({
           workosUserId: WorkOSIds.UserId
         }),
-        Result: S.extend(
-          AuthenticationIdentity,
-          S.Struct({ workosOrganizationId: WorkOSIds.OrganizationId })
-        ),
+        Result: S.Struct({
+          ...AuthenticationIdentity.fields,
+          workosOrganizationId: WorkOSIds.OrganizationId
+        }),
         execute: ({ workosUserId }) =>
           sql`
             SELECT
@@ -93,4 +94,6 @@ export class AuthenticationQueryRepository extends Effect.Service<Authentication
       }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

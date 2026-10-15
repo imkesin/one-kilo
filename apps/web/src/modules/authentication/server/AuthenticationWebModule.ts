@@ -5,34 +5,36 @@ import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kil
 import { getCookie, setCookie } from "@tanstack/react-start/server"
 import * as Cache from "effect/Cache"
 import * as Clock from "effect/Clock"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Predicate from "effect/Predicate"
 import * as RcMap from "effect/RcMap"
 import * as S from "effect/Schema"
+import * as Semaphore from "effect/Semaphore"
 import * as Jose from "jose"
 import { AuthenticationServerApiClient } from "~/infra/api/server/ServerApiClients"
 import { AuthenticationContextCookieNotFoundError, AuthenticationContextExpiredError } from "./AuthenticationErrors"
 
-const AuthenticationContextFromJsonString = S.parseJson(AuthenticationContext)
+const AuthenticationContextFromJsonString = S.fromJsonString(AuthenticationContext)
 
 const HTTP_ONLY_COOKIE_NAME = "one-kilo/web/AuthenticationContext"
 
-export class AuthenticationWebModule extends Effect.Service<AuthenticationWebModule>()(
+export class AuthenticationWebModule extends Context.Service<AuthenticationWebModule>()(
   "@one-kilo/web/AuthenticationWebModule",
   {
-    dependencies: [AuthenticationServerApiClient.Default],
-    scoped: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const authenticationClient = yield* AuthenticationServerApiClient
 
       const setAuthenticationContext = Effect.fn(
         function*(authenticationContext: AuthenticationContext) {
           const encodedAuthenticationContext = yield* pipe(
             authenticationContext,
-            S.encode(AuthenticationContextFromJsonString),
+            S.encodeEffect(AuthenticationContextFromJsonString),
             Effect.catchTag(
-              "ParseError",
+              "SchemaError",
               dieWithUnexpectedErrorCallback("Failed to encode authentication context cookie")
             )
           )
@@ -60,8 +62,8 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
 
         const decodedAuthenticationContext = yield* pipe(
           cookie,
-          S.decode(AuthenticationContextFromJsonString),
-          Effect.tapErrorCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
+          S.decodeEffect(AuthenticationContextFromJsonString),
+          Effect.tapCause((cause) => Effect.logError("Failed to decode authentication context", cause)),
           Effect.mapError(() => AuthenticationContextCookieNotFoundError.make())
         )
 
@@ -93,21 +95,23 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
         () => AuthenticationContextExpiredError.make()
       )
 
-      const refreshedAuthenticationContextCache = yield* Cache.makeWith({
-        capacity: 10,
-        lookup: (refreshToken: WorkOSValues.RefreshToken) =>
+      const refreshedAuthenticationContextCache = yield* Cache.makeWith(
+        (refreshToken: WorkOSValues.RefreshToken) =>
           pipe(
             authenticationClient.authentication.refreshContext({ payload: { refreshToken } }),
             Effect.map(({ authenticationContext }) => authenticationContext)
           ),
-        timeToLive: (exit) =>
-          Exit.isFailure(exit)
-            ? "50 millis"
-            : "5 seconds"
-      })
+        {
+          capacity: 10,
+          timeToLive: (exit) =>
+            Exit.isFailure(exit)
+              ? "50 millis"
+              : "5 seconds"
+        }
+      )
 
       const refreshTokenLocks = yield* RcMap.make({
-        lookup: (_refreshToken: WorkOSValues.RefreshToken) => Effect.makeSemaphore(1),
+        lookup: (_refreshToken: WorkOSValues.RefreshToken) => Semaphore.make(1),
         idleTimeToLive: "10 seconds"
       })
       const withRefreshTokenLock =
@@ -126,7 +130,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
 
       const refreshAndSetAuthenticationContext = Effect.fn(
         function*(refreshToken: WorkOSValues.RefreshToken) {
-          const authenticationContext = yield* refreshedAuthenticationContextCache.get(refreshToken)
+          const authenticationContext = yield* Cache.get(refreshedAuthenticationContextCache, refreshToken)
 
           yield* setAuthenticationContext(authenticationContext)
 
@@ -140,7 +144,7 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
       )
 
       const accountIdLocks = yield* RcMap.make({
-        lookup: (_accountId: AccountId) => Effect.makeSemaphore(1),
+        lookup: (_accountId: AccountId) => Semaphore.make(1),
         idleTimeToLive: "1 minute"
       })
       const withAccountIdLock = (accountId: AccountId) => <A, E, R>(effect: Effect.Effect<A, E, R>) =>
@@ -184,4 +188,9 @@ export class AuthenticationWebModule extends Effect.Service<AuthenticationWebMod
       }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(AuthenticationServerApiClient.layer)
+  )
+}

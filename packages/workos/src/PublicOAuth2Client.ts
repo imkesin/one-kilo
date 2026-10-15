@@ -1,5 +1,5 @@
 import * as Config from "effect/Config"
-import type { ConfigError } from "effect/ConfigError"
+import type { ConfigError } from "effect/Config"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -8,9 +8,9 @@ import * as PublicOAuth2ClientDefinitions from "./internal/public-oauth2/PublicO
 
 export type Service = PublicOAuth2ClientDefinitions.Client
 
-export class PublicOAuth2Client extends Context.Tag(
+export class PublicOAuth2Client extends Context.Service<PublicOAuth2Client, Service>()(
   "@effect/auth-workos/PublicOAuth2Client"
-)<PublicOAuth2Client, Service>() {}
+) {}
 
 export const make = (
   options: {

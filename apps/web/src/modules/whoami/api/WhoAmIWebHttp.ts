@@ -1,8 +1,8 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { AuthenticationHeaders } from "@one-kilo/server-api/infra/AuthenticationSecurity"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder"
 import * as Layer from "effect/Layer"
 import { ApplicationServerApiClient } from "~/infra/api/server/ServerApiClients"
 import { WebActor } from "~/infra/api/WebActor"
@@ -28,5 +28,5 @@ export const WhoAmIWebHttp = pipe(
         }))
     })
   ),
-  Layer.provide(ApplicationServerApiClient.Default)
+  Layer.provide(ApplicationServerApiClient.layer)
 )

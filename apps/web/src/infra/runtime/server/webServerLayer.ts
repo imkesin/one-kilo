@@ -8,13 +8,13 @@ import { AuthenticationWebModule } from "~/modules/authentication/server/Authent
 import { WhoAmIWebProxy } from "~/modules/whoami/server/WhoAmIWebProxy"
 
 const WebModulesLayer = Layer.mergeAll(
-  AuthenticationWebModule.Default,
-  WhoAmIWebProxy.Default
+  AuthenticationWebModule.layer,
+  WhoAmIWebProxy.layer
 )
 
 const WorkOSPublicApiClientLayer = WorkOSPublicApiClient.layerConfig({
   clientId: pipe(
-    Config.string("WORKOS_CLIENT_ID"),
+    Config.String("WORKOS_CLIENT_ID"),
     Config.map(WorkOSIds.EnvironmentClientId.make)
   )
 })
@@ -23,7 +23,7 @@ export const WebServerLayer = pipe(
   Layer.empty,
   Layer.merge(WebModulesLayer),
   Layer.merge(WorkOSPublicApiClientLayer),
-  Layer.provide(Logger.pretty)
+  Layer.provideMerge(Logger.layer([Logger.consolePretty(), Logger.tracerLogger]))
 )
 
-export type WebServerLayerSuccess = Layer.Layer.Success<typeof WebServerLayer>
+export type WebServerLayerSuccess = Layer.Success<typeof WebServerLayer>

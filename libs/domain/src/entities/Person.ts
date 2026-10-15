@@ -2,8 +2,9 @@ import * as Arr from "effect/Array"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
-import * as ParseResult from "effect/ParseResult"
 import * as S from "effect/Schema"
+import * as SchemaIssue from "effect/SchemaIssue"
+import * as SchemaTransformation from "effect/SchemaTransformation"
 import { PersonId } from "../ids/PersonId.ts"
 import { LocalDate } from "../values/LocalDate.ts"
 import { FullName, PreferredName, Sex, Timezone } from "../values/PersonValues.ts"
@@ -25,38 +26,37 @@ const EntityBaseFields = {
 
 const PersonNameFromWorkOSName = pipe(
   S.Struct({
-    firstName: S.NonEmptyTrimmedString,
-    lastName: S.NullOr(S.NonEmptyTrimmedString)
+    firstName: S.Trimmed.check(S.isNonEmpty()),
+    lastName: S.NullOr(S.Trimmed.check(S.isNonEmpty()))
   }),
-  S.transformOrFail(
+  S.decodeTo(
     S.Struct({
       preferredName: PreferredName,
       fullName: FullName
     }),
-    {
+    SchemaTransformation.transformEffect({
       decode: ({ firstName, lastName }) =>
         Effect.succeed({
           preferredName: firstName,
           fullName: lastName === null ? firstName : `${firstName} ${lastName}`
         }),
-      encode: ({ fullName }, _, ast) => {
+      encode: ({ fullName }) => {
         const [firstName, ...rest] = fullName.split(/\s+/)
         const lastName = rest.join(" ")
 
         return firstName
           ? Effect.succeed({ firstName, lastName: lastName.length > 0 ? lastName : null })
           : Effect.fail(
-            new ParseResult.Type(
-              ast,
-              fullName,
-              "`fullName` must contain at least one non-whitespace part"
+            new SchemaIssue.InvalidValue(
+              { message: "`fullName` must contain at least one non-whitespace part" },
+              fullName
             )
           )
       }
-    }
+    })
   )
 )
-const encodeWorkOSName = S.encode(PersonNameFromWorkOSName)
+const encodeWorkOSName = S.encodeEffect(PersonNameFromWorkOSName)
 
 type PersonFieldsPatch = {
   readonly preferredName?: PreferredName
@@ -113,7 +113,7 @@ const diffPersonFields = (
 
   const changedKeys = Object.keys(changed) as ReadonlyArray<keyof PersonFieldsPatch>
 
-  return Arr.isNonEmptyReadonlyArray(changedKeys)
+  return Arr.isReadonlyArrayNonEmpty(changedKeys)
     ? PersonDiff.Changed({ keys: changedKeys, patch: changed })
     : PersonDiff.Unchanged()
 }

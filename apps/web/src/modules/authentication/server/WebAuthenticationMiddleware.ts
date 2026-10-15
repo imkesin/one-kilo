@@ -1,4 +1,4 @@
-import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import { dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
@@ -13,18 +13,21 @@ export const WebAuthenticationMiddlewareLayer = pipe(
     Effect.gen(function*() {
       const authentication = yield* AuthenticationWebModule
 
-      return WebAuthenticationMiddleware.of(
-        pipe(
-          authentication.refreshedAuthenticationContext,
-          Effect.map(({ workosAccessToken }) => WebActor.of({ workosAccessToken })),
-          Effect.catchTags({
-            "AuthenticationContextCookieNotFoundError": () => WebUnauthenticatedError.make(),
-            "RefreshContext:InvalidRefreshTokenError": () => WebUnauthenticatedError.make()
-          }),
-          orDieWithUnexpectedError("An unexpected error occurred")
+      const webActor = pipe(
+        authentication.refreshedAuthenticationContext,
+        Effect.map(({ workosAccessToken }) => WebActor.of({ workosAccessToken })),
+        Effect.catchTags({
+          "AuthenticationContextCookieNotFoundError": () => WebUnauthenticatedError.make(),
+          "RefreshContext:InvalidRefreshTokenError": () => WebUnauthenticatedError.make()
+        }),
+        Effect.catchIf(
+          (error) => !(error instanceof WebUnauthenticatedError),
+          dieWithUnexpectedErrorCallback("An unexpected error occurred")
         )
       )
+
+      return WebAuthenticationMiddleware.of((httpEffect) => Effect.provideServiceEffect(httpEffect, WebActor, webActor))
     })
   ),
-  Layer.provide(AuthenticationWebModule.Default)
+  Layer.provide(AuthenticationWebModule.layer)
 )

@@ -9,8 +9,11 @@ import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/va
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { PersonsRepository } from "@one-kilo/sql/modules/persons/PersonsRepository"
 import type * as Arr from "effect/Array"
+import * as Context from "effect/Context"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 
 type UpdatePersonFields = {
   readonly preferredName?: PreferredName
@@ -38,15 +41,10 @@ type UpdatePersonOutcome = Data.TaggedEnum<{
 }>
 const UpdatePersonOutcome = Data.taggedEnum<UpdatePersonOutcome>()
 
-export class PersonsManagementModule extends Effect.Service<PersonsManagementModule>()(
+export class PersonsManagementModule extends Context.Service<PersonsManagementModule>()(
   "@one-kilo/core/PersonsManagementModule",
   {
-    dependencies: [
-      AuditLogsRepository.Default,
-      DomainIdGenerator.Default,
-      PersonsRepository.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const auditLogsRepository = yield* AuditLogsRepository
       const idGenerator = yield* DomainIdGenerator
       const personsRepository = yield* PersonsRepository
@@ -104,4 +102,13 @@ export class PersonsManagementModule extends Effect.Service<PersonsManagementMod
       return { updatePerson }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      AuditLogsRepository.layer,
+      DomainIdGenerator.layer,
+      PersonsRepository.layer
+    ])
+  )
+}

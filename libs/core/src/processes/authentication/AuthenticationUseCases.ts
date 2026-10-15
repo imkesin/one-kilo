@@ -1,8 +1,10 @@
 import * as WorkOSApiClient from "@effect/auth-workos/ApiClient"
 import type * as WorkOSValues from "@effect/auth-workos/domain/Values"
 import { dieWithUnexpectedError, dieWithUnexpectedErrorCallback } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as Predicate from "effect/Predicate"
 import { AuthenticationQueryModule } from "../../modules/authentication/AuthenticationQueryModule.ts"
@@ -11,13 +13,10 @@ type RefreshContextParameters = {
   readonly refreshToken: WorkOSValues.RefreshToken
 }
 
-export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCases>()(
+export class AuthenticationUseCases extends Context.Service<AuthenticationUseCases>()(
   "@one-kilo/core/AuthenticationUseCases",
   {
-    dependencies: [
-      AuthenticationQueryModule.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const workosDirectClient = yield* WorkOSApiClient.ApiClient
 
       const authenticationQueryModule = yield* AuthenticationQueryModule
@@ -37,7 +36,7 @@ export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCase
             )
           )
 
-          if (Predicate.isNullable(workosOrganizationId)) {
+          if (Predicate.isNullish(workosOrganizationId)) {
             return yield* dieWithUnexpectedError("Refresh token response is not associated with an organization")
           }
 
@@ -65,4 +64,9 @@ export class AuthenticationUseCases extends Effect.Service<AuthenticationUseCase
       return { refreshContext }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(AuthenticationQueryModule.layer)
+  )
+}

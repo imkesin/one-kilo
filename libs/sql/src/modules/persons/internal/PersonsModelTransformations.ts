@@ -27,12 +27,10 @@ export const toPersonEntity = ({
     archivedAt
   })
 
-export const PersonRow = S.extend(
-  PersonsModel.select,
-  S.Struct({
-    emailAddresses: S.Array(EmailAddressesModel.select)
-  })
-)
+export const PersonRow = S.Struct({
+  ...PersonsModel.select.fields,
+  emailAddresses: S.Array(EmailAddressesModel.select)
+})
 
 export const toPerson = (row: typeof PersonRow.Type): Person =>
   Person.make({

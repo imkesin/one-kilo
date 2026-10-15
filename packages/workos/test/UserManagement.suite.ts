@@ -4,9 +4,9 @@ import { pipe } from "effect/Function"
 import * as ApiGateway from "../src/ApiGateway.ts"
 import { EmailAddress } from "../src/domain/Values.ts"
 
-export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway, boolean>) => {
+export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGateway.ApiGateway>) => {
   describe("User Management", () => {
-    it.scoped("can create a user", () =>
+    it.effect("can create a user", () =>
       Effect.gen(function*() {
         const gatewayClient = yield* ApiGateway.ApiGateway
 
@@ -25,7 +25,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() => {
           return pipe(
             gatewayClient.userManagement.deleteUser(user.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         })
@@ -39,7 +39,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         })
       }))
 
-    it.scoped("can update a user", () =>
+    it.effect("can update a user", () =>
       Effect.gen(function*() {
         const gatewayClient = yield* ApiGateway.ApiGateway
 
@@ -54,7 +54,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             gatewayClient.userManagement.deleteUser(user.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
@@ -76,7 +76,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         expect(updated.email).toEqual(testEmail)
       }))
 
-    it.scoped("can create an organization membership", () =>
+    it.effect("can create an organization membership", () =>
       Effect.gen(function*() {
         const gatewayClient = yield* ApiGateway.ApiGateway
 
@@ -88,7 +88,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             gatewayClient.organizations.deleteOrganization(organization.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete an organization", cause)),
             Effect.ignore
           )
         )
@@ -102,7 +102,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             gatewayClient.userManagement.deleteUser(user.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete a user", cause)),
             Effect.ignore
           )
         )
@@ -115,7 +115,7 @@ export const makeUserManagementTests = () => (it: Vitest.MethodsNonLive<ApiGatew
         yield* Effect.addFinalizer(() =>
           pipe(
             gatewayClient.userManagement.deleteOrganizationMembership(membership.id),
-            Effect.tapErrorCause((cause) => Effect.logWarning("Failed to delete an organization membership", cause)),
+            Effect.tapCause((cause) => Effect.logWarning("Failed to delete an organization membership", cause)),
             Effect.ignore
           )
         )

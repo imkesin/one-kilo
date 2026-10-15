@@ -1,4 +1,5 @@
 import { AccountCreatedAuditLog } from "@one-kilo/domain/audit-logs/AccountAuditLogs"
+import type { AuditLog } from "@one-kilo/domain/audit-logs/AuditLogDefinitions"
 import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
 import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
 import { WorkspaceMembershipCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceMembershipAuditLogs"
@@ -17,7 +18,7 @@ export const toAuditLog = ({
   traceId,
   type,
   version
-}: typeof AuditLogsModel.select.Type) => {
+}: typeof AuditLogsModel.select.Type): Effect.Effect<AuditLog> => {
   if (
     type === "Account.Created"
     && version === 1
@@ -55,7 +56,7 @@ export const toAuditLog = ({
           version: 1
         })
       ),
-      Effect.catchTag("ParseError", () =>
+      Effect.catchTag("SchemaError", () =>
         dieWithUnexpectedError(
           "Failed to decode `Person.Updated` audit log context",
           { auditLog: { id, type, version } }

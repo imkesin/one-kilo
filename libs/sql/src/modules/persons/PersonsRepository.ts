@@ -1,5 +1,3 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
@@ -7,8 +5,12 @@ import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
 import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
 import { dieWithUnexpectedError, orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchemaExtensions from "../../utils/SqlSchemaExtensions.ts"
 import { toPersonEntity } from "./internal/PersonsModelTransformations.ts"
 import { PersonsCreatedByForeignKey, PersonsUpdatedByForeignKey } from "./PersonsForeignKeys.ts"
 import { PersonsModel } from "./PersonsModel.ts"
@@ -33,15 +35,14 @@ type UpdatePersonParameters = {
   readonly performedByAccountId: AccountId
 }
 
-export class PersonsRepository extends Effect.Service<PersonsRepository>()(
+export class PersonsRepository extends Context.Service<PersonsRepository>()(
   "@one-kilo/sql/PersonsRepository",
   {
-    dependencies: [DomainIdGenerator.Default],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
       const idGenerator = yield* DomainIdGenerator
 
-      const insertSchema = SqlSchema.single({
+      const insertSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: PersonsModel.insert,
         Result: PersonsModel.select,
         execute: (request) => sql`INSERT INTO persons ${sql.insert(request).returning("*")}`
@@ -79,7 +80,7 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
         orDieWithUnexpectedError("Failed to insert person")
       )
 
-      const updateSchema = SqlSchema.single({
+      const updateSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: PersonsModel.partialUpdate,
         Result: PersonsModel.select,
         execute: ({ id, ...fields }) =>
@@ -124,4 +125,9 @@ export class PersonsRepository extends Effect.Service<PersonsRepository>()(
       }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide(DomainIdGenerator.layer)
+  )
+}

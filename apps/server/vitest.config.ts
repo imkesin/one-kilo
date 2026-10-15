@@ -4,8 +4,6 @@ import { defineConfig, type ViteUserConfig } from "vitest/config"
 export const commonConfig = {
   hookTimeout: 5_000, // 5 seconds
 
-  fakeTimers: { toFake: undefined },
-
   setupFiles: [
     fileURLToPath(
       new URL(

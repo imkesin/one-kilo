@@ -1,18 +1,18 @@
-import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
 import * as Config from "effect/Config"
-import type { ConfigError } from "effect/ConfigError"
+import type { ConfigError } from "effect/Config"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as HttpClient from "effect/http/HttpClient"
+import * as HttpClientRequest from "effect/http/HttpClientRequest"
 import * as Layer from "effect/Layer"
 import * as OAuth2ClientDefinitions from "./internal/oauth2/OAuth2ClientDefinitions.ts"
 
 export type Service = OAuth2ClientDefinitions.Client
 
-export class OAuth2Client extends Context.Tag(
+export class OAuth2Client extends Context.Service<OAuth2Client, Service>()(
   "@effect/auth-workos/OAuth2Client"
-)<OAuth2Client, Service>() {}
+) {}
 
 export const make = (
   options: {

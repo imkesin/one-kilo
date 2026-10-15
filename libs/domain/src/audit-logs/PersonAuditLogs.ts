@@ -19,11 +19,11 @@ export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-
     type: "Person.Updated",
     context: S.Struct({
       fields: S.Struct({
-        preferredName: S.optionalWith(PreferredName, { exact: true }),
-        fullName: S.optionalWith(FullName, { exact: true }),
-        sex: S.optionalWith(Sex, { exact: true }),
-        dateOfBirth: S.optionalWith(LocalDate, { exact: true }),
-        timezone: S.optionalWith(Timezone, { exact: true })
+        preferredName: S.optionalKey(PreferredName),
+        fullName: S.optionalKey(FullName),
+        sex: S.optionalKey(Sex),
+        dateOfBirth: S.optionalKey(LocalDate),
+        timezone: S.optionalKey(Timezone)
       })
     })
   }),
@@ -49,16 +49,9 @@ export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-
   /**
    * Assumes that context is already a JSON object.
    */
-  static decodeContextUnknown = pipe(
-    PersonUpdatedAuditLog.fields.context,
-    S.decodeUnknown
-  )
+  static decodeContextUnknown = S.decodeUnknownEffect(PersonUpdatedAuditLog.fields.context)
 
-  static encodeContextSync = pipe(
-    PersonUpdatedAuditLog.fields.context,
-    (_) => S.parseJson(_),
-    S.encodeSync
-  )
+  static encodeContextSync = S.encodeSync(S.fromJsonString(PersonUpdatedAuditLog.fields.context))
 
   withEncodedContext() {
     const { context, ...rest } = this

@@ -5,7 +5,10 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { AthletesRepository } from "@one-kilo/sql/modules/athletes/AthletesRepository"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 
 type CreateAthleteParameters = {
   personId: PersonId
@@ -17,15 +20,10 @@ type RecordAthleteCreatedParameters = {
   performedByAccountId: AccountId
 }
 
-export class AthletesCreationModule extends Effect.Service<AthletesCreationModule>()(
+export class AthletesCreationModule extends Context.Service<AthletesCreationModule>()(
   "@one-kilo/core/AthletesCreationModule",
   {
-    dependencies: [
-      AthletesRepository.Default,
-      AuditLogsRepository.Default,
-      DomainIdGenerator.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const athletesRepository = yield* AthletesRepository
       const auditLogsRepository = yield* AuditLogsRepository
       const idGenerator = yield* DomainIdGenerator
@@ -57,4 +55,13 @@ export class AthletesCreationModule extends Effect.Service<AthletesCreationModul
       return { createAthlete }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      AthletesRepository.layer,
+      AuditLogsRepository.layer,
+      DomainIdGenerator.layer
+    ])
+  )
+}

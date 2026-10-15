@@ -7,7 +7,7 @@ import "@fontsource/fira-sans/latin-700.css"
 import "@fontsource/fira-mono/latin-400.css"
 import "@fontsource/fira-mono/latin-500.css"
 
-import { RegistryProvider } from "@effect-atom/atom-react"
+import { RegistryProvider } from "@effect/atom-react"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import type { PropsWithChildren } from "react"
 import appCss from "~/styles/globals.css?url"

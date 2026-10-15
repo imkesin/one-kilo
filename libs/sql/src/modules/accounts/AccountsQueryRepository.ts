@@ -1,12 +1,14 @@
-import * as SqlClient from "@effect/sql/SqlClient"
-import * as SqlSchema from "@effect/sql/SqlSchema"
 import type { Account } from "@one-kilo/domain/entities/Account"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
+import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as S from "effect/Schema"
+import * as SqlClient from "effect/sql/SqlClient"
+import * as SqlSchema from "effect/sql/SqlSchema"
 import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 import { MachineClientsModel } from "../machine-clients/MachineClientsModel.ts"
 import { PersonsModel } from "../persons/PersonsModel.ts"
@@ -17,31 +19,28 @@ type FindAccountByAccountIdParameters = {
   accountId: AccountId
 }
 
-export class AccountsQueryRepository extends Effect.Service<AccountsQueryRepository>()(
+export class AccountsQueryRepository extends Context.Service<AccountsQueryRepository>()(
   "@one-kilo/sql/AccountsQueryRepository",
   {
-    dependencies: [],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const sql = yield* SqlClient.SqlClient
 
-      const findAccountByAccountIdSchema = SqlSchema.findOne({
+      const findAccountByAccountIdSchema = SqlSchema.findOneOption({
         Request: AccountId,
-        Result: S.extend(
-          AccountsModel.select,
-          S.Struct({
-            person: pipe(
-              S.extend(
-                PersonsModel.select,
-                S.Struct({ emailAddresses: S.Array(EmailAddressesModel.select) })
-              ),
-              S.NullOr
-            ),
-            machineClient: pipe(
-              MachineClientsModel.select,
-              S.NullOr
-            )
-          })
-        ),
+        Result: S.Struct({
+          ...AccountsModel.select.fields,
+          person: pipe(
+            S.Struct({
+              ...PersonsModel.select.fields,
+              emailAddresses: S.Array(EmailAddressesModel.select)
+            }),
+            S.NullOr
+          ),
+          machineClient: pipe(
+            MachineClientsModel.select,
+            S.NullOr
+          )
+        }),
         execute: (accountId) =>
           sql`
             SELECT
@@ -88,4 +87,6 @@ export class AccountsQueryRepository extends Effect.Service<AccountsQueryReposit
       }
     })
   }
-) {}
+) {
+  static readonly layer = Layer.effect(this, this.make)
+}

@@ -21,7 +21,7 @@ const MachineClientAccountIdentity = S.Struct({
   })
 })
 
-const ActorAccountIdentity = S.Union(PersonAccountIdentity, MachineClientAccountIdentity)
+const ActorAccountIdentity = S.Union([PersonAccountIdentity, MachineClientAccountIdentity])
 
 export const ActorIdentity = pipe(
   S.Struct({
@@ -30,7 +30,7 @@ export const ActorIdentity = pipe(
       id: WorkspaceId
     })
   }),
-  S.annotations({
+  S.annotate({
     description: "The identity of the actor performing an action, including account type and workspace scope",
     identifier: "ActorIdentity",
     title: "Actor Identity"

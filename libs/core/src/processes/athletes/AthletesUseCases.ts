@@ -7,9 +7,11 @@ import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import * as PgClientExtensions from "@one-kilo/sql/utils/PgClientExtensions"
+import * as Context from "effect/Context"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
+import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import { AthletesCreationModule } from "../../modules/athletes/AthletesCreationModule.ts"
 import { AthletesQueryModule } from "../../modules/athletes/AthletesQueryModule.ts"
@@ -30,15 +32,10 @@ export type RegisterAthleteOutcome = Data.TaggedEnum<{
 }>
 export const RegisterAthleteOutcome = Data.taggedEnum<RegisterAthleteOutcome>()
 
-export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
+export class AthletesUseCases extends Context.Service<AthletesUseCases>()(
   "@one-kilo/core/AthletesUseCases",
   {
-    dependencies: [
-      AthletesCreationModule.Default,
-      AthletesQueryModule.Default,
-      PersonsQueryModule.Default
-    ],
-    effect: Effect.gen(function*() {
+    make: Effect.gen(function*() {
       const pg = yield* PgClient.PgClient
 
       const athletesCreationModule = yield* AthletesCreationModule
@@ -79,4 +76,13 @@ export class AthletesUseCases extends Effect.Service<AthletesUseCases>()(
       return { registerAthlete }
     })
   }
-) {}
+) {
+  static readonly layer = pipe(
+    Layer.effect(this, this.make),
+    Layer.provide([
+      AthletesCreationModule.layer,
+      AthletesQueryModule.layer,
+      PersonsQueryModule.layer
+    ])
+  )
+}

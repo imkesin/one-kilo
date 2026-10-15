@@ -1,39 +1,36 @@
 import { pipe } from "effect/Function"
 import * as S from "effect/Schema"
 import { ApplicationClientId } from "../../domain/Ids.ts"
+import { LiteralWithEncodingDefault } from "../CommonDefinitions.ts"
 import { AuthorizeScopeFromSet } from "../oauth2/OAuth2ClientDefinitionSchemas.ts"
 
-export class BuildAuthorizeUrlParameters extends S.Class<BuildAuthorizeUrlParameters>("BuildAuthorizeUrlParameters")({
-  clientId: pipe(
-    ApplicationClientId,
-    S.propertySignature,
-    S.fromKey("client_id")
-  ),
-  nonce: S.NonEmptyTrimmedString,
-  redirectUri: pipe(
-    S.NonEmptyTrimmedString,
-    S.propertySignature,
-    S.fromKey("redirect_uri")
-  ),
-  responseType: pipe(
-    S.Literal("code"),
-    S.optionalWith({ default: () => "code" }),
-    S.fromKey("response_type")
-  ),
-  scope: AuthorizeScopeFromSet,
+export const BuildAuthorizeUrlParameters = pipe(
+  S.Struct({
+    clientId: ApplicationClientId,
+    nonce: S.Trimmed.check(S.isNonEmpty()),
+    redirectUri: S.Trimmed.check(S.isNonEmpty()),
+    responseType: LiteralWithEncodingDefault("code"),
+    scope: AuthorizeScopeFromSet,
 
-  state: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional
-  ),
-  codeChallenge: pipe(
-    S.NonEmptyTrimmedString,
-    S.optional,
-    S.fromKey("code_challenge")
-  ),
-  codeChallengeMethod: pipe(
-    S.Literal("S256"),
-    S.optional,
-    S.fromKey("code_challenge_method")
-  )
-}) {}
+    state: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    codeChallenge: pipe(
+      S.Trimmed.check(S.isNonEmpty()),
+      S.optional
+    ),
+    codeChallengeMethod: pipe(
+      S.Literal("S256"),
+      S.optional
+    )
+  }),
+  S.encodeKeys({
+    clientId: "client_id",
+    redirectUri: "redirect_uri",
+    responseType: "response_type",
+    codeChallenge: "code_challenge",
+    codeChallengeMethod: "code_challenge_method"
+  })
+)
+export type BuildAuthorizeUrlParameters = typeof BuildAuthorizeUrlParameters.Type

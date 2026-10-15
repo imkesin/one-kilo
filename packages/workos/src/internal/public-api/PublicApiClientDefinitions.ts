@@ -1,8 +1,8 @@
-import * as UrlParams from "@effect/platform/UrlParams"
 import * as Effect from "effect/Effect"
-import * as Either from "effect/Either"
 import { pipe } from "effect/Function"
-import * as Option from "effect/Option"
+import * as Url from "effect/http/Url"
+import * as UrlParams from "effect/http/UrlParams"
+import * as Result from "effect/Result"
 import * as WorkOSError from "../../domain/Errors.ts"
 import type { EnvironmentClientId } from "../../domain/Ids.ts"
 import { encodeCatching } from "../schema/SchemaExtensions.ts"
@@ -28,13 +28,13 @@ export const make = (options: { apiPath: string; clientId: EnvironmentClientId }
         encodeCatching(BuildAuthorizationUrlParameters),
         Effect.flatMap((_) =>
           pipe(
-            UrlParams.makeUrl(
+            Url.make(
               `${options.apiPath}/user_management/authorize`,
               UrlParams.fromInput(_),
-              Option.none()
+              undefined
             ),
-            Either.match({
-              onLeft: (error) =>
+            Result.match({
+              onFailure: (error) =>
                 Effect.fail(
                   WorkOSError.WorkOSCommonError.make({
                     reason: WorkOSError.UnexpectedError.make({
@@ -43,7 +43,7 @@ export const make = (options: { apiPath: string; clientId: EnvironmentClientId }
                     })
                   })
                 ),
-              onRight: (url) => Effect.succeed(url.toString())
+              onSuccess: (url) => Effect.succeed(url.toString())
             })
           )
         )

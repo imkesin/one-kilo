@@ -1,4 +1,3 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema"
 import type { Person } from "@one-kilo/domain/entities/Person"
 import { PersonIdFromPrefixed } from "@one-kilo/domain/ids/PersonId"
 import { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
@@ -13,8 +12,8 @@ const PersonsApi_Update_Path = S.Struct({
 })
 
 const PersonsApi_Update_Payload = S.Struct({
-  preferredName: S.optionalWith(PreferredName, { exact: true }),
-  fullName: S.optionalWith(FullName, { exact: true })
+  preferredName: S.optionalKey(PreferredName),
+  fullName: S.optionalKey(FullName)
 })
 
 const Api_Person = S.Struct({
@@ -33,7 +32,7 @@ class PersonsApi_Update_Updated extends S.TaggedClass<PersonsApi_Update_Updated>
   {
     person: Api_Person
   },
-  HttpApiSchema.annotations({ status: 200 })
+  { httpApiStatus: 200 }
 ) {
   static fromDomain = (person: Person) => PersonsApi_Update_Updated.make({ person })
 }

@@ -1,9 +1,11 @@
-import * as Model from "@effect/sql/Model"
 import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { AuditLogId } from "@one-kilo/domain/ids/AuditLogId"
 import { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
-import { pipe } from "effect/Function"
+import { identity, pipe } from "effect/Function"
+import * as Number from "effect/Number"
 import * as S from "effect/Schema"
+import * as Model from "effect/schema/Model"
+import * as SchemaTransformation from "effect/SchemaTransformation"
 import * as ModelExtensions from "../../utils/ModelExtensions.ts"
 
 export class AuditLogsModel extends Model.Class<AuditLogsModel>(
@@ -20,17 +22,22 @@ export class AuditLogsModel extends Model.Class<AuditLogsModel>(
     S.NonEmptyArray(
       S.Struct({
         id: UUIDv7,
-        type: S.NonEmptyTrimmedString
+        type: S.Trimmed.check(S.isNonEmpty())
       })
     ),
     ModelExtensions.JsonFromStringOnWrite
   ),
   timestamp: Model.DateTimeInsert,
-  traceId: S.NonEmptyTrimmedString,
-  type: S.NonEmptyTrimmedString,
+  traceId: S.Trimmed.check(S.isNonEmpty()),
+  type: S.Trimmed.check(S.isNonEmpty()),
   version: pipe(
-    S.Number,
-    S.int(),
-    S.clamp(1, 3)
+    S.Int,
+    S.decode(
+      SchemaTransformation.transform({
+        decode: Number.clamp({ minimum: 1, maximum: 3 }),
+        encode: identity
+      })
+    ),
+    S.check(S.isBetween({ minimum: 1, maximum: 3 }))
   )
 }) {}

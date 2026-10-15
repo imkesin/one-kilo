@@ -11,7 +11,7 @@ export class HttpRequestError extends S.TaggedError<HttpRequestError>(
 )(
   "HttpRequestError",
   {
-    reason: S.Literal("Encode", "InvalidUrl", "Transport"),
+    reason: S.Literals(["Encode", "InvalidUrl", "Transport"]),
     description: S.optional(S.String)
   }
 ) {
@@ -25,7 +25,7 @@ export class HttpResponseError extends S.TaggedError<HttpResponseError>(
 )(
   "HttpResponseError",
   {
-    reason: S.Literal("Decode", "EmptyBody", "StatusCode"),
+    reason: S.Literals(["Decode", "EmptyBody", "StatusCode"]),
     status: S.Int,
     description: S.optional(S.String)
   }
@@ -40,20 +40,20 @@ export class UnexpectedError extends S.TaggedError<UnexpectedError>("@effect/aut
   "UnexpectedError",
   {
     cause: pipe(
-      S.Defect,
+      S.Defect(),
       S.optional
     ),
-    message: S.NonEmptyTrimmedString
+    message: S.Trimmed.check(S.isNonEmpty())
   }
 ) {
   readonly isTransient = false
 }
 
-const WorkOSCommonErrorReason = S.Union(
+const WorkOSCommonErrorReason = S.Union([
   HttpRequestError,
   HttpResponseError,
   UnexpectedError
-)
+])
 
 export class WorkOSCommonError extends S.TaggedError<WorkOSCommonError>("@effect/auth-workos/WorkOSCommonError")(
   "WorkOSCommonError",

@@ -10,15 +10,12 @@ import * as EventsSuite from "./Events.suite.ts"
 const integrationTestLayer = pipe(
   ApiClient.layerConfig({
     clientId: pipe(
-      Config.string("WORKOS_CLIENT_ID"),
+      Config.String("WORKOS_CLIENT_ID"),
       Config.map(EnvironmentClientId.make)
     ),
-    clientSecret: pipe(
-      Config.string("WORKOS_API_KEY"),
-      (_) => Config.redacted(_)
-    )
+    clientSecret: Config.Redacted("WORKOS_API_KEY")
   }),
-  Layer.provide(NodeHttpClient.layer)
+  Layer.provide(NodeHttpClient.layerNodeHttp)
 )
 
 describe("ApiClient - Integration", () => {
