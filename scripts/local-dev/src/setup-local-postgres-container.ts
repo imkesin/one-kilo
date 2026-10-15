@@ -24,7 +24,7 @@ class DockerCommandError extends S.TaggedError<DockerCommandError>("@one-kilo/lo
   "DockerCommandError",
   {
     message: S.String,
-    exitCode: S.Number
+    exitCode: S.Int
   }
 ) {}
 
@@ -48,12 +48,10 @@ const startExistingContainer = Effect.gen(function*() {
     exitCode
   )
   if (code !== 0) {
-    return yield* Effect.fail(
-      new DockerCommandError({
-        message: `Failed to start container '${CONTAINER_NAME}' (exit code ${code})`,
-        exitCode: code
-      })
-    )
+    return yield* new DockerCommandError({
+      message: `Failed to start container '${CONTAINER_NAME}' (exit code ${code})`,
+      exitCode: code
+    })
   }
   yield* Effect.log(`Started existing container '${CONTAINER_NAME}'`)
 })
@@ -70,12 +68,10 @@ const ensureImagePulled = Effect.gen(function*() {
     exitCode
   )
   if (pullCode !== 0) {
-    return yield* Effect.fail(
-      new DockerCommandError({
-        message: `Failed to pull ${POSTGRES_IMAGE} (exit code ${pullCode})`,
-        exitCode: pullCode
-      })
-    )
+    return yield* new DockerCommandError({
+      message: `Failed to pull ${POSTGRES_IMAGE} (exit code ${pullCode})`,
+      exitCode: pullCode
+    })
   }
 })
 
@@ -100,12 +96,10 @@ const createContainer = Effect.gen(function*() {
     exitCode
   )
   if (code !== 0) {
-    return yield* Effect.fail(
-      new DockerCommandError({
-        message: `Failed to create container '${CONTAINER_NAME}' (exit code ${code})`,
-        exitCode: code
-      })
-    )
+    return yield* new DockerCommandError({
+      message: `Failed to create container '${CONTAINER_NAME}' (exit code ${code})`,
+      exitCode: code
+    })
   }
   yield* Effect.log(`Created and started container '${CONTAINER_NAME}'`)
 })

@@ -38,16 +38,15 @@ export const layerTest = (
   }
 ) => Layer.effect(TokenClient, makeTest(options))
 
-export const layerKeyPairTest = () =>
-  pipe(
-    Effect.gen(function*() {
-      const { publicKey } = yield* KeyPairTest
+export const layerKeyPairTest = pipe(
+  Effect.gen(function*() {
+    const { publicKey } = yield* KeyPairTest
 
-      return layerTest({ publicKey })
-    }),
-    Layer.unwrap,
-    Layer.provide(KeyPairTest.layer)
-  )
+    return layerTest({ publicKey })
+  }),
+  Layer.unwrap,
+  Layer.provide(KeyPairTest.layer)
+)
 
 export const make = (
   options: {

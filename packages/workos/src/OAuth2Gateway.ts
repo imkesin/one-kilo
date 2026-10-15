@@ -12,26 +12,24 @@ export class OAuth2Gateway extends Context.Service<OAuth2Gateway, Service>()(
   "@effect/auth-workos/OAuth2Gateway"
 ) {}
 
-export const makeTest = (): Effect.Effect<Service, never, Store.Store> =>
-  Effect.gen(function*() {
-    const { oauth2Client } = yield* Store.Store
+export const makeTest: Effect.Effect<Service, never, Store.Store> = Effect.gen(function*() {
+  const { oauth2Client } = yield* Store.Store
 
-    return OAuth2Gateway.of(oauth2Client)
+  return OAuth2Gateway.of(oauth2Client)
+})
+
+export const layerTest = Layer.effect(OAuth2Gateway, makeTest)
+
+export const make: Effect.Effect<Service, never, OAuth2Client.OAuth2Client> = Effect.gen(function*() {
+  const client = yield* OAuth2Client.OAuth2Client
+
+  return OAuth2Gateway.of({
+    retrieveTokenByClientCredentials: (parameters) =>
+      pipe(
+        client.retrieveTokenByClientCredentials(parameters),
+        Effect.orDie
+      )
   })
+})
 
-export const layerTest = () => Layer.effect(OAuth2Gateway, makeTest())
-
-export const make = (): Effect.Effect<Service, never, OAuth2Client.OAuth2Client> =>
-  Effect.gen(function*() {
-    const client = yield* OAuth2Client.OAuth2Client
-
-    return OAuth2Gateway.of({
-      retrieveTokenByClientCredentials: (parameters) =>
-        pipe(
-          client.retrieveTokenByClientCredentials(parameters),
-          Effect.orDie
-        )
-    })
-  })
-
-export const layer = () => Layer.effect(OAuth2Gateway, make())
+export const layer = Layer.effect(OAuth2Gateway, make)

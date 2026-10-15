@@ -18,7 +18,7 @@ const apiClient = ApiClient.layerConfig({
 })
 
 const integrationTestLayer = pipe(
-  ApiGateway.layer(),
+  ApiGateway.layer,
   Layer.provide(apiClient),
   Layer.provide(NodeHttpClient.layerNodeHttp)
 )

@@ -123,11 +123,7 @@ export class PersonsQueryRepository extends Context.Service<PersonsQueryReposito
             Option.fromNullishOr(row.account),
             Option.match({
               onNone: () => Effect.succeed(Option.none<PersonAccountEntity>()),
-              onSome: (_) =>
-                Effect.map(
-                  toPersonAccountEntity(_),
-                  Option.some
-                )
+              onSome: (_) => Effect.asSome(toPersonAccountEntity(_))
             })
           )
 

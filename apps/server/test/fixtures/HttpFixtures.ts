@@ -18,7 +18,7 @@ export const layerTest = (options: {
     TestOnlyLayer,
     Layer.provideMerge(HttpTestWithoutInfra),
     Layer.provide([
-      SqlFixtures.layerTest(),
+      SqlFixtures.layerTest,
       WorkOSFixtures.layerTest({ suiteName: options.suiteName })
     ])
   )

@@ -58,7 +58,7 @@ export const makeNotImplemented = (): Service => {
 /**
  * Intended to be used in tests
  */
-export const layerNotImplemented = (): Layer.Layer<ApiClient> => Layer.succeed(ApiClient, makeNotImplemented())
+export const layerNotImplemented: Layer.Layer<ApiClient> = Layer.succeed(ApiClient, makeNotImplemented())
 
 export const make = (
   options: {

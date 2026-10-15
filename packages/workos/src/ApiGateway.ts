@@ -11,39 +11,37 @@ export class ApiGateway extends Context.Service<ApiGateway, Service>()(
   "@effect/auth-workos/ApiGateway"
 ) {}
 
-export const makeTest = (): Effect.Effect<Service, never, Store.Store> =>
-  Effect.gen(function*() {
-    const { apiClient } = yield* Store.Store
+export const makeTest: Effect.Effect<Service, never, Store.Store> = Effect.gen(function*() {
+  const { apiClient } = yield* Store.Store
 
-    return ApiGateway.of({
-      userManagement: apiClient.userManagement,
-      organizations: apiClient.organizations
-    })
+  return ApiGateway.of({
+    userManagement: apiClient.userManagement,
+    organizations: apiClient.organizations
   })
+})
 
-export const layerTest = () => Layer.effect(ApiGateway, makeTest())
+export const layerTest = Layer.effect(ApiGateway, makeTest)
 
-export const make = (): Effect.Effect<Service, never, ApiClient.ApiClient> =>
-  Effect.gen(function*() {
-    const client = yield* ApiClient.ApiClient
+export const make: Effect.Effect<Service, never, ApiClient.ApiClient> = Effect.gen(function*() {
+  const client = yield* ApiClient.ApiClient
 
-    return ApiGateway.of({
-      userManagement: {
-        createUser: (parameters) => client.userManagement.createUser(parameters),
-        retrieveUser: (userId) => client.userManagement.retrieveUser(userId),
-        updateUser: (userId, parameters) => client.userManagement.updateUser(userId, parameters),
-        deleteUser: (userId) => client.userManagement.deleteUser(userId),
+  return ApiGateway.of({
+    userManagement: {
+      createUser: (parameters) => client.userManagement.createUser(parameters),
+      retrieveUser: (userId) => client.userManagement.retrieveUser(userId),
+      updateUser: (userId, parameters) => client.userManagement.updateUser(userId, parameters),
+      deleteUser: (userId) => client.userManagement.deleteUser(userId),
 
-        createOrganizationMembership: (parameters) => client.userManagement.createOrganizationMembership(parameters),
-        deleteOrganizationMembership: (organizationMembershipId) =>
-          client.userManagement.deleteOrganizationMembership(organizationMembershipId)
-      },
-      organizations: {
-        createOrganization: (parameters) => client.organizations.createOrganization(parameters),
-        retrieveOrganization: (organizationId) => client.organizations.retrieveOrganization(organizationId),
-        deleteOrganization: (organizationId) => client.organizations.deleteOrganization(organizationId)
-      }
-    })
+      createOrganizationMembership: (parameters) => client.userManagement.createOrganizationMembership(parameters),
+      deleteOrganizationMembership: (organizationMembershipId) =>
+        client.userManagement.deleteOrganizationMembership(organizationMembershipId)
+    },
+    organizations: {
+      createOrganization: (parameters) => client.organizations.createOrganization(parameters),
+      retrieveOrganization: (organizationId) => client.organizations.retrieveOrganization(organizationId),
+      deleteOrganization: (organizationId) => client.organizations.deleteOrganization(organizationId)
+    }
   })
+})
 
-export const layer = () => Layer.effect(ApiGateway, make())
+export const layer = Layer.effect(ApiGateway, make)

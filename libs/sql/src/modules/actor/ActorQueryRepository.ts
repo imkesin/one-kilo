@@ -97,10 +97,7 @@ export class ActorQueryRepository extends Context.Service<ActorQueryRepository>(
             return Option.none<ActorIdentity>()
           }
 
-          return yield* Effect.map(
-            toActorIdentity(maybeRow.value),
-            Option.some
-          )
+          return yield* Effect.asSome(toActorIdentity(maybeRow.value))
         },
         orDieWithUnexpectedError("An unexpected error occurred while finding actor identity")
       )

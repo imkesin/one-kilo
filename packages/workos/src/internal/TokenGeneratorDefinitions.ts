@@ -27,7 +27,7 @@ export interface Generator {
     readonly sessionId?: SessionId
   }) => Effect.Effect<AccessToken, GenerateTokenError>
 
-  readonly generateRefreshToken: () => Effect.Effect<RefreshToken>
+  readonly generateRefreshToken: Effect.Effect<RefreshToken>
 }
 
 export const makeTest = (
@@ -67,7 +67,7 @@ export const makeTest = (
       )
     }),
 
-    generateRefreshToken: () => Effect.succeed(RefreshToken.make(generateRandomString("RefreshToken"))),
+    generateRefreshToken: Effect.sync(() => RefreshToken.make(generateRandomString("RefreshToken"))),
 
     generateSessionAccessToken: Effect.fnUntraced(function*({
       userId,

@@ -10,7 +10,7 @@ import * as TokenClient from "../src/TokenClient.ts"
 import * as OAuth2TestSuite from "./OAuth2.suite.ts"
 
 const oauth2Gateway = pipe(
-  OAuth2Gateway.layer(),
+  OAuth2Gateway.layer,
   Layer.provide(
     OAuth2Client.layerConfig({ authKitDomain: Config.String("WORKOS_AUTHKIT_DOMAIN") })
   )

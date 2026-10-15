@@ -50,13 +50,13 @@ export const layerTest = (options: {
     Layer.provideMerge(WorkOSTokenGenerator.layerKeyPairTest({ authKitDomain: "test.authkit.app" }))
   )
 
-  const ApiClientLayer = WorkOSApiClient.layerNotImplemented()
-  const TokenClientLayer = WorkOSTokenClient.layerKeyPairTest()
+  const ApiClientLayer = WorkOSApiClient.layerNotImplemented
+  const TokenClientLayer = WorkOSTokenClient.layerKeyPairTest
 
   const StandaloneLayers = Layer.merge(ApiClientLayer, TokenClientLayer)
 
   return pipe(
-    WorkOSApiGateway.layerTest(),
+    WorkOSApiGateway.layerTest,
     Layer.provideMerge(StoreLayer),
     Layer.merge(StandaloneLayers)
   )

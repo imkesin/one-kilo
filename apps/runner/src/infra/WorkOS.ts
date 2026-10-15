@@ -14,6 +14,6 @@ const DirectApiClientLayer = WorkOSApiClient.layerConfig({
 })
 
 export const WorkOSLayer = pipe(
-  WorkOSApiGateway.layer(),
+  WorkOSApiGateway.layer,
   Layer.provide(DirectApiClientLayer)
 )

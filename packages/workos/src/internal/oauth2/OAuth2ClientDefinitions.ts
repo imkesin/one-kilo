@@ -203,22 +203,20 @@ export const make = (httpClient: HttpClient.HttpClient): Client => {
         flatMapResponse(
           HttpClientResponse.matchStatus({
             "2xx": HttpResponseExtensions.decodeExpected(RetrieveTokenByDeviceCodeResponseSuccessFromWire),
-            "4xx": HttpResponseExtensions.decodeExpected(
-              S.Union([
-                RetrieveTokenByDeviceCodeResponseAuthorizationPending,
-                RetrieveTokenByDeviceCodeResponseAuthorizationDeclined
-              ])
-            ),
+            "4xx": (response) =>
+              pipe(
+                response,
+                HttpResponseExtensions.decodeExpected(
+                  S.Union([
+                    RetrieveTokenByDeviceCodeResponseAuthorizationPending,
+                    RetrieveTokenByDeviceCodeResponseAuthorizationDeclined
+                  ])
+                ),
+                Effect.flatMap(Effect.fail)
+              ),
             orElse: HttpResponseExtensions.unexpectedStatus
           })
-        ),
-        Effect.flatMap((response) => {
-          if (response._tag === "RetrieveTokenByDeviceCodeResponse.Success") {
-            return Effect.succeed(response)
-          }
-
-          return Effect.fail(response)
-        })
+        )
       )
 
       const pollingRequest = pipe(

@@ -74,10 +74,7 @@ export class AccountsQueryRepository extends Context.Service<AccountsQueryReposi
             return Option.none<Account>()
           }
 
-          return yield* Effect.map(
-            toAccount(maybeAccountModel.value),
-            Option.some
-          )
+          return yield* Effect.asSome(toAccount(maybeAccountModel.value))
         },
         orDieWithUnexpectedError("An unexpected error occurred while finding an account")
       )

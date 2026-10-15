@@ -46,7 +46,7 @@ export class AthletesUseCases extends Context.Service<AthletesUseCases>()(
         function*({ personId, performedByAccountId }: EnsureAthleteParameters) {
           const maybePerson = yield* personsQueryModule.retrievePersonEntity({ personId })
           if (Option.isNone(maybePerson)) {
-            return yield* Effect.fail(new PersonNotFoundError({ personId }))
+            return yield* PersonNotFoundError.make({ personId })
           }
 
           const maybeExistingAthlete = yield* athletesQueryModule.retrieveAthleteEntityByPersonId({ personId })

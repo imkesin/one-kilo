@@ -40,11 +40,11 @@ const store = pipe(
   }))
 )
 const oauth2Gateway = pipe(
-  OAuth2Gateway.layerTest(),
+  OAuth2Gateway.layerTest,
   Layer.provide(store)
 )
 
-const tokenClient = TokenClient.layerKeyPairTest()
+const tokenClient = TokenClient.layerKeyPairTest
 
 const unitTestLayer = Layer.mergeAll(
   oauth2Gateway,

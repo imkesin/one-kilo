@@ -22,7 +22,7 @@ const store = pipe(
 )
 
 const unitTestLayer = pipe(
-  ApiGateway.layerTest(),
+  ApiGateway.layerTest,
   Layer.provide(store)
 )
 

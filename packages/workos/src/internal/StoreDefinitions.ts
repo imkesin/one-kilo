@@ -539,7 +539,7 @@ export const make = (options?: MakeOptions): Effect.Effect<
           const client = yield* findClientById(parameters.clientId)
 
           if (client.secret !== Redacted.value(parameters.clientSecret)) {
-            return yield* Effect.fail(WorkOSError.UnauthorizedError.make())
+            return yield* WorkOSError.UnauthorizedError.make()
           }
 
           const accessToken = yield* pipe(

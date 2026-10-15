@@ -11,17 +11,18 @@ const nearestNamedSpan = pipe(
 
     while (activeSpan.traceId === "noop") {
       if (activeSpan._tag === "ExternalSpan" || Option.isNone(activeSpan.parent)) {
-        return Effect.fail(new NoSuchElementError())
+        return yield* new NoSuchElementError()
       }
 
       activeSpan = activeSpan.parent.value
     }
 
-    return activeSpan._tag === "Span"
-      ? Effect.succeed(activeSpan)
-      : Effect.fail(new NoSuchElementError())
+    if (activeSpan._tag !== "Span") {
+      return yield* new NoSuchElementError()
+    }
+
+    return activeSpan
   }),
-  Effect.flatten,
   orDieWithUnexpectedError("Failed to find nearest named span")
 )
 
