@@ -45,7 +45,7 @@ const _defaultLogBucket = new GCP.logging.ProjectBucketConfig(
     project: gcpConfig.require("project"),
     location: "global",
     bucketId: "_Default",
-    retentionDays: 14
+    retentionDays: 28
   }
 )
 
