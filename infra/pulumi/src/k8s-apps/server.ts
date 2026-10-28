@@ -1,6 +1,6 @@
 import * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
-import { appLabels, type SharedConfig } from "./shared-config.js"
+import { appLabels, podEnv, type SharedConfig, telemetryEnv } from "./shared-config.js"
 
 export type CreateServerParameters = {
   readonly k8sProvider: K8s.Provider
@@ -40,6 +40,10 @@ export function createServer({
                 { secretRef: { name: sharedConfig.workosApiKeySecret.metadata.name } },
                 { configMapRef: { name: sharedConfig.postgresConfigMap.metadata.name } },
                 { secretRef: { name: sharedConfig.postgresPasswordSecret.metadata.name } }
+              ],
+              env: [
+                ...podEnv,
+                ...telemetryEnv({ containerName: "server", serviceVersion: imageTag })
               ],
               resources: {
                 requests: { cpu: "500m", memory: "1Gi" },

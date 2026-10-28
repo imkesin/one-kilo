@@ -75,6 +75,16 @@ const _defaultLogSink = new GCP.logging.ProjectSink(
   }
 )
 
+const _observabilityApis = ["cloudtrace", "logging", "monitoring", "telemetry"].map((api) =>
+  new GCP.projects.Service(
+    `${api}-api`,
+    {
+      service: `${api}.googleapis.com`,
+      disableOnDestroy: false
+    }
+  )
+)
+
 const kubeconfig = Pulumi
   .all([cluster.endpoint, cluster.masterAuth])
   .apply(([endpoint, auth]) =>

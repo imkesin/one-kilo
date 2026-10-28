@@ -1,6 +1,6 @@
 import * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
-import { appLabels, type SharedConfig } from "./shared-config.js"
+import { appLabels, podEnv, type SharedConfig, telemetryEnv } from "./shared-config.js"
 
 export type CreateRunnerParameters = {
   readonly k8sProvider: K8s.Provider
@@ -93,14 +93,8 @@ export function createRunner({
               image: Pulumi.interpolate`${imageBase}/runner:${imageTag}`,
               ports: [{ name: "cluster", containerPort: RUNNER_PORT }],
               env: [
-                {
-                  name: "POD_NAME",
-                  valueFrom: { fieldRef: { fieldPath: "metadata.name" } }
-                },
-                {
-                  name: "POD_NAMESPACE",
-                  valueFrom: { fieldRef: { fieldPath: "metadata.namespace" } }
-                },
+                ...podEnv,
+                ...telemetryEnv({ containerName: "runner", serviceVersion: imageTag }),
                 {
                   name: "RUNNER_HOST",
                   value: "$(POD_NAME).runner-headless.$(POD_NAMESPACE).svc.cluster.local"
