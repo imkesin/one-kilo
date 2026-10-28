@@ -3,10 +3,13 @@
   "devDependencies": {
     "@effect/platform-node": "^4.0.3",
     "@one-kilo/sql": "workspace:*",
+    "@one-kilo/telemetry": "workspace:*",
     "effect": "^4.0.3"
   },
   "private": true,
   "scripts": {
+    "infra:setup": "pnpm pg:setup && pnpm otel:setup",
+    "otel:setup": "node src/setup-local-otel-container.ts",
     "pg:reset": "node src/reset-local-postgres.ts",
     "pg:setup": "node src/setup-local-postgres-container.ts",
     "typecheck": "tsc -b tsconfig.json"

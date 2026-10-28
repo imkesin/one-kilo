@@ -1,4 +1,4 @@
-import * as Tracer from "@one-kilo/telemetry/Tracer"
+import * as Otlp from "@one-kilo/telemetry/Otlp"
 import * as Config from "effect/Config"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -13,7 +13,7 @@ export const TelemetryLayer = Layer.unwrap(
       Config.withDefault("dev")
     )
 
-    return Tracer.layer({
+    return Otlp.layer({
       serviceName: SERVICE_NAME,
       serviceVersion
     })

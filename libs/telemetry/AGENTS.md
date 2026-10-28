@@ -1,6 +1,10 @@
 # Telemetry
 
-OpenTelemetry tracing layer. This is not yet consumed by any app, needs work and testing.
+OTLP export (traces, metrics, logs) via `effect/observability`.
+
+## Structure (`/src`)
+
+- `configs/` — local collector defaults (see `@one-kilo/local-dev` `otel:setup`).
 
 ## Commands
 
