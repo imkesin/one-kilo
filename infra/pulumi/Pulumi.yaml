@@ -13,6 +13,10 @@ config:
     type: string
   postgres-port:
     type: string
+  postgres-ssl:
+    type: boolean
+    default: true
+    description: Require TLS with certificate verification for Postgres connections. Disable only for an in-cluster database.
   postgres-user:
     type: string
   postgres-db:

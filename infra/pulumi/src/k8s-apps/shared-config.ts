@@ -51,6 +51,7 @@ export function createSharedConfig({
       data: {
         POSTGRES_HOST: config.require("postgres-host"),
         POSTGRES_PORT: config.require("postgres-port"),
+        POSTGRES_SSL: String(config.requireBoolean("postgres-ssl")),
         POSTGRES_USER: config.require("postgres-user"),
         POSTGRES_DB: config.require("postgres-db")
       }

@@ -75,6 +75,10 @@ export const layer = (options?: PgLayerOptions) =>
       Config.Number("POSTGRES_PORT"),
       Config.withDefault(PostgresDefaults.port)
     ),
+    ssl: pipe(
+      Config.Boolean("POSTGRES_SSL"),
+      Config.withDefault(PostgresDefaults.ssl)
+    ),
 
     username: pipe(
       Config.String("POSTGRES_USER"),
