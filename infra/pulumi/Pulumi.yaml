@@ -5,6 +5,10 @@ runtime:
     packagemanager: pnpm
 main: dist/src/main.js
 config:
+  node-count:
+    type: integer
+    default: 1
+    description: Nodes in the GKE node pool. Set to 0 to park the cluster; only redeploy with an unchanged image-tag while parked, since Deployment rollouts can't finish without nodes.
   cloudflare-tunnel-token:
     type: string
     secret: true

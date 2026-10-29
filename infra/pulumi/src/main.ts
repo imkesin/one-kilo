@@ -17,13 +17,12 @@ const cluster = new GCP.container.Cluster(
   {
     location: gcpConfig.require("zone"),
 
+    /*
+     * GKE requires a node pool at creation; it is deleted immediately so `nodePool` below owns all nodes, and node
+     * changes replace only that pool instead of the whole cluster.
+     */
+    removeDefaultNodePool: true,
     initialNodeCount: 1,
-    nodeConfig: {
-      machineType: "e2-standard-4",
-      spot: true,
-      serviceAccount: Pulumi.interpolate`${bootstrap.requireOutput("gkeNodesServiceAccountEmail")}`,
-      oauthScopes: ["https://www.googleapis.com/auth/cloud-platform"]
-    },
 
     addonsConfig: {
       gkeBackupAgentConfig: {
@@ -40,6 +39,20 @@ const cluster = new GCP.container.Cluster(
     },
     managedOpentelemetryConfig: {
       scope: "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"
+    }
+  }
+)
+
+const nodePool = new GCP.container.NodePool(
+  "one-kilo-nodes",
+  {
+    cluster: cluster.id,
+    nodeCount: config.requireNumber("node-count"),
+    nodeConfig: {
+      machineType: "e2-standard-4",
+      spot: true,
+      serviceAccount: Pulumi.interpolate`${bootstrap.requireOutput("gkeNodesServiceAccountEmail")}`,
+      oauthScopes: ["https://www.googleapis.com/auth/cloud-platform"]
     }
   }
 )
@@ -78,7 +91,8 @@ const kubeconfig = Pulumi
 
 const k8sProvider = new K8s.Provider(
   "gke",
-  { kubeconfig }
+  { kubeconfig },
+  { dependsOn: [nodePool] }
 )
 
 const k8sNamespace = new K8s.core.v1.Namespace(
