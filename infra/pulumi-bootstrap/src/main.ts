@@ -130,9 +130,7 @@ const _gkeNodesRegistryReader = new GCP.artifactregistry.RepositoryIamMember(
 )
 
 const githubActions = createGithubActionsResources({
-  project,
   repository: artifactRegistryRepository,
-  gkeNodesServiceAccount,
   githubRepositoryName: "imkesin/one-kilo"
 })
 
@@ -141,4 +139,3 @@ export const imageRepositoryUrl = Pulumi
 export const gkeNodesServiceAccountEmail = gkeNodesServiceAccount.email
 export const workloadIdentityPoolProviderName = githubActions.workloadIdentityPoolProvider.name
 export const ciServiceAccountEmail = githubActions.ciServiceAccount.email
-export const deployServiceAccountEmail = githubActions.deployServiceAccount.email
