@@ -50,8 +50,8 @@ export function createWeb({
                 { name: "WEB_PUBLIC_BASE_URL", value: webPublicBaseUrl }
               ],
               resources: {
-                requests: { cpu: "500m", memory: "2Gi" },
-                limits: { cpu: "2000m", memory: "6Gi" }
+                requests: { cpu: "100m", memory: "256Mi" },
+                limits: { cpu: "1000m", memory: "1Gi" }
               },
               startupProbe: {
                 httpGet: { path: "/livez", port: WEB_PORT },

@@ -24,11 +24,6 @@ const cluster = new GCP.container.Cluster(
     removeDefaultNodePool: true,
     initialNodeCount: 1,
 
-    addonsConfig: {
-      gkeBackupAgentConfig: {
-        enabled: true
-      }
-    },
     datapathProvider: "ADVANCED_DATAPATH",
     maintenancePolicy: {
       recurringWindow: {
@@ -49,7 +44,8 @@ const nodePool = new GCP.container.NodePool(
     cluster: cluster.id,
     nodeCount: config.requireNumber("node-count"),
     nodeConfig: {
-      machineType: "e2-standard-4",
+      machineType: "e2-standard-2",
+      diskSizeGb: 30,
       spot: true,
       serviceAccount: Pulumi.interpolate`${bootstrap.requireOutput("gkeNodesServiceAccountEmail")}`,
       oauthScopes: ["https://www.googleapis.com/auth/cloud-platform"]
@@ -99,27 +95,6 @@ const k8sNamespace = new K8s.core.v1.Namespace(
   "one-kilo",
   { metadata: { name: "one-kilo" } },
   { provider: k8sProvider }
-)
-
-const _backupPlan = new GCP.gkebackup.BackupPlan(
-  "one-kilo-cluster-backup-plan",
-  {
-    location: gcpConfig.require("region"),
-    cluster: cluster.id,
-    backupConfig: {
-      selectedNamespaces: {
-        namespaces: [k8sNamespace.metadata.name]
-      },
-      includeVolumeData: false,
-      includeSecrets: true
-    },
-    backupSchedule: {
-      cronSchedule: "0 3 * * *"
-    },
-    retentionPolicy: {
-      backupRetainDays: 7
-    }
-  }
 )
 
 const tunnelTokenSecret = new K8s.core.v1.Secret(

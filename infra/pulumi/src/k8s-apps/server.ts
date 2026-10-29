@@ -46,8 +46,8 @@ export function createServer({
                 ...telemetryEnv({ containerName: "server", serviceVersion: imageTag })
               ],
               resources: {
-                requests: { cpu: "500m", memory: "1Gi" },
-                limits: { cpu: "2000m", memory: "4Gi" }
+                requests: { cpu: "100m", memory: "256Mi" },
+                limits: { cpu: "1000m", memory: "1Gi" }
               },
               startupProbe: {
                 httpGet: { path: "/livez", port: SERVER_PORT },
