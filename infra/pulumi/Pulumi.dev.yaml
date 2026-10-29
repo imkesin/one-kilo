@@ -8,3 +8,9 @@ config:
   one-kilo-infra:workos-api-key:
     secure: AAABAGDI3JvPeLGFuJJB03V/R69IxmUevMGgMfSX0xOTHhWwRm3nIXLs1sosoAX6dpIOkWAy6H8xl6usGOWUxTU6k6gD+S17P3kVEHD3k4SW2XQdK7FlRn97aSx2Bzp9QpnvyXobCNq1hH/MgPN7SwJPqg==
   one-kilo-infra:web-public-base-url: https://one-kilo.dev
+  one-kilo-infra:postgres-host: gcp-us-central1-1.pg.psdb.cloud
+  one-kilo-infra:postgres-port: "5432"
+  one-kilo-infra:postgres-user: pscale_api_0xxfjrg1ckjp.l5w982ovajmg
+  one-kilo-infra:postgres-db: one_kilo_dev
+  one-kilo-infra:postgres-password:
+    secure: AAABAFFdwAeQsi8qgA0QF2J1xryx+nTqEteD9M9B1y6sNglpYYFsMyd/bDIrmhoNT+g5nYhmqlRQ3tEDDPhexGH18eD8MTsA07g=
