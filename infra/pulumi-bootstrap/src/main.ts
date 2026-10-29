@@ -5,11 +5,14 @@ import { createGithubActionsResources } from "./github-actions.js"
 const gcpConfig = new Pulumi.Config("gcp")
 const project = gcpConfig.require("project")
 
-const _apis = [
+/*
+ * Resources that call a Google API depend on `apis`, so a fresh project enables them before first use.
+ */
+const apis = [
   "artifactregistry",
+  "cloudresourcemanager",
   "cloudtrace",
   "container",
-  "gkebackup",
   "iam",
   "iamcredentials",
   "logging",
@@ -33,7 +36,8 @@ const _defaultLogBucket = new GCP.logging.ProjectBucketConfig(
     location: "global",
     bucketId: "_Default",
     retentionDays: 28
-  }
+  },
+  { dependsOn: apis }
 )
 
 const _defaultLogSink = new GCP.logging.ProjectSink(
@@ -59,7 +63,8 @@ const _defaultLogSink = new GCP.logging.ProjectSink(
       }
     ],
     uniqueWriterIdentity: true
-  }
+  },
+  { dependsOn: apis }
 )
 
 const artifactRegistryRepository = new GCP.artifactregistry.Repository(
@@ -85,7 +90,7 @@ const artifactRegistryRepository = new GCP.artifactregistry.Repository(
       }
     ]
   },
-  { protect: true }
+  { protect: true, dependsOn: apis }
 )
 
 const gkeNodesServiceAccount = new GCP.serviceaccount.Account(
@@ -93,7 +98,8 @@ const gkeNodesServiceAccount = new GCP.serviceaccount.Account(
   {
     accountId: "gke-nodes",
     displayName: "GKE nodes"
-  }
+  },
+  { dependsOn: apis }
 )
 
 const gkeNodesMember = Pulumi.interpolate`serviceAccount:${gkeNodesServiceAccount.email}`
@@ -130,6 +136,7 @@ const _gkeNodesRegistryReader = new GCP.artifactregistry.RepositoryIamMember(
 )
 
 const githubActions = createGithubActionsResources({
+  apis,
   repository: artifactRegistryRepository,
   githubRepositoryName: "imkesin/one-kilo"
 })

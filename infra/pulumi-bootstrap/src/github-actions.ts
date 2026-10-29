@@ -2,11 +2,13 @@ import * as GCP from "@pulumi/gcp"
 import * as Pulumi from "@pulumi/pulumi"
 
 type CreateGithubActionsResourcesParameters = {
+  readonly apis: Array<GCP.projects.Service>
   readonly repository: GCP.artifactregistry.Repository
   readonly githubRepositoryName: string
 }
 
 export function createGithubActionsResources({
+  apis,
   repository,
   githubRepositoryName
 }: CreateGithubActionsResourcesParameters) {
@@ -15,7 +17,8 @@ export function createGithubActionsResources({
     {
       workloadIdentityPoolId: "github-actions",
       displayName: "GitHub Actions"
-    }
+    },
+    { dependsOn: apis }
   )
 
   const workloadIdentityPoolProvider = new GCP.iam.WorkloadIdentityPoolProvider(
@@ -41,7 +44,8 @@ export function createGithubActionsResources({
     {
       accountId: "github-actions",
       displayName: "GitHub Actions CI"
-    }
+    },
+    { dependsOn: apis }
   )
 
   const _ciRegistryWriter = new GCP.artifactregistry.RepositoryIamMember(
