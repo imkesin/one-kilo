@@ -12,6 +12,7 @@ const apis = [
   "artifactregistry",
   "cloudresourcemanager",
   "cloudtrace",
+  "compute",
   "container",
   "iam",
   "iamcredentials",
