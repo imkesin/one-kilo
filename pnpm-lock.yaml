@@ -202,6 +202,9 @@ importers:
       '@pulumi/pulumi':
         specifier: ^3.220.0
         version: 3.220.0(typescript@5.9.3)
+      '@pulumi/pulumiservice':
+        specifier: ^1.5.0
+        version: 1.5.0(typescript@5.9.3)
 
   libs/core:
     dependencies:
@@ -1455,6 +1458,9 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  '@pulumi/pulumiservice@1.5.0':
+    resolution: {integrity: sha512-RFPjYwZdV9n0YWiXaufQfYhAj3MnT2zYTSF8kuMlYlNgnh4TBERZHFDvoyKAEHPhjyO0DIsR2quyaQ4GY8Sg8Q==}
 
   '@redis/bloom@6.3.0':
     resolution: {integrity: sha512-NQ5poYpZr0jv6zazN1cy6JY5kIipKFZ3R9GTL4kOUTX3a9YAfY29U8bsE4lWhVQEM+G4V0BXVC57mubIdDijeA==}
@@ -5473,6 +5479,14 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
+
+  '@pulumi/pulumiservice@1.5.0(typescript@5.9.3)':
+    dependencies:
+      '@pulumi/pulumi': 3.220.0(typescript@5.9.3)
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+      - typescript
 
   '@redis/bloom@6.3.0(@redis/client@6.3.0(@opentelemetry/api@1.9.0))':
     dependencies:

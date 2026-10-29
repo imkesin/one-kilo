@@ -26,6 +26,12 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
 
+      - uses: pulumi/auth-actions@v2
+        with:
+          organization: one-kilo
+          requested-token-type: urn:pulumi:token-type:access_token:personal
+          scope: user:one-kilo
+
       - uses: google-github-actions/setup-gcloud@v3
 
       - run: gcloud components install gke-gcloud-auth-plugin --quiet
@@ -47,5 +53,3 @@ jobs:
           stack-name: dev
           work-dir: infra/pulumi
           config-map: '{"image-tag":{"value":"${{ inputs.image-tag || github.sha }}"}}'
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

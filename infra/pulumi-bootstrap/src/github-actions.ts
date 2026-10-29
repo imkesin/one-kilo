@@ -1,5 +1,6 @@
 import * as GCP from "@pulumi/gcp"
 import * as Pulumi from "@pulumi/pulumi"
+import * as PulumiService from "@pulumi/pulumiservice"
 
 type CreateGithubActionsResourcesParameters = {
   readonly project: string
@@ -117,6 +118,34 @@ export function createGithubActionsResources({
       serviceAccountId: deployServiceAccount.name,
       role: "roles/iam.workloadIdentityUser",
       member: workflowPrincipal("deploy.yaml")
+    }
+  )
+
+  /*
+   * Lets the deploy workflow exchange its GitHub ID token for a short-lived Pulumi Cloud token. On an
+   * individual Pulumi account the organization name is also the user login.
+   */
+  const pulumiOrganization = Pulumi.getOrganization()
+
+  const _deployPulumiCloudIssuer = new PulumiService.OidcIssuer(
+    "github-actions-pulumi-cloud",
+    {
+      organization: pulumiOrganization,
+      name: "github-actions",
+      url: "https://token.actions.githubusercontent.com",
+      maxExpirationSeconds: 2 * 60 * 60,
+      policies: [
+        {
+          decision: PulumiService.AuthPolicyDecision.Allow,
+          tokenType: PulumiService.AuthPolicyTokenType.Personal,
+          userLogin: pulumiOrganization,
+          rules: {
+            aud: `urn:pulumi:org:${pulumiOrganization}`,
+            sub: `repo:${githubRepositoryName}:*`,
+            job_workflow_ref: `${githubRepositoryName}/.github/workflows/deploy.yaml@refs/heads/main`
+          }
+        }
+      ]
     }
   )
 

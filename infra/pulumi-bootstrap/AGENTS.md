@@ -7,7 +7,7 @@ permissions. `infra/pulumi` reads its outputs via a stack reference.
 ## Structure (`/src`)
 
 - `main.ts` — APIs, logging, registry, GKE node identity, exported outputs.
-- `github-actions.ts` — GitHub OIDC trust and the CI/deploy service accounts.
+- `github-actions.ts` — GitHub OIDC trust (GCP and Pulumi Cloud) and the CI/deploy service accounts.
 
 ## Commands
 
