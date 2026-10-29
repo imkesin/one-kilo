@@ -194,6 +194,15 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
 
+  infra/pulumi-bootstrap:
+    devDependencies:
+      '@pulumi/gcp':
+        specifier: ^9.12.0
+        version: 9.12.0(typescript@5.9.3)
+      '@pulumi/pulumi':
+        specifier: ^3.220.0
+        version: 3.220.0(typescript@5.9.3)
+
   libs/core:
     dependencies:
       '@effect/auth-workos':

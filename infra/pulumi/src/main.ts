@@ -2,12 +2,15 @@ import * as GCP from "@pulumi/gcp"
 import * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
 import * as YAML from "js-yaml"
-import { createGithubActionsResources } from "./github-actions.js"
 import { createAppDeployments } from "./k8s-apps.js"
 
 const config = new Pulumi.Config()
 const gcpConfig = new Pulumi.Config("gcp")
 const imageTag = config.get("image-tag") ?? "latest"
+
+const bootstrap = new Pulumi.StackReference(
+  `${Pulumi.getOrganization()}/one-kilo-bootstrap/${Pulumi.getStack()}`
+)
 
 const cluster = new GCP.container.Cluster(
   "one-kilo-cluster",
@@ -17,7 +20,9 @@ const cluster = new GCP.container.Cluster(
     initialNodeCount: 1,
     nodeConfig: {
       machineType: "e2-standard-4",
-      spot: true
+      spot: true,
+      serviceAccount: Pulumi.interpolate`${bootstrap.requireOutput("gkeNodesServiceAccountEmail")}`,
+      oauthScopes: ["https://www.googleapis.com/auth/cloud-platform"]
     },
 
     addonsConfig: {
@@ -37,52 +42,6 @@ const cluster = new GCP.container.Cluster(
       scope: "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"
     }
   }
-)
-
-const _defaultLogBucket = new GCP.logging.ProjectBucketConfig(
-  "default-log-bucket",
-  {
-    project: gcpConfig.require("project"),
-    location: "global",
-    bucketId: "_Default",
-    retentionDays: 28
-  }
-)
-
-const _defaultLogSink = new GCP.logging.ProjectSink(
-  "default-log-sink",
-  {
-    name: "_Default",
-    destination: `logging.googleapis.com/projects/${gcpConfig.require("project")}/locations/global/buckets/_Default`,
-    exclusions: [
-      {
-        name: "gke-heartbeat-logs",
-        filter: [
-          "resource.type=\"k8s_cluster\"",
-          "(",
-          "protoPayload.methodName=\"io.k8s.coordination.v1.leases.update\"",
-          "OR protoPayload.methodName=\"io.k8s.coordination.v1.leases.create\"",
-          "OR protoPayload.methodName=\"io.k8s.core.v1.configmaps.update\"",
-          ")"
-        ].join("\n")
-      },
-      {
-        name: "fluentbit-logs",
-        filter: `logName="projects/${gcpConfig.require("project")}/logs/fluentbit"`
-      }
-    ],
-    uniqueWriterIdentity: true
-  }
-)
-
-const _observabilityApis = ["cloudtrace", "logging", "monitoring", "telemetry"].map((api) =>
-  new GCP.projects.Service(
-    `${api}-api`,
-    {
-      service: `${api}.googleapis.com`,
-      disableOnDestroy: false
-    }
-  )
 )
 
 const kubeconfig = Pulumi
@@ -220,44 +179,9 @@ const _cloudflared = new K8s.apps.v1.Deployment(
   }
 )
 
-const artifactRegistryRepository = new GCP.artifactregistry.Repository(
-  "one-kilo",
-  {
-    repositoryId: "one-kilo",
-    format: "DOCKER",
-    location: gcpConfig.require("region"),
-    cleanupPolicies: [
-      {
-        id: "keep-latest-30",
-        action: "KEEP",
-        mostRecentVersions: {
-          keepCount: 30
-        }
-      },
-      {
-        id: "delete-older-than-7d",
-        action: "DELETE",
-        condition: {
-          olderThan: "7d"
-        }
-      }
-    ]
-  }
-)
-
-const githubActions = createGithubActionsResources({
-  repository: artifactRegistryRepository,
-  cluster,
-  githubRepositoryName: "imkesin/one-kilo"
-})
-
 createAppDeployments({
   k8sProvider,
   k8sNamespace,
-  repository: artifactRegistryRepository,
-  projectName: gcpConfig.require("project"),
+  imageBase: Pulumi.interpolate`${bootstrap.requireOutput("imageRepositoryUrl")}`,
   imageTag
 })
-
-export const workloadIdentityPoolProviderName = githubActions.workloadIdentityPoolProvider.name
-export const githubActionsServiceAccountEmail = githubActions.serviceAccount.email

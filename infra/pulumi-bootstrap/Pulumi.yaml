@@ -1,0 +1,7 @@
+name: one-kilo-bootstrap
+description: Project-level foundation (APIs, logging, registry, service accounts, IAM). Applied locally by a project owner, never by CI.
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+main: dist/src/main.js

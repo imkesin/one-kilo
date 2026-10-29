@@ -1,4 +1,3 @@
-import type * as GCP from "@pulumi/gcp"
 import type * as K8s from "@pulumi/kubernetes"
 import * as Pulumi from "@pulumi/pulumi"
 import { createRunner } from "./k8s-apps/runner.js"
@@ -9,20 +8,16 @@ import { createWeb } from "./k8s-apps/web.js"
 type CreateAppDeploymentsParameters = {
   readonly k8sProvider: K8s.Provider
   readonly k8sNamespace: K8s.core.v1.Namespace
-  readonly repository: GCP.artifactregistry.Repository
-  readonly projectName: string
+  readonly imageBase: Pulumi.Output<string>
   readonly imageTag: string
 }
 
 export function createAppDeployments({
   k8sProvider,
   k8sNamespace,
-  repository,
-  projectName,
+  imageBase,
   imageTag
 }: CreateAppDeploymentsParameters) {
-  const imageBase = Pulumi.interpolate`${repository.location}-docker.pkg.dev/${projectName}/${repository.repositoryId}`
-
   const config = new Pulumi.Config()
   const webPublicBaseUrl = config.require("web-public-base-url")
 

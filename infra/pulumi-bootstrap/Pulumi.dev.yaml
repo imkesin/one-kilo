@@ -1,0 +1,3 @@
+config:
+  gcp:project: one-kilo-dev
+  gcp:region: us-central1

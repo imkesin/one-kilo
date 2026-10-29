@@ -24,3 +24,6 @@
 Thumbs.db
 *.md
 LICENSE
+
+# google-github-actions/auth credential config written into the workspace
+gha-creds-*.json
