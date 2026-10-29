@@ -6,7 +6,7 @@
   },
   "private": true,
   "scripts": {
-    "deploy:dev": "node src/deploy.ts dev",
+    "deploy:proto": "node src/deploy.ts proto",
     "typecheck": "tsc -b tsconfig.json"
   },
   "type": "module"

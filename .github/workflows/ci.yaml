@@ -36,7 +36,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    environment: dev
+    environment: proto
     strategy:
       matrix:
         include:

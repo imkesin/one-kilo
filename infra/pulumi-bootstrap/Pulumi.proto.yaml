@@ -1,0 +1,3 @@
+config:
+  gcp:project: one-kilo-proto
+  gcp:region: us-central1

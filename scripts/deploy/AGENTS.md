@@ -10,8 +10,8 @@ and `effect/cli` for arguments.
 ## Commands
 
 ```bash
-pnpm deploy:dev # Deploy HEAD to the `dev` stack with the images CI pushed for it
-pnpm typecheck  # Type check
+pnpm deploy:proto # Deploy HEAD to the `proto` stack with the images CI pushed for it
+pnpm typecheck    # Type check
 ```
 
 ## Prerequisites
