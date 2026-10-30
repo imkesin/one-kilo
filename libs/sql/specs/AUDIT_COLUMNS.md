@@ -13,11 +13,11 @@ Someone decided to do this (Person, Workspace, EmailAddress creations).
 
 ## Event records
 
-The runner _observed_ the event; it didn't _decide_ it (WorkflowSuspension, webhooks-received,
-retries-exhausted, rate-limit-hits, deadletter-arrivals).
+The runner _observed_ the event; it didn't _decide_ it (webhooks-received, retries-exhausted,
+rate-limit-hits, deadletter-arrivals).
 
 - `occurred_at` only. No `created_by`.
-- The cause is modeled by domain columns (`execution_id`, `workflow_name`), not an actor FK.
+- The cause is modeled by domain columns (e.g. a webhook's provider event ID), not an actor FK.
 
 ## Why
 

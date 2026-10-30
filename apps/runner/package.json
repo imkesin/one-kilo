@@ -10,7 +10,6 @@
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/sql": "workspace:*",
     "@one-kilo/telemetry": "workspace:*",
-    "@one-kilo/workflow": "workspace:*",
     "effect": "^4.0.3"
   },
   "private": true,

@@ -66,9 +66,6 @@ importers:
       '@one-kilo/telemetry':
         specifier: workspace:*
         version: link:../../libs/telemetry
-      '@one-kilo/workflow':
-        specifier: workspace:*
-        version: link:../../libs/workflow
       effect:
         specifier: ^4.0.3
         version: 4.0.3
@@ -307,15 +304,6 @@ importers:
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../lib
-      effect:
-        specifier: ^4.0.3
-        version: 4.0.3
-
-  libs/workflow:
-    dependencies:
-      '@one-kilo/domain':
-        specifier: workspace:*
-        version: link:../domain
       effect:
         specifier: ^4.0.3
         version: 4.0.3

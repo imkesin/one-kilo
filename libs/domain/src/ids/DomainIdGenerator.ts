@@ -11,7 +11,6 @@ import { CoachingRelationshipId } from "./CoachingRelationshipId.js"
 import { EmailAddressId } from "./EmailAddressId.js"
 import { MachineClientId } from "./MachineClientId.js"
 import { PersonId } from "./PersonId.js"
-import { WorkflowSuspensionId } from "./WorkflowSuspensionId.js"
 import { WorkspaceId } from "./WorkspaceId.js"
 import { WorkspaceMembershipId } from "./WorkspaceMembershipId.js"
 
@@ -29,7 +28,6 @@ export class DomainIdGenerator extends Context.Service<DomainIdGenerator>()(
         machineClientId: Effect.map(uuidGenerator.v7, MachineClientId.make),
         personId: Effect.map(uuidGenerator.v7, PersonId.make),
         accountId: Effect.map(uuidGenerator.v7, AccountId.make),
-        workflowSuspensionId: Effect.map(uuidGenerator.v7, WorkflowSuspensionId.make),
         workspaceId: Effect.map(uuidGenerator.v7, WorkspaceId.make),
         workspaceMembershipId: Effect.map(uuidGenerator.v7, WorkspaceMembershipId.make)
       }
