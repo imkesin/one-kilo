@@ -3,11 +3,13 @@ import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import * as S from "effect/Schema"
 import { AccountId } from "../ids/AccountId.ts"
+import { AccountVersion } from "../versions/AccountVersion.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const AccountAuditLogBuilder = AuditBuilder.make({
   id: AccountId,
-  type: "Account"
+  type: "Account",
+  version: AccountVersion
 })
 
 export class AccountCreatedAuditLog extends S.Class<AccountCreatedAuditLog>("@one-kilo/domain/AccountCreatedAuditLog")(
@@ -18,7 +20,7 @@ export class AccountCreatedAuditLog extends S.Class<AccountCreatedAuditLog>("@on
   }
 ) {
   static build = Effect.fnUntraced(
-    function*(parameters: Omit<AccountCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">) {
+    function*(parameters: Omit<AccountCreatedAuditLog, "timestamp" | "traceId" | "type" | "schemaVersion">) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 

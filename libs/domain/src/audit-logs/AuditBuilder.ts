@@ -3,11 +3,12 @@ import type { UUIDv7 } from "@one-kilo/lib/uuid/UUIDv7"
 import * as S from "effect/Schema"
 import { AccountId } from "../ids/AccountId.ts"
 import { AuditLogId } from "../ids/AuditLogId.ts"
+import type { AggregateVersion } from "../versions/internal/AggregateVersion.ts"
 
 const TypeId = "~@one-kilo/domain/AuditBuilder" as const
 type TypeId = typeof TypeId
 
-type Version = 1 | 2 | 3
+type SchemaVersion = 1 | 2 | 3
 
 type AuditMetadataFields<Type extends string, Targets extends S.Top = S.Top> = {
   // Inputs
@@ -21,7 +22,7 @@ type AuditMetadataFields<Type extends string, Targets extends S.Top = S.Top> = {
 
   // Inferred
   readonly type: S.tag<Type>
-  readonly version: S.tag<Version>
+  readonly schemaVersion: S.tag<SchemaVersion>
 }
 
 interface AuditBuilder<Targets extends S.Top> {
@@ -30,7 +31,7 @@ interface AuditBuilder<Targets extends S.Top> {
   Audit: <Type extends string>(
     parameters: {
       type: Type
-      version?: Version
+      schemaVersion?: SchemaVersion
     }
   ) => AuditMetadataFields<Type, Targets>
 
@@ -38,7 +39,7 @@ interface AuditBuilder<Targets extends S.Top> {
     parameters: {
       type: Type
       context: Context
-      version?: Version
+      schemaVersion?: SchemaVersion
     }
   ) => AuditMetadataFields<Type, Targets> & { context: Context }
 }
@@ -49,6 +50,10 @@ type Target<T extends string = "Unknown"> = {
     `@one-kilo/domain/${T}Id`
   >
   type: T
+  version: S.brand<
+    typeof AggregateVersion,
+    `@one-kilo/domain/${T}Version`
+  >
 }
 
 export function make<A extends string>(
@@ -56,7 +61,7 @@ export function make<A extends string>(
 ): AuditBuilder<
   S.Tuple<
     readonly [
-      S.Struct<{ id: typeof target["id"]; type: S.tag<typeof target["type"]> }>
+      S.Struct<{ id: typeof target["id"]; type: S.tag<typeof target["type"]>; version: typeof target["version"] }>
     ]
   >
 >
@@ -69,8 +74,8 @@ export function make<
 ): AuditBuilder<
   S.Tuple<
     readonly [
-      S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]> }>,
-      S.Struct<{ id: typeof targetB["id"]; type: S.tag<typeof targetB["type"]> }>
+      S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]>; version: typeof targetA["version"] }>,
+      S.Struct<{ id: typeof targetB["id"]; type: S.tag<typeof targetB["type"]>; version: typeof targetB["version"] }>
     ]
   >
 >
@@ -85,9 +90,9 @@ export function make<
 ): AuditBuilder<
   S.Tuple<
     readonly [
-      S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]> }>,
-      S.Struct<{ id: typeof targetB["id"]; type: S.tag<typeof targetB["type"]> }>,
-      S.Struct<{ id: typeof targetC["id"]; type: S.tag<typeof targetC["type"]> }>
+      S.Struct<{ id: typeof targetA["id"]; type: S.tag<typeof targetA["type"]>; version: typeof targetA["version"] }>,
+      S.Struct<{ id: typeof targetB["id"]; type: S.tag<typeof targetB["type"]>; version: typeof targetB["version"] }>,
+      S.Struct<{ id: typeof targetC["id"]; type: S.tag<typeof targetC["type"]>; version: typeof targetC["version"] }>
     ]
   >
 >
@@ -99,23 +104,23 @@ export function make(
   let targets: S.Top
   switch (arguments.length) {
     case 1: {
-      targets = S.Tuple([S.Struct({ id: targetA.id, type: S.tag(targetA.type) })])
+      targets = S.Tuple([S.Struct({ id: targetA.id, type: S.tag(targetA.type), version: targetA.version })])
 
       break
     }
     case 2: {
       targets = S.Tuple([
-        S.Struct({ id: targetA.id, type: S.tag(targetA.type) }),
-        S.Struct({ id: targetB!.id, type: S.tag(targetB!.type) })
+        S.Struct({ id: targetA.id, type: S.tag(targetA.type), version: targetA.version }),
+        S.Struct({ id: targetB!.id, type: S.tag(targetB!.type), version: targetB!.version })
       ])
 
       break
     }
     case 3: {
       targets = S.Tuple([
-        S.Struct({ id: targetA.id, type: S.tag(targetA.type) }),
-        S.Struct({ id: targetB!.id, type: S.tag(targetB!.type) }),
-        S.Struct({ id: targetC!.id, type: S.tag(targetC!.type) })
+        S.Struct({ id: targetA.id, type: S.tag(targetA.type), version: targetA.version }),
+        S.Struct({ id: targetB!.id, type: S.tag(targetB!.type), version: targetB!.version }),
+        S.Struct({ id: targetC!.id, type: S.tag(targetC!.type), version: targetC!.version })
       ])
 
       break
@@ -131,7 +136,7 @@ export function make(
     Audit: <Type extends string>(
       parameters: {
         type: Type
-        version?: Version
+        schemaVersion?: SchemaVersion
       }
     ) => ({
       id: AuditLogId,
@@ -142,13 +147,13 @@ export function make(
       traceId: S.Trimmed.check(S.isNonEmpty()),
 
       type: S.tag(parameters.type),
-      version: S.tag(parameters.version ?? 1)
+      schemaVersion: S.tag(parameters.schemaVersion ?? 1)
     }),
     AuditWithContext: <Type extends string, Context extends S.Top>(
       parameters: {
         type: Type
         context: Context
-        version?: Version
+        schemaVersion?: SchemaVersion
       }
     ) => ({
       id: AuditLogId,
@@ -160,7 +165,7 @@ export function make(
       traceId: S.Trimmed.check(S.isNonEmpty()),
 
       type: S.tag(parameters.type),
-      version: S.tag(parameters.version ?? 1)
+      schemaVersion: S.tag(parameters.schemaVersion ?? 1)
     })
   }
 }

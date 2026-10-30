@@ -4,6 +4,7 @@ import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
 import type { FullName, PreferredName } from "@one-kilo/domain/values/PersonValues"
+import type { AccountVersion } from "@one-kilo/domain/versions/AccountVersion"
 import { AccountsRepository } from "@one-kilo/sql/modules/accounts/AccountsRepository"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { EmailAddressesRepository } from "@one-kilo/sql/modules/email-addresses/EmailAddressesRepository"
@@ -32,13 +33,13 @@ export class AccountsCreationModule extends Context.Service<AccountsCreationModu
       const accountsRepository = yield* AccountsRepository
 
       const recordAccountCreated = Effect.fn("AccountsCreationModule.recordAccountCreated")(
-        function*(account: { id: AccountId }) {
+        function*(account: { id: AccountId; version: AccountVersion }) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* AccountCreatedAuditLog.build({
             id,
             performedByAccountId: account.id,
-            targets: [{ id: account.id, type: "Account" as const }]
+            targets: [{ id: account.id, type: "Account" as const, version: account.version }]
           })
 
           yield* auditLogsRepository.insert(auditLog)

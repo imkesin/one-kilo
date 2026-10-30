@@ -18,11 +18,11 @@ export const toAuditLog = ({
   timestamp,
   traceId,
   type,
-  version
+  schemaVersion
 }: typeof AuditLogsModel.select.Type): Effect.Effect<AuditLog> => {
   if (
     type === "Account.Created"
-    && version === 1
+    && schemaVersion === 1
     && S.is(AccountCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
@@ -33,14 +33,14 @@ export const toAuditLog = ({
         timestamp,
         traceId,
         type: "Account.Created",
-        version: 1
+        schemaVersion: 1
       })
     )
   }
 
   if (
     type === "Athlete.Created"
-    && version === 1
+    && schemaVersion === 1
     && S.is(AthleteCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
@@ -51,14 +51,14 @@ export const toAuditLog = ({
         timestamp,
         traceId,
         type: "Athlete.Created",
-        version: 1
+        schemaVersion: 1
       })
     )
   }
 
   if (
     type === "Person.Updated"
-    && version === 1
+    && schemaVersion === 1
     && S.is(PersonUpdatedAuditLog.fields.targets)(targets)
   ) {
     return pipe(
@@ -72,20 +72,20 @@ export const toAuditLog = ({
           timestamp,
           traceId,
           type: "Person.Updated",
-          version: 1
+          schemaVersion: 1
         })
       ),
       Effect.catchTag("SchemaError", () =>
         dieWithUnexpectedError(
           "Failed to decode `Person.Updated` audit log context",
-          { auditLog: { id, type, version } }
+          { auditLog: { id, type, schemaVersion } }
         ))
     )
   }
 
   if (
     type === "Workspace.Created"
-    && version === 1
+    && schemaVersion === 1
     && S.is(WorkspaceCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
@@ -96,14 +96,14 @@ export const toAuditLog = ({
         timestamp,
         traceId,
         type: "Workspace.Created",
-        version: 1
+        schemaVersion: 1
       })
     )
   }
 
   if (
     type === "WorkspaceMembership.Created"
-    && version === 1
+    && schemaVersion === 1
     && S.is(WorkspaceMembershipCreatedAuditLog.fields.targets)(targets)
   ) {
     return Effect.succeed(
@@ -114,7 +114,7 @@ export const toAuditLog = ({
         timestamp,
         traceId,
         type: "WorkspaceMembership.Created",
-        version: 1
+        schemaVersion: 1
       })
     )
   }
@@ -125,7 +125,7 @@ export const toAuditLog = ({
       auditLog: {
         id,
         type,
-        version
+        schemaVersion
       }
     }
   )

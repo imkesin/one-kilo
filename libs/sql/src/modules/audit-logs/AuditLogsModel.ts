@@ -22,7 +22,8 @@ export class AuditLogsModel extends Model.Class<AuditLogsModel>(
     S.NonEmptyArray(
       S.Struct({
         id: UUIDv7,
-        type: S.Trimmed.check(S.isNonEmpty())
+        type: S.Trimmed.check(S.isNonEmpty()),
+        version: S.Int.check(S.isGreaterThanOrEqualTo(1))
       })
     ),
     ModelExtensions.JsonFromStringOnWrite
@@ -30,7 +31,7 @@ export class AuditLogsModel extends Model.Class<AuditLogsModel>(
   timestamp: Model.DateTimeInsert,
   traceId: S.Trimmed.check(S.isNonEmpty()),
   type: S.Trimmed.check(S.isNonEmpty()),
-  version: pipe(
+  schemaVersion: pipe(
     S.Int,
     S.decode(
       SchemaTransformation.transform({

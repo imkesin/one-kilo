@@ -7,11 +7,13 @@ import * as S from "effect/Schema"
 import { PersonId } from "../ids/PersonId.ts"
 import { LocalDate } from "../values/LocalDate.ts"
 import { FullName, PreferredName, Sex, Timezone } from "../values/PersonValues.ts"
+import { PersonVersion } from "../versions/PersonVersion.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const PersonAuditLogBuilder = AuditBuilder.make({
   id: PersonId,
-  type: "Person"
+  type: "Person",
+  version: PersonVersion
 })
 
 export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-kilo/domain/PersonUpdatedAuditLog")(
@@ -36,7 +38,7 @@ export class PersonUpdatedAuditLog extends S.Class<PersonUpdatedAuditLog>("@one-
     function*(
       parameters: Omit<
         PersonUpdatedAuditLog,
-        "timestamp" | "traceId" | "type" | "version" | "withEncodedContext"
+        "timestamp" | "traceId" | "type" | "schemaVersion" | "withEncodedContext"
       >
     ) {
       const timestamp = yield* DateTime.now

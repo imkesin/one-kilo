@@ -3,11 +3,13 @@ import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import * as S from "effect/Schema"
 import { AthleteId } from "../ids/AthleteId.ts"
+import { AthleteVersion } from "../versions/AthleteVersion.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const AthleteAuditLogBuilder = AuditBuilder.make({
   id: AthleteId,
-  type: "Athlete"
+  type: "Athlete",
+  version: AthleteVersion
 })
 
 export class AthleteCreatedAuditLog extends S.Class<AthleteCreatedAuditLog>("@one-kilo/domain/AthleteCreatedAuditLog")(
@@ -18,7 +20,7 @@ export class AthleteCreatedAuditLog extends S.Class<AthleteCreatedAuditLog>("@on
   }
 ) {
   static build = Effect.fnUntraced(
-    function*(parameters: Omit<AthleteCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">) {
+    function*(parameters: Omit<AthleteCreatedAuditLog, "timestamp" | "traceId" | "type" | "schemaVersion">) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 

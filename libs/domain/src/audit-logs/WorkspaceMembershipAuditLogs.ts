@@ -5,20 +5,26 @@ import * as S from "effect/Schema"
 import { AccountId } from "../ids/AccountId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 import { WorkspaceMembershipId } from "../ids/WorkspaceMembershipId.ts"
+import { AccountVersion } from "../versions/AccountVersion.ts"
+import { WorkspaceMembershipVersion } from "../versions/WorkspaceMembershipVersion.ts"
+import { WorkspaceVersion } from "../versions/WorkspaceVersion.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const WorkspaceMembershipAuditLogBuilder = AuditBuilder.make(
   {
     id: AccountId,
-    type: "Account"
+    type: "Account",
+    version: AccountVersion
   },
   {
     id: WorkspaceId,
-    type: "Workspace"
+    type: "Workspace",
+    version: WorkspaceVersion
   },
   {
     id: WorkspaceMembershipId,
-    type: "WorkspaceMembership"
+    type: "WorkspaceMembership",
+    version: WorkspaceMembershipVersion
   }
 )
 
@@ -33,7 +39,7 @@ export class WorkspaceMembershipCreatedAuditLog
 {
   static build = Effect.fnUntraced(
     function*(
-      parameters: Omit<WorkspaceMembershipCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">
+      parameters: Omit<WorkspaceMembershipCreatedAuditLog, "timestamp" | "traceId" | "type" | "schemaVersion">
     ) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId

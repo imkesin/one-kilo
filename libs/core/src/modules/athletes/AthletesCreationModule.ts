@@ -3,6 +3,7 @@ import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import type { AthleteId } from "@one-kilo/domain/ids/AthleteId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
+import type { AthleteVersion } from "@one-kilo/domain/versions/AthleteVersion"
 import { AthletesRepository } from "@one-kilo/sql/modules/athletes/AthletesRepository"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import * as Context from "effect/Context"
@@ -16,7 +17,7 @@ type CreateAthleteParameters = {
 }
 
 type RecordAthleteCreatedParameters = {
-  athlete: { id: AthleteId }
+  athlete: { id: AthleteId; version: AthleteVersion }
   performedByAccountId: AccountId
 }
 
@@ -35,7 +36,7 @@ export class AthletesCreationModule extends Context.Service<AthletesCreationModu
           const auditLog = yield* AthleteCreatedAuditLog.build({
             id,
             performedByAccountId,
-            targets: [{ id: athlete.id, type: "Athlete" as const }]
+            targets: [{ id: athlete.id, type: "Athlete" as const, version: athlete.version }]
           })
 
           yield* auditLogsRepository.insert(auditLog)

@@ -77,7 +77,7 @@ export class RegistrationUseCases extends Context.Service<RegistrationUseCases>(
           } = yield* workspacesCreationModule.createPersonalWorkspace({
             id: workspaceParameters.id,
             workosOrganizationId: workspaceParameters.workosOrganizationId,
-            accountId: accountParameters.id,
+            account,
             workspaceMembershipParameters
           })
 

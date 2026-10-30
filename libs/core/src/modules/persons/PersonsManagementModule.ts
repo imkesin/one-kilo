@@ -2,7 +2,6 @@ import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLo
 import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
-import type { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { Actor } from "@one-kilo/domain/tags/Actor"
 import type { LocalDate } from "@one-kilo/domain/values/LocalDate"
 import type { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
@@ -26,7 +25,7 @@ type UpdatePersonFields = {
 type RecordPersonUpdatedParameters = {
   readonly fields: UpdatePersonFields
   readonly performedByAccountId: AccountId
-  readonly personId: PersonId
+  readonly person: PersonEntity
 }
 
 type UpdatePersonOutcome = Data.TaggedEnum<{
@@ -50,13 +49,13 @@ export class PersonsManagementModule extends Context.Service<PersonsManagementMo
       const personsRepository = yield* PersonsRepository
 
       const recordPersonUpdated = Effect.fn("PersonsManagementModule.recordPersonUpdated")(
-        function*({ fields, performedByAccountId, personId }: RecordPersonUpdatedParameters) {
+        function*({ fields, performedByAccountId, person }: RecordPersonUpdatedParameters) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* PersonUpdatedAuditLog.build({
             id,
             performedByAccountId,
-            targets: [{ id: personId, type: "Person" as const }],
+            targets: [{ id: person.id, type: "Person" as const, version: person.version }],
             context: { fields }
           })
 
@@ -88,7 +87,7 @@ export class PersonsManagementModule extends Context.Service<PersonsManagementMo
           const auditLog = yield* recordPersonUpdated({
             fields: patch,
             performedByAccountId,
-            personId: person.id
+            person: updatedPerson
           })
 
           return UpdatePersonOutcome.Updated({

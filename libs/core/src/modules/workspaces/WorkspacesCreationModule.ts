@@ -6,6 +6,9 @@ import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { WorkspaceId } from "@one-kilo/domain/ids/WorkspaceId"
 import type { WorkspaceMembershipId } from "@one-kilo/domain/ids/WorkspaceMembershipId"
 import { WorkspaceName } from "@one-kilo/domain/values/WorkspaceValues"
+import type { AccountVersion } from "@one-kilo/domain/versions/AccountVersion"
+import type { WorkspaceMembershipVersion } from "@one-kilo/domain/versions/WorkspaceMembershipVersion"
+import type { WorkspaceVersion } from "@one-kilo/domain/versions/WorkspaceVersion"
 import { dieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
 import { AuditLogsRepository } from "@one-kilo/sql/modules/audit-logs/AuditLogsRepository"
 import { WorkspaceMembershipsRepository } from "@one-kilo/sql/modules/workspaces/WorkspaceMembershipsRepository"
@@ -21,7 +24,7 @@ type CreatePersonalWorkspaceParameters = {
   id: WorkspaceId
   workosOrganizationId: WorkOSIds.OrganizationId
 
-  accountId: AccountId
+  account: { id: AccountId; version: AccountVersion }
   workspaceMembershipParameters: {
     id: WorkspaceMembershipId
     workosOrganizationMembershipId: WorkOSIds.OrganizationMembershipId
@@ -39,13 +42,13 @@ export class WorkspacesCreationModule extends Context.Service<WorkspacesCreation
       const workspacesRepository = yield* WorkspacesRepository
 
       const recordWorkspaceCreated = Effect.fn("WorkspacesCreationModule.recordWorkspaceCreated")(
-        function*(workspace: { id: WorkspaceId }, performedByAccountId: AccountId) {
+        function*(workspace: { id: WorkspaceId; version: WorkspaceVersion }, performedByAccountId: AccountId) {
           const id = yield* idGenerator.auditLogId
 
           const auditLog = yield* WorkspaceCreatedAuditLog.build({
             id,
             performedByAccountId,
-            targets: [{ id: workspace.id, type: "Workspace" as const }]
+            targets: [{ id: workspace.id, type: "Workspace" as const, version: workspace.version }]
           })
 
           yield* auditLogsRepository.insert(auditLog)
@@ -56,7 +59,15 @@ export class WorkspacesCreationModule extends Context.Service<WorkspacesCreation
         "WorkspacesCreationModule.recordWorkspaceMembershipCreated"
       )(
         function*(
-          workspaceMembership: { id: WorkspaceMembershipId; accountId: AccountId; workspaceId: WorkspaceId },
+          {
+            account,
+            workspace,
+            workspaceMembership
+          }: {
+            account: { id: AccountId; version: AccountVersion }
+            workspace: { id: WorkspaceId; version: WorkspaceVersion }
+            workspaceMembership: { id: WorkspaceMembershipId; version: WorkspaceMembershipVersion }
+          },
           performedByAccountId: AccountId
         ) {
           const id = yield* idGenerator.auditLogId
@@ -65,9 +76,13 @@ export class WorkspacesCreationModule extends Context.Service<WorkspacesCreation
             id,
             performedByAccountId,
             targets: [
-              { id: workspaceMembership.accountId, type: "Account" as const },
-              { id: workspaceMembership.workspaceId, type: "Workspace" as const },
-              { id: workspaceMembership.id, type: "WorkspaceMembership" as const }
+              { id: account.id, type: "Account" as const, version: account.version },
+              { id: workspace.id, type: "Workspace" as const, version: workspace.version },
+              {
+                id: workspaceMembership.id,
+                type: "WorkspaceMembership" as const,
+                version: workspaceMembership.version
+              }
             ]
           })
 
@@ -79,11 +94,11 @@ export class WorkspacesCreationModule extends Context.Service<WorkspacesCreation
         function*({
           id,
           workosOrganizationId,
-          accountId,
+          account,
           workspaceMembershipParameters
         }: CreatePersonalWorkspaceParameters) {
           yield* pipe(
-            workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByAccountId({ accountId }),
+            workspacesQueryRepository.findPersonalWorkspaceAndMembershipEntitiesByAccountId({ accountId: account.id }),
             Effect.andThen(
               Option.match({
                 onNone: () => Effect.void,
@@ -97,20 +112,20 @@ export class WorkspacesCreationModule extends Context.Service<WorkspacesCreation
             name: WorkspaceName.make("Personal"),
             type: "Personal",
             workosOrganizationId,
-            performedByAccountId: accountId
+            performedByAccountId: account.id
           })
 
           const workspaceMembership = yield* workspaceMembershipsRepository.insert({
             id: workspaceMembershipParameters.id,
-            accountId,
+            accountId: account.id,
             workspaceId: workspace.id,
             role: "Owner",
             workosOrganizationMembershipId: workspaceMembershipParameters.workosOrganizationMembershipId
           })
 
           yield* Effect.all([
-            recordWorkspaceCreated(workspace, accountId),
-            recordWorkspaceMembershipCreated(workspaceMembership, accountId)
+            recordWorkspaceCreated(workspace, account.id),
+            recordWorkspaceMembershipCreated({ account, workspace, workspaceMembership }, account.id)
           ], { concurrency: "unbounded" })
 
           return { workspace, workspaceMembership }

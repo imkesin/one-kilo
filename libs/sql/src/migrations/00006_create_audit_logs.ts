@@ -10,7 +10,7 @@ export default Effect.gen(function*() {
 
       performed_by_account_id UUID NOT NULL,
       timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      version INTEGER NOT NULL,
+      schema_version INTEGER NOT NULL,
 
       trace_id TEXT NOT NULL,
       type TEXT NOT NULL,

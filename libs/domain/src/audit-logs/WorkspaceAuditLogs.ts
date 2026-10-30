@@ -3,11 +3,13 @@ import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
 import * as S from "effect/Schema"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
+import { WorkspaceVersion } from "../versions/WorkspaceVersion.ts"
 import * as AuditBuilder from "./AuditBuilder.ts"
 
 const WorkspaceAuditLogBuilder = AuditBuilder.make({
   id: WorkspaceId,
-  type: "Workspace"
+  type: "Workspace",
+  version: WorkspaceVersion
 })
 
 export class WorkspaceCreatedAuditLog
@@ -20,7 +22,7 @@ export class WorkspaceCreatedAuditLog
   )
 {
   static build = Effect.fnUntraced(
-    function*(parameters: Omit<WorkspaceCreatedAuditLog, "timestamp" | "traceId" | "type" | "version">) {
+    function*(parameters: Omit<WorkspaceCreatedAuditLog, "timestamp" | "traceId" | "type" | "schemaVersion">) {
       const timestamp = yield* DateTime.now
       const traceId = yield* TracingExtensions.nearestTraceId
 

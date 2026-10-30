@@ -23,7 +23,7 @@ type InsertAuditLogParameters = {
   ]
   readonly traceId: string
   readonly type: AuditLogDefinitions.AuditLogType
-  readonly version: 1 | 2 | 3
+  readonly schemaVersion: 1 | 2 | 3
 
   readonly encodedContext?: Option.Option<string>
   readonly id?: AuditLogId
@@ -48,7 +48,7 @@ export class AuditLogsRepository extends Context.Service<AuditLogsRepository>()(
           targets,
           traceId,
           type,
-          version,
+          schemaVersion,
 
           encodedContext = Option.none(),
           id,
@@ -73,7 +73,7 @@ export class AuditLogsRepository extends Context.Service<AuditLogsRepository>()(
                   timestamp: (timestamp as (typeof timestamp & Brand.Brand<"Override">)) ?? undefined,
                   traceId,
                   type,
-                  version
+                  schemaVersion
                 })
             ),
             Effect.flatMap(toAuditLog)
