@@ -3,12 +3,14 @@ import { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { MachineClientId } from "@one-kilo/domain/ids/MachineClientId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { AccountType } from "@one-kilo/domain/values/AccountValues"
+import { AccountVersion } from "@one-kilo/domain/versions/AccountVersion"
 import * as S from "effect/Schema"
 import * as Model from "effect/schema/Model"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class AccountsModel extends Model.Class<AccountsModel>("AccountsModel")({
   id: Model.GeneratedByApp(AccountId),
+  version: Model.GeneratedByDb(AccountVersion),
 
   type: AccountType,
 
@@ -24,6 +26,7 @@ export class AccountsModel extends Model.Class<AccountsModel>("AccountsModel")({
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
+        'version', ${alias}.version,
         'type', ${alias}.type,
         'person_id', ${alias}.person_id,
         'workos_user_id', ${alias}.workos_user_id,

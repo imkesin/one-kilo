@@ -19,6 +19,7 @@ import type { AccountsModel } from "../AccountsModel.ts"
 
 export const toPersonAccountEntity = ({
   id,
+  version,
   type,
   personId,
   workosUserId,
@@ -34,6 +35,7 @@ export const toPersonAccountEntity = ({
     return Effect.succeed(
       PersonAccountEntity.make({
         id,
+        version,
         type: "Person",
         personId,
         workosUserId,
@@ -49,6 +51,7 @@ export const toPersonAccountEntity = ({
 
 export const toAccountEntity = ({
   id,
+  version,
   type,
   personId,
   workosUserId,
@@ -66,6 +69,7 @@ export const toAccountEntity = ({
     return Effect.succeed(
       PersonAccountEntity.make({
         id,
+        version,
         type: "Person",
         personId,
         workosUserId,
@@ -84,6 +88,7 @@ export const toAccountEntity = ({
     return Effect.succeed(
       MachineClientAccountEntity.make({
         id,
+        version,
         type: "MachineClient",
         machineClientId,
         workosClientId,
@@ -115,6 +120,7 @@ type AccountWithRelations = typeof AccountsModel.select.Type & {
 
 export const toAccount = ({
   id,
+  version,
   type,
   workosUserId,
   workosClientId,
@@ -135,10 +141,12 @@ export const toAccount = ({
     return Effect.succeed(
       PersonAccount.make({
         id,
+        version,
         type: "Person",
         workosUserId,
         person: PersonOnAccount.make({
           id: person.id,
+          version: person.version,
           preferredName: person.preferredName,
           fullName: person.fullName,
           sex: person.sex,
@@ -147,6 +155,7 @@ export const toAccount = ({
           emailAddresses: [
             EmailAddressOnPerson.make({
               id: onlyEmailAddress.id,
+              version: onlyEmailAddress.version,
               value: onlyEmailAddress.value,
               createdAt: onlyEmailAddress.createdAt,
               updatedAt: onlyEmailAddress.updatedAt,
@@ -172,10 +181,12 @@ export const toAccount = ({
     return Effect.succeed(
       MachineClientAccount.make({
         id,
+        version,
         type: "MachineClient",
         workosClientId,
         machineClient: MachineClientOnAccount.make({
           id: machineClient.id,
+          version: machineClient.version,
           name: machineClient.name,
           createdAt: machineClient.createdAt,
           updatedAt: machineClient.updatedAt,

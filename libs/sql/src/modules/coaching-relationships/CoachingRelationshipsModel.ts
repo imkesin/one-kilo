@@ -1,12 +1,14 @@
 import { AthleteId } from "@one-kilo/domain/ids/AthleteId"
 import { CoachId } from "@one-kilo/domain/ids/CoachId"
 import { CoachingRelationshipId } from "@one-kilo/domain/ids/CoachingRelationshipId"
+import { CoachingRelationshipVersion } from "@one-kilo/domain/versions/CoachingRelationshipVersion"
 import * as Model from "effect/schema/Model"
 import { LocalDateRangeFromPgDateRange } from "../../utils/DateRangeFields.ts"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class CoachingRelationshipsModel extends Model.Class<CoachingRelationshipsModel>("CoachingRelationshipsModel")({
   id: Model.GeneratedByApp(CoachingRelationshipId),
+  version: Model.GeneratedByDb(CoachingRelationshipVersion),
 
   coachId: CoachId,
   athleteId: AthleteId,
@@ -19,6 +21,7 @@ export class CoachingRelationshipsModel extends Model.Class<CoachingRelationship
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
+        'version', ${alias}.version,
         'coach_id', ${alias}.coach_id,
         'athlete_id', ${alias}.athlete_id,
         'period', ${alias}.period,

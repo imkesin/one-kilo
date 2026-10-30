@@ -7,6 +7,7 @@ export default Effect.gen(function*() {
   yield* sql`
     CREATE TABLE coaches (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
+      version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
 
       person_id UUID NOT NULL,
 

@@ -13,6 +13,7 @@ export default Effect.gen(function*() {
   yield* sql`
     CREATE TABLE coaching_relationships (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
+      version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
 
       coach_id UUID NOT NULL,
       athlete_id UUID NOT NULL,

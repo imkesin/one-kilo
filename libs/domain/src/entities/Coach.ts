@@ -1,12 +1,14 @@
 import * as S from "effect/Schema"
 import { CoachId } from "../ids/CoachId.ts"
 import { PersonId } from "../ids/PersonId.ts"
+import { CoachVersion } from "../versions/CoachVersion.ts"
 import { CoachingRelationshipOnAthlete } from "./CoachingRelationship.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 import { PersonEntity } from "./Person.ts"
 
 const EntityBaseFields = {
   id: CoachId,
+  version: CoachVersion,
 
   personId: PersonId,
 

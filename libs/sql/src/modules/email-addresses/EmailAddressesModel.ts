@@ -1,11 +1,13 @@
 import { EmailAddressId } from "@one-kilo/domain/ids/EmailAddressId"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { EmailAddress } from "@one-kilo/domain/values/EmailAddressValues"
+import { EmailAddressVersion } from "@one-kilo/domain/versions/EmailAddressVersion"
 import * as Model from "effect/schema/Model"
 import { ModelAuditFields } from "../../utils/ModelFields.ts"
 
 export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("EmailAddressesModel")({
   id: Model.GeneratedByApp(EmailAddressId),
+  version: Model.GeneratedByDb(EmailAddressVersion),
 
   personId: PersonId,
   value: EmailAddress,
@@ -16,6 +18,7 @@ export class EmailAddressesModel extends Model.Class<EmailAddressesModel>("Email
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
+        'version', ${alias}.version,
         'person_id', ${alias}.person_id,
         'value', ${alias}.value,
         'created_at', ${alias}.created_at,

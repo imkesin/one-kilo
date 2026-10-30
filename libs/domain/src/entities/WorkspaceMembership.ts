@@ -4,10 +4,12 @@ import { AccountId } from "../ids/AccountId.ts"
 import { WorkspaceId } from "../ids/WorkspaceId.ts"
 import { WorkspaceMembershipId } from "../ids/WorkspaceMembershipId.ts"
 import { WorkspaceMembershipRole } from "../values/WorkspaceMembershipValues.ts"
+import { WorkspaceMembershipVersion } from "../versions/WorkspaceMembershipVersion.ts"
 import { EntityRelationAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: WorkspaceMembershipId,
+  version: WorkspaceMembershipVersion,
 
   accountId: AccountId,
   workspaceId: WorkspaceId,

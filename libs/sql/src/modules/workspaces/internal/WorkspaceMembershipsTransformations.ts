@@ -3,6 +3,7 @@ import type { WorkspaceMembershipsModel } from "../WorkspaceMembershipsModel.ts"
 
 export const toWorkspaceMembershipEntity = ({
   id,
+  version,
   accountId,
   workspaceId,
   role,
@@ -13,6 +14,7 @@ export const toWorkspaceMembershipEntity = ({
 }: typeof WorkspaceMembershipsModel.select.Type) =>
   WorkspaceMembership.make({
     id,
+    version,
     accountId,
     workspaceId,
     role,

@@ -4,12 +4,14 @@ import { AccountId } from "../ids/AccountId.ts"
 import { MachineClientId } from "../ids/MachineClientId.ts"
 import { PersonId } from "../ids/PersonId.ts"
 import { AccountType } from "../values/AccountValues.ts"
+import { AccountVersion } from "../versions/AccountVersion.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 import { MachineClientOnAccount } from "./MachineClient.ts"
 import { PersonOnAccount } from "./Person.ts"
 
 const EntityBaseFields = {
   id: AccountId,
+  version: AccountVersion,
   ...EntityAuditFields
 } as const
 

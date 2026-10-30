@@ -23,8 +23,10 @@ export const AthleteRow = S.Struct({
 export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
   Athlete.make({
     id: row.id,
+    version: row.version,
     person: PersonEntity.make({
       id: row.person.id,
+      version: row.person.version,
       preferredName: row.person.preferredName,
       fullName: row.person.fullName,
       sex: row.person.sex,
@@ -39,6 +41,7 @@ export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
         id: coach.id,
         person: PersonEntity.make({
           id: coach.person.id,
+          version: coach.person.version,
           preferredName: coach.person.preferredName,
           fullName: coach.person.fullName,
           sex: coach.person.sex,
@@ -50,6 +53,7 @@ export const toAthlete = (row: typeof AthleteRow.Type): Athlete =>
         }),
         relationship: CoachingRelationshipOnAthlete.make({
           id: coach.relationship.id,
+          version: coach.relationship.version,
           period: coach.relationship.period,
           addedAt: coach.relationship.createdAt,
           updatedAt: coach.relationship.updatedAt,

@@ -6,6 +6,7 @@ import { PersonsModel } from "../PersonsModel.ts"
 
 export const toPersonEntity = ({
   id,
+  version,
   preferredName,
   fullName,
   sex,
@@ -17,6 +18,7 @@ export const toPersonEntity = ({
 }: typeof PersonsModel.select.Type) =>
   PersonEntity.make({
     id,
+    version,
     preferredName,
     fullName,
     sex,
@@ -35,6 +37,7 @@ export const PersonRow = S.Struct({
 export const toPerson = (row: typeof PersonRow.Type): Person =>
   Person.make({
     id: row.id,
+    version: row.version,
     preferredName: row.preferredName,
     fullName: row.fullName,
     sex: row.sex,
@@ -43,6 +46,7 @@ export const toPerson = (row: typeof PersonRow.Type): Person =>
     emailAddresses: row.emailAddresses.map((emailAddress) =>
       EmailAddressOnPerson.make({
         id: emailAddress.id,
+        version: emailAddress.version,
         value: emailAddress.value,
         createdAt: emailAddress.createdAt,
         updatedAt: emailAddress.updatedAt,

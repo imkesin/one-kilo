@@ -7,6 +7,7 @@ export default Effect.gen(function*() {
   yield* sql`
     CREATE TABLE workspace_memberships (
       id UUID PRIMARY KEY DEFAULT uuidv7(),
+      version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
 
       account_id UUID NOT NULL,
       workspace_id UUID NOT NULL,

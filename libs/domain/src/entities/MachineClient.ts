@@ -2,10 +2,12 @@ import * as S from "effect/Schema"
 import { AccountId } from "../ids/AccountId.ts"
 import { MachineClientId } from "../ids/MachineClientId.ts"
 import { MachineClientName } from "../values/MachineClientValues.ts"
+import { MachineClientVersion } from "../versions/MachineClientVersion.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: MachineClientId,
+  version: MachineClientVersion,
 
   name: MachineClientName,
 

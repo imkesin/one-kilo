@@ -1,5 +1,6 @@
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { FullName, PreferredName, Sex, Timezone } from "@one-kilo/domain/values/PersonValues"
+import { PersonVersion } from "@one-kilo/domain/versions/PersonVersion"
 import * as S from "effect/Schema"
 import * as Model from "effect/schema/Model"
 import { LocalDateFromPgDate } from "../../utils/DateFields.ts"
@@ -8,6 +9,7 @@ import { EmailAddressesModel } from "../email-addresses/EmailAddressesModel.ts"
 
 export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
   id: Model.GeneratedByApp(PersonId),
+  version: Model.GeneratedByDb(PersonVersion),
 
   preferredName: PreferredName,
   fullName: FullName,
@@ -28,6 +30,7 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
     return `
       JSONB_BUILD_OBJECT(
         'id', ${alias}.id,
+        'version', ${alias}.version,
         'preferred_name', ${alias}.preferred_name,
         'full_name', ${alias}.full_name,
         'sex', ${alias}.sex,

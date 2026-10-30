@@ -3,10 +3,12 @@ import { AthleteId } from "../ids/AthleteId.ts"
 import { CoachId } from "../ids/CoachId.ts"
 import { CoachingRelationshipId } from "../ids/CoachingRelationshipId.ts"
 import { LocalDateRange } from "../values/LocalDateRange.ts"
+import { CoachingRelationshipVersion } from "../versions/CoachingRelationshipVersion.ts"
 import { EntityRelationAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: CoachingRelationshipId,
+  version: CoachingRelationshipVersion,
 
   coachId: CoachId,
   athleteId: AthleteId,
@@ -33,6 +35,7 @@ export class CoachingRelationshipOnAthlete
     "CoachingRelationshipOnAthlete",
     {
       id: CoachingRelationshipId,
+      version: CoachingRelationshipVersion,
 
       period: LocalDateRange,
 

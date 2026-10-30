@@ -2,10 +2,12 @@ import * as S from "effect/Schema"
 import { EmailAddressId } from "../ids/EmailAddressId.ts"
 import { PersonId } from "../ids/PersonId.ts"
 import { EmailAddress } from "../values/EmailAddressValues.ts"
+import { EmailAddressVersion } from "../versions/EmailAddressVersion.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: EmailAddressId,
+  version: EmailAddressVersion,
   value: EmailAddress,
 
   ...EntityAuditFields

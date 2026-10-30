@@ -1,12 +1,14 @@
 import * as S from "effect/Schema"
 import { AthleteId } from "../ids/AthleteId.ts"
 import { PersonId } from "../ids/PersonId.ts"
+import { AthleteVersion } from "../versions/AthleteVersion.ts"
 import { CoachOnAthlete } from "./Coach.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 import { PersonEntity } from "./Person.ts"
 
 const EntityBaseFields = {
   id: AthleteId,
+  version: AthleteVersion,
 
   personId: PersonId,
 
@@ -29,6 +31,7 @@ export class Athlete extends S.TaggedClass<Athlete>("@one-kilo/domain/Athlete")(
   "Athlete",
   {
     id: AthleteId,
+    version: AthleteVersion,
 
     person: PersonEntity,
     coaches: S.Array(CoachOnAthlete),

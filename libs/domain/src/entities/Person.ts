@@ -8,11 +8,13 @@ import * as SchemaTransformation from "effect/SchemaTransformation"
 import { PersonId } from "../ids/PersonId.ts"
 import { LocalDate } from "../values/LocalDate.ts"
 import { FullName, PreferredName, Sex, Timezone } from "../values/PersonValues.ts"
+import { PersonVersion } from "../versions/PersonVersion.ts"
 import { EmailAddressOnPerson } from "./EmailAddress.ts"
 import { EntityAuditFields } from "./internal/EntityFields.ts"
 
 const EntityBaseFields = {
   id: PersonId,
+  version: PersonVersion,
 
   preferredName: PreferredName,
   fullName: FullName,

@@ -52,6 +52,7 @@ export class EmailAddressesRepository extends Context.Service<EmailAddressesRepo
 
           return EmailAddressEntity.make({
             id: model.id,
+            version: model.version,
             personId: model.personId,
             value: model.value,
             createdAt: model.createdAt,
