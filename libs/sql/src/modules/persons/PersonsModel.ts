@@ -59,6 +59,7 @@ export class PersonsModel extends Model.Class<PersonsModel>("PersonsModel")({
 
   static partialUpdate = S.Struct({
     id: PersonId,
+    version: PersonVersion,
 
     preferredName: S.optionalKey(PreferredName),
     fullName: S.optionalKey(FullName),

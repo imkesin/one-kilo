@@ -78,7 +78,7 @@ export class PersonsManagementModule extends Context.Service<PersonsManagementMo
           const performedByAccountId = yield* Effect.map(Actor, ({ account }) => account.id)
 
           const updatedPerson = yield* personsRepository.update(
-            person.id,
+            person,
             {
               fields: patch,
               performedByAccountId

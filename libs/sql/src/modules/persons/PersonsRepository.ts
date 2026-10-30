@@ -1,3 +1,4 @@
+import type { PersonEntity } from "@one-kilo/domain/entities/Person"
 import type { AccountId } from "@one-kilo/domain/ids/AccountId"
 import { DomainIdGenerator } from "@one-kilo/domain/ids/DomainIdGenerator"
 import type { PersonId } from "@one-kilo/domain/ids/PersonId"
@@ -83,27 +84,39 @@ export class PersonsRepository extends Context.Service<PersonsRepository>()(
       const updateSchema = SqlSchemaExtensions.findOneWithRequestDefaults({
         Request: PersonsModel.partialUpdate,
         Result: PersonsModel.select,
-        execute: ({ id, ...fields }) =>
+        execute: ({ id, version, ...fields }) =>
           sql`
             UPDATE persons
-            SET ${sql.update(fields)}
-            WHERE id = ${id}
+            SET ${sql.update(fields)}, version = version + 1
+            WHERE id = ${id} AND version = ${version}
             RETURNING *
           `
       })
 
       const update = Effect.fn("PersonsRepository.update")(
-        function*(personId: PersonId, parameters: UpdatePersonParameters) {
+        function*(person: PersonEntity, parameters: UpdatePersonParameters) {
           if (Object.keys(parameters.fields).length === 0) {
             return yield* dieWithUnexpectedError("No fields to update")
           }
 
-          const model = yield* updateSchema({
-            id: personId,
-            ...parameters.fields,
-            updatedAt: undefined,
-            updatedByAccountId: parameters.performedByAccountId
-          })
+          const model = yield* pipe(
+            updateSchema({
+              id: person.id,
+              version: person.version,
+              ...parameters.fields,
+              updatedAt: undefined,
+              updatedByAccountId: parameters.performedByAccountId
+            }),
+            /*
+             * Under SERIALIZABLE a concurrent write raises a serialization failure instead, so no row
+             * means the version that was read is wrong.
+             */
+            Effect.catchTag("NoSuchElementError", () =>
+              dieWithUnexpectedError(
+                "The person changed since it was read",
+                { person: { id: person.id, version: person.version } }
+              ))
+          )
 
           return toPersonEntity(model)
         },
