@@ -1,4 +1,5 @@
 import { AccountCreatedAuditLog } from "@one-kilo/domain/audit-logs/AccountAuditLogs"
+import { AthleteCreatedAuditLog } from "@one-kilo/domain/audit-logs/AthleteAuditLogs"
 import type { AuditLog } from "@one-kilo/domain/audit-logs/AuditLogDefinitions"
 import { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
 import { WorkspaceCreatedAuditLog } from "@one-kilo/domain/audit-logs/WorkspaceAuditLogs"
@@ -32,6 +33,24 @@ export const toAuditLog = ({
         timestamp,
         traceId,
         type: "Account.Created",
+        version: 1
+      })
+    )
+  }
+
+  if (
+    type === "Athlete.Created"
+    && version === 1
+    && S.is(AthleteCreatedAuditLog.fields.targets)(targets)
+  ) {
+    return Effect.succeed(
+      AthleteCreatedAuditLog.make({
+        id,
+        performedByAccountId,
+        targets,
+        timestamp,
+        traceId,
+        type: "Athlete.Created",
         version: 1
       })
     )
