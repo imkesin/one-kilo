@@ -1,6 +1,7 @@
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient"
 import * as NodeHttpServer from "@effect/platform-node/NodeHttpServer"
 import { ServerApi } from "@one-kilo/server-api/ServerApi"
+import * as TestRunner from "effect/cluster/TestRunner"
 import * as Config from "effect/Config"
 import type * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -9,10 +10,9 @@ import * as HttpMiddleware from "effect/http/HttpMiddleware"
 import * as HttpRouter from "effect/http/HttpRouter"
 import type * as HttpServerResponse from "effect/http/HttpServerResponse"
 import * as Layer from "effect/Layer"
-import * as WorkflowEngine from "effect/workflow/WorkflowEngine"
 import { createServer } from "node:http"
 import { AuthenticationMiddlewareLayer } from "./infra/AuthenticationMiddleware.ts"
-import { WorkflowEngineLayer } from "./infra/Cluster.ts"
+import { ClusterClientLayer } from "./infra/Cluster.ts"
 import { SqlLayer } from "./infra/Sql.ts"
 import { WorkOSLayer } from "./infra/WorkOS.ts"
 import { AthletesHttp } from "./modules/athletes/AthletesHttp.ts"
@@ -34,7 +34,7 @@ const ServerApiLayer = pipe(
 )
 
 const ServerInfraLayer = pipe(
-  Layer.merge(WorkflowEngineLayer, WorkOSLayer),
+  Layer.merge(ClusterClientLayer, WorkOSLayer),
   Layer.provideMerge(SqlLayer),
   Layer.provide(NodeHttpClient.layerUndici)
 )
@@ -51,7 +51,7 @@ const middleware = <E, R>(httpApp: Effect.Effect<HttpServerResponse.HttpServerRe
 
 export const HttpTestWithoutInfra = pipe(
   HttpRouter.serve(ServerApiLayer, { middleware, disableLogger: true, disableListenLog: true }),
-  Layer.provide(WorkflowEngine.layerMemory),
+  Layer.provide(TestRunner.layer),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 

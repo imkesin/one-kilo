@@ -62,10 +62,10 @@ export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
             return UpdatePersonOutcome.Unchanged({ person: updatePersonOutcome.person })
           }
 
-          const { auditLog, changedFields, person: updatedPerson } = updatePersonOutcome
+          const { changedFields, person: updatedPerson } = updatePersonOutcome
 
           yield* PersonWorkOSSync.enqueueIfNeeded({
-            auditLog,
+            afterPerson: updatedPerson,
             beforePerson,
             changedFields,
             maybeAccount

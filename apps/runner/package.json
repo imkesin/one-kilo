@@ -5,6 +5,8 @@
     "@effect/auth-workos": "workspace:*",
     "@effect/platform-node": "^4.0.3",
     "@one-kilo/core": "workspace:*",
+    "@one-kilo/domain": "workspace:*",
+    "@one-kilo/entities": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/sql": "workspace:*",
     "@one-kilo/telemetry": "workspace:*",

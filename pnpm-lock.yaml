@@ -51,6 +51,12 @@ importers:
       '@one-kilo/core':
         specifier: workspace:*
         version: link:../../libs/core
+      '@one-kilo/domain':
+        specifier: workspace:*
+        version: link:../../libs/domain
+      '@one-kilo/entities':
+        specifier: workspace:*
+        version: link:../../libs/entities
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../../libs/lib
@@ -217,15 +223,15 @@ importers:
       '@one-kilo/domain':
         specifier: workspace:*
         version: link:../domain
+      '@one-kilo/entities':
+        specifier: workspace:*
+        version: link:../entities
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../lib
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../sql
-      '@one-kilo/workflow':
-        specifier: workspace:*
-        version: link:../workflow
       effect:
         specifier: ^4.0.3
         version: 4.0.3
@@ -241,6 +247,15 @@ importers:
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../lib
+      effect:
+        specifier: ^4.0.3
+        version: 4.0.3
+
+  libs/entities:
+    dependencies:
+      '@one-kilo/domain':
+        specifier: workspace:*
+        version: link:../domain
       effect:
         specifier: ^4.0.3
         version: 4.0.3

@@ -4,6 +4,7 @@ import * as ClusterWorkflowEngine from "effect/cluster/ClusterWorkflowEngine"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { AliveCron } from "./crons/AliveCron.ts"
+import * as PersonWorkOSSync from "./entities/PersonWorkOSSync.ts"
 import { WorkOSLayer } from "./infra/WorkOS.ts"
 import * as PushPersonChangeToWorkOS from "./workflows/PushPersonChangeToWorkOS.ts"
 
@@ -19,6 +20,11 @@ export function makeRunnerLayer<A, E, R>(ClusterLayer: Layer.Layer<A, E, R>) {
     Layer.provide(ClusterLayer)
   )
 
+  const EntitiesLayer = pipe(
+    Layer.mergeAll(PersonWorkOSSync.EntityLayer),
+    Layer.provide(ClusterLayer)
+  )
+
   const WorkflowEngineLayer = Layer.provide(
     ClusterWorkflowEngine.layer,
     ClusterLayer
@@ -30,7 +36,7 @@ export function makeRunnerLayer<A, E, R>(ClusterLayer: Layer.Layer<A, E, R>) {
   )
 
   return pipe(
-    Layer.mergeAll(CronsLayer, WorkflowsLayer),
+    Layer.mergeAll(CronsLayer, EntitiesLayer, WorkflowsLayer),
     Layer.provide(RunnerInfraLayer)
   )
 }

@@ -6,9 +6,9 @@
     "@effect/platform-node": "^4.0.3",
     "@effect/sql-pg": "^4.0.3",
     "@one-kilo/domain": "workspace:*",
+    "@one-kilo/entities": "workspace:*",
     "@one-kilo/lib": "workspace:*",
     "@one-kilo/sql": "workspace:*",
-    "@one-kilo/workflow": "workspace:*",
     "effect": "^4.0.3",
     "jose": "^6.2.2"
   },

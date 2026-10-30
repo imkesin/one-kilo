@@ -1,8 +1,7 @@
-import type { PersonUpdatedAuditLog } from "@one-kilo/domain/audit-logs/PersonAuditLogs"
 import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity, PersonMutableFieldKey } from "@one-kilo/domain/entities/Person"
+import { PersonWorkOSSyncEntity } from "@one-kilo/entities/PersonWorkOSSyncEntity"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import * as PushPersonChangeToWorkOSDefinition from "@one-kilo/workflow/PushPersonChangeToWorkOSDefinition"
 import * as Arr from "effect/Array"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -20,19 +19,22 @@ const changeRequiresSync = (changedFields: Arr.NonEmptyReadonlyArray<PersonMutab
   Arr.some(WORKOS_MIRRORED_PERSON_FIELDS, (field) => Arr.contains(changedFields, field))
 
 type EnqueueIfNeededParameters = {
-  readonly auditLog: PersonUpdatedAuditLog
+  readonly afterPerson: PersonEntity
   readonly beforePerson: PersonEntity
   readonly changedFields: Arr.NonEmptyReadonlyArray<PersonMutableFieldKey>
   readonly maybeAccount: Option.Option<PersonAccountEntity>
 }
 
 /**
- * Enqueues a workflow that pushes the person change to WorkOS when a person update both touches a
+ * Sends the person change to the person's WorkOS sync mailbox when a person update both touches a
  * WorkOS-mirrored field and belongs to a linked account. A no-op otherwise.
+ *
+ * Must run inside the transaction that updated the person, so the message commits or rolls back
+ * with the change.
  */
 export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
   function*({
-    auditLog,
+    afterPerson,
     beforePerson,
     changedFields,
     maybeAccount
@@ -46,16 +48,20 @@ export const enqueueIfNeeded = Effect.fn("PersonWorkOSSync.enqueueIfNeeded")(
       orDieWithUnexpectedError("Failed to derive a WorkOS name from the before-state person")
     )
 
-    yield* PushPersonChangeToWorkOSDefinition.Workflow.execute(
-      {
-        causedByAuditLogId: auditLog.id,
-        expected: {
-          firstName: beforeWorkOsName.firstName,
-          lastName: beforeWorkOsName.lastName
+    const makeClient = yield* PersonWorkOSSyncEntity.client
+
+    yield* pipe(
+      makeClient(afterPerson.id).Push(
+        {
+          expected: {
+            firstName: beforeWorkOsName.firstName,
+            lastName: beforeWorkOsName.lastName
+          },
+          personVersion: afterPerson.version
         },
-        personId: beforePerson.id
-      },
-      { discard: true }
+        { discard: true }
+      ),
+      orDieWithUnexpectedError("Failed to send a person change to WorkOS sync")
     )
   }
 )
