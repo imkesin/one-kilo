@@ -4,7 +4,7 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import { AliveCron } from "./crons/AliveCron.ts"
 import { WorkOSLayer } from "./infra/WorkOS.ts"
-import * as PersonToWorkOSOutbox from "./mailboxes/PersonToWorkOSOutbox.ts"
+import { PersonToWorkOSOutboxHandlers } from "./mailboxes/PersonToWorkOSOutboxHandlers.ts"
 
 const SqlLayer = PgLayers.layer()
 
@@ -19,7 +19,7 @@ export function makeRunnerLayer<A, E, R>(ClusterLayer: Layer.Layer<A, E, R>) {
   )
 
   const EntitiesLayer = pipe(
-    Layer.mergeAll(PersonToWorkOSOutbox.EntityLayer),
+    Layer.mergeAll(PersonToWorkOSOutboxHandlers),
     Layer.provide(ClusterLayer)
   )
 

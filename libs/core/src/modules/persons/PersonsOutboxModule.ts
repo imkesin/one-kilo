@@ -1,7 +1,7 @@
 import type { PersonAccountEntity } from "@one-kilo/domain/entities/Account"
 import type { PersonEntity, PersonMutableFieldKey } from "@one-kilo/domain/entities/Person"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import * as PersonToWorkOSOutbox from "@one-kilo/mailboxes/PersonToWorkOSOutbox"
+import { PersonToWorkOSOutbox } from "@one-kilo/mailboxes/PersonToWorkOSOutbox"
 import * as Arr from "effect/Array"
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
@@ -41,7 +41,7 @@ export class PersonsOutboxModule extends Context.Service<PersonsOutboxModule>()(
   "@one-kilo/core/PersonsOutboxModule",
   {
     make: Effect.gen(function*() {
-      const makePersonToWorkOSOutboxClient = yield* PersonToWorkOSOutbox.Entity.client
+      const makeWorkOSOutboxClient = yield* PersonToWorkOSOutbox.client
 
       const handleUpdate = Effect.fn("PersonsOutboxModule.handleUpdate")(
         function*({
@@ -59,8 +59,10 @@ export class PersonsOutboxModule extends Context.Service<PersonsOutboxModule>()(
             orDieWithUnexpectedError("Failed to derive a WorkOS name from the before-state person")
           )
 
+          const workosOutboxClient = makeWorkOSOutboxClient(afterPerson.id)
+
           yield* pipe(
-            makePersonToWorkOSOutboxClient(afterPerson.id).pushUpdate(
+            workosOutboxClient.pushUpdate(
               {
                 expected: {
                   firstName: beforeWorkOSName.firstName,

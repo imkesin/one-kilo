@@ -47,6 +47,6 @@ export const PushUpdate = Rpc.make(
  * person ID). Updates for a person are pushed strictly in order; the WorkOS user is resolved at
  * push time, not at send time.
  */
-export const Entity = ClusterEntity
+export const PersonToWorkOSOutbox = ClusterEntity
   .make("PersonToWorkOSOutbox", [PushUpdate])
   .annotateRpcs(ClusterSchema.Persisted, true)

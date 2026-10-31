@@ -1,8 +1,7 @@
-import { PersonsQueryModule } from "@one-kilo/core/modules/persons/PersonsQueryModule"
-import * as PersonToWorkOS from "@one-kilo/core/processes/persons/PersonToWorkOS"
+import { PersonsToWorkOSRelay } from "@one-kilo/core/relays/persons/PersonsToWorkOSRelay"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import * as PersonToWorkOSOutbox from "@one-kilo/mailboxes/PersonToWorkOSOutbox"
+import { PersonToWorkOSOutbox } from "@one-kilo/mailboxes/PersonToWorkOSOutbox"
 import * as ClusterEntity from "effect/cluster/Entity"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
@@ -12,8 +11,6 @@ import * as S from "effect/Schema"
 
 /*
  * Failures are retried here, per message, rather than through the entity's defect retry policy:
- * that policy's backoff is shared by every person (built once per entity type), so one stuck person
- * would slow everyone else's recovery. The person's later updates wait behind this one.
  */
 const PushUpdateRetrySchedule = Schedule.min([
   Schedule.exponential("5 seconds"),
@@ -31,20 +28,21 @@ const DefectRetrySchedule = Schedule.min([
 
 const decodePersonId = S.decodeUnknownEffect(PersonId)
 
-const EntityLayerWithoutDependencies = PersonToWorkOSOutbox.Entity.toLayer(
+const HandlersWithoutDependencies = PersonToWorkOSOutbox.toLayer(
   Effect.gen(function*() {
     const { entityId } = yield* ClusterEntity.CurrentAddress
+    const personsToWorkOSRelay = yield* PersonsToWorkOSRelay
 
     const personId = yield* pipe(
       decodePersonId(entityId),
       orDieWithUnexpectedError("A PersonToWorkOSOutbox entity ID is not a person ID", { entityId })
     )
 
-    return PersonToWorkOSOutbox.Entity.of({
+    return PersonToWorkOSOutbox.of({
       pushUpdate: Effect.fnUntraced(
         function*({ payload }) {
           const outcome = yield* pipe(
-            PersonToWorkOS.pushUpdate({ personId, expected: payload.expected }),
+            personsToWorkOSRelay.relayUpdate({ personId, expected: payload.expected }),
             Effect.tapError((error) => Effect.logWarning("Failed to push a person update to WorkOS, retrying", error)),
             Effect.retry(PushUpdateRetrySchedule),
             /*
@@ -70,7 +68,7 @@ const EntityLayerWithoutDependencies = PersonToWorkOSOutbox.Entity.toLayer(
   { defectRetryPolicy: DefectRetrySchedule }
 )
 
-export const EntityLayer = pipe(
-  EntityLayerWithoutDependencies,
-  Layer.provide(PersonsQueryModule.layer)
+export const PersonToWorkOSOutboxHandlers = pipe(
+  HandlersWithoutDependencies,
+  Layer.provide(PersonsToWorkOSRelay.layer)
 )
