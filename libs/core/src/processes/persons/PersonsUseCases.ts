@@ -13,8 +13,8 @@ import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import { PersonsManagementModule } from "../../modules/persons/PersonsManagementModule.ts"
+import { PersonsOutboxModule } from "../../modules/persons/PersonsOutboxModule.ts"
 import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
-import * as PersonToWorkOSOutbox from "./internal/PersonToWorkOSOutbox.ts"
 
 type UpdatePersonFields = {
   readonly preferredName?: PreferredName
@@ -39,6 +39,7 @@ export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
       const pg = yield* PgClient.PgClient
 
       const personsManagementModule = yield* PersonsManagementModule
+      const personsOutboxModule = yield* PersonsOutboxModule
       const personsQueryModule = yield* PersonsQueryModule
 
       const update = Effect.fn("PersonsUseCases.update")(
@@ -64,7 +65,7 @@ export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
 
           const { changedFields, person: updatedPerson } = updatePersonOutcome
 
-          yield* PersonToWorkOSOutbox.pushUpdateIfNeeded({
+          yield* personsOutboxModule.handleUpdate({
             afterPerson: updatedPerson,
             beforePerson,
             changedFields,
@@ -89,6 +90,7 @@ export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
     Layer.effect(this, this.make),
     Layer.provide([
       PersonsManagementModule.layer,
+      PersonsOutboxModule.layer,
       PersonsQueryModule.layer
     ])
   )
