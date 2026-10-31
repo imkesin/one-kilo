@@ -13,7 +13,7 @@ export const PushUpdateOutcome = S.Literals([
 ])
 
 export const PushUpdate = Rpc.make(
-  "PushUpdate",
+  "pushUpdate",
   {
     payload: {
       expected: pipe(

@@ -41,7 +41,7 @@ const EntityLayerWithoutDependencies = PersonToWorkOSOutbox.Entity.toLayer(
     )
 
     return PersonToWorkOSOutbox.Entity.of({
-      PushUpdate: Effect.fnUntraced(
+      pushUpdate: Effect.fnUntraced(
         function*({ payload }) {
           const outcome = yield* pipe(
             PersonToWorkOS.pushUpdate({ personId, expected: payload.expected }),

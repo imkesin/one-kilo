@@ -60,7 +60,7 @@ export class PersonsOutboxModule extends Context.Service<PersonsOutboxModule>()(
           )
 
           yield* pipe(
-            makePersonToWorkOSOutboxClient(afterPerson.id).PushUpdate(
+            makePersonToWorkOSOutboxClient(afterPerson.id).pushUpdate(
               {
                 expected: {
                   firstName: beforeWorkOSName.firstName,
