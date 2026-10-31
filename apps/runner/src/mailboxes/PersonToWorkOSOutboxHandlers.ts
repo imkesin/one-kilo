@@ -12,7 +12,7 @@ import * as S from "effect/Schema"
 /*
  * Failures are retried here, per message, rather than through the entity's defect retry policy:
  */
-const PushUpdateRetrySchedule = Schedule.min([
+const RelayRetrySchedule = Schedule.min([
   Schedule.exponential("5 seconds"),
   Schedule.spaced("1 hour")
 ])
@@ -39,12 +39,12 @@ const HandlersWithoutDependencies = PersonToWorkOSOutbox.toLayer(
     )
 
     return PersonToWorkOSOutbox.of({
-      pushUpdate: Effect.fnUntraced(
+      PersonUpdated: Effect.fnUntraced(
         function*({ payload }) {
           const outcome = yield* pipe(
             personsToWorkOSRelay.relayUpdate({ personId, expected: payload.expected }),
-            Effect.tapError((error) => Effect.logWarning("Failed to push a person update to WorkOS, retrying", error)),
-            Effect.retry(PushUpdateRetrySchedule),
+            Effect.tapError((error) => Effect.logWarning("Failed to relay a person update to WorkOS, retrying", error)),
+            Effect.retry(RelayRetrySchedule),
             /*
              * Unreachable: the schedule never ends. Narrows the error channel to `never`.
              */
@@ -52,7 +52,7 @@ const HandlersWithoutDependencies = PersonToWorkOSOutbox.toLayer(
           )
 
           if (outcome._tag === "DriftDetected") {
-            yield* Effect.log("The WorkOS user changed since the push was sent; skipped the push")
+            yield* Effect.log("The WorkOS user changed since the update was sent; skipped relaying it")
           }
 
           return outcome._tag

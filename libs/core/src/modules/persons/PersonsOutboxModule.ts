@@ -41,7 +41,7 @@ export class PersonsOutboxModule extends Context.Service<PersonsOutboxModule>()(
   "@one-kilo/core/PersonsOutboxModule",
   {
     make: Effect.gen(function*() {
-      const makeWorkOSOutboxClient = yield* PersonToWorkOSOutbox.client
+      const makePersonToWorkOSOutboxClient = yield* PersonToWorkOSOutbox.client
 
       const handleUpdate = Effect.fn("PersonsOutboxModule.handleUpdate")(
         function*({
@@ -59,10 +59,10 @@ export class PersonsOutboxModule extends Context.Service<PersonsOutboxModule>()(
             orDieWithUnexpectedError("Failed to derive a WorkOS name from the before-state person")
           )
 
-          const workosOutboxClient = makeWorkOSOutboxClient(afterPerson.id)
+          const client = makePersonToWorkOSOutboxClient(afterPerson.id)
 
           yield* pipe(
-            workosOutboxClient.pushUpdate(
+            client.PersonUpdated(
               {
                 expected: {
                   firstName: beforeWorkOSName.firstName,
