@@ -14,7 +14,7 @@ import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import { PersonsManagementModule } from "../../modules/persons/PersonsManagementModule.ts"
 import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
-import * as PersonWorkOSSync from "./internal/PersonWorkOSSync.ts"
+import * as PersonToWorkOSOutbox from "./internal/PersonToWorkOSOutbox.ts"
 
 type UpdatePersonFields = {
   readonly preferredName?: PreferredName
@@ -64,7 +64,7 @@ export class PersonsUseCases extends Context.Service<PersonsUseCases>()(
 
           const { changedFields, person: updatedPerson } = updatePersonOutcome
 
-          yield* PersonWorkOSSync.enqueueIfNeeded({
+          yield* PersonToWorkOSOutbox.pushUpdateIfNeeded({
             afterPerson: updatedPerson,
             beforePerson,
             changedFields,

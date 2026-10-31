@@ -10,9 +10,9 @@ import * as Option from "effect/Option"
 import * as S from "effect/Schema"
 import { PersonsQueryModule } from "../../modules/persons/PersonsQueryModule.ts"
 
-const ID_PREFIX = "@one-kilo/core/PersonWorkOSPush"
+const ID_PREFIX = "@one-kilo/core/PersonToWorkOS"
 
-type PushParameters = {
+type PushUpdateParameters = {
   readonly personId: PersonId
   readonly expected: {
     readonly firstName: string
@@ -20,7 +20,7 @@ type PushParameters = {
   }
 }
 
-export type PushOutcome = Data.TaggedEnum<{
+export type PushUpdateOutcome = Data.TaggedEnum<{
   AccountUnlinked: {}
   AlreadySynced: {}
   /*
@@ -30,7 +30,7 @@ export type PushOutcome = Data.TaggedEnum<{
   DriftDetected: {}
   Updated: {}
 }>
-const PushOutcome = Data.taggedEnum<PushOutcome>()
+const PushUpdateOutcome = Data.taggedEnum<PushUpdateOutcome>()
 
 export class TargetedPersonNotFoundError extends S.TaggedError<TargetedPersonNotFoundError>(
   `${ID_PREFIX}/TargetedPersonNotFoundError`
@@ -67,8 +67,8 @@ export class WorkOSUserNotFoundError extends S.TaggedError<WorkOSUserNotFoundErr
  * The WorkOS user is resolved now rather than when the push was sent, so an account unlinked in
  * between aborts instead of updating a stale WorkOS user.
  */
-export const push = Effect.fn("PersonWorkOSPush.push")(
-  function*({ personId, expected }: PushParameters) {
+export const pushUpdate = Effect.fn("PersonToWorkOS.pushUpdate")(
+  function*({ personId, expected }: PushUpdateParameters) {
     const workosGatewayClient = yield* WorkOSApiGateway.ApiGateway
     const personsQueryModule = yield* PersonsQueryModule
 
@@ -83,7 +83,7 @@ export const push = Effect.fn("PersonWorkOSPush.push")(
     )
 
     if (Option.isNone(maybeAccount)) {
-      return PushOutcome.AccountUnlinked()
+      return PushUpdateOutcome.AccountUnlinked()
     }
 
     const { workosUserId } = maybeAccount.value
@@ -113,14 +113,14 @@ export const push = Effect.fn("PersonWorkOSPush.push")(
       derivedWorkOSName.firstName === workosUser.firstName
       && derivedWorkOSName.lastName === workosUser.lastName
     ) {
-      return PushOutcome.AlreadySynced()
+      return PushUpdateOutcome.AlreadySynced()
     }
 
     if (
       expected.firstName !== workosUser.firstName
       || expected.lastName !== workosUser.lastName
     ) {
-      return PushOutcome.DriftDetected()
+      return PushUpdateOutcome.DriftDetected()
     }
 
     yield* pipe(
@@ -145,6 +145,6 @@ export const push = Effect.fn("PersonWorkOSPush.push")(
       })
     )
 
-    return PushOutcome.Updated()
+    return PushUpdateOutcome.Updated()
   }
 )

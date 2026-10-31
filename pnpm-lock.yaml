@@ -54,12 +54,12 @@ importers:
       '@one-kilo/domain':
         specifier: workspace:*
         version: link:../../libs/domain
-      '@one-kilo/entities':
-        specifier: workspace:*
-        version: link:../../libs/entities
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../../libs/lib
+      '@one-kilo/mailboxes':
+        specifier: workspace:*
+        version: link:../../libs/mailboxes
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../../libs/sql
@@ -220,12 +220,12 @@ importers:
       '@one-kilo/domain':
         specifier: workspace:*
         version: link:../domain
-      '@one-kilo/entities':
-        specifier: workspace:*
-        version: link:../entities
       '@one-kilo/lib':
         specifier: workspace:*
         version: link:../lib
+      '@one-kilo/mailboxes':
+        specifier: workspace:*
+        version: link:../mailboxes
       '@one-kilo/sql':
         specifier: workspace:*
         version: link:../sql
@@ -248,17 +248,17 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
 
-  libs/entities:
-    dependencies:
-      '@one-kilo/domain':
-        specifier: workspace:*
-        version: link:../domain
+  libs/lib:
+    devDependencies:
       effect:
         specifier: ^4.0.3
         version: 4.0.3
 
-  libs/lib:
-    devDependencies:
+  libs/mailboxes:
+    dependencies:
+      '@one-kilo/domain':
+        specifier: workspace:*
+        version: link:../domain
       effect:
         specifier: ^4.0.3
         version: 4.0.3

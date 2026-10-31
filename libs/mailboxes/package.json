@@ -1,5 +1,5 @@
 {
-  "name": "@one-kilo/entities",
+  "name": "@one-kilo/mailboxes",
   "version": "0.1.0",
   "dependencies": {
     "@one-kilo/domain": "workspace:*",

@@ -1,9 +1,9 @@
 import { PersonsQueryModule } from "@one-kilo/core/modules/persons/PersonsQueryModule"
-import * as PersonWorkOSPush from "@one-kilo/core/processes/persons/PersonWorkOSPush"
+import * as PersonToWorkOS from "@one-kilo/core/processes/persons/PersonToWorkOS"
 import { PersonId } from "@one-kilo/domain/ids/PersonId"
-import { PersonWorkOSSyncEntity } from "@one-kilo/entities/PersonWorkOSSyncEntity"
 import { orDieWithUnexpectedError } from "@one-kilo/lib/errors/UnexpectedError"
-import * as Entity from "effect/cluster/Entity"
+import * as PersonToWorkOSOutbox from "@one-kilo/mailboxes/PersonToWorkOSOutbox"
+import * as ClusterEntity from "effect/cluster/Entity"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Layer from "effect/Layer"
@@ -13,9 +13,9 @@ import * as S from "effect/Schema"
 /*
  * Failures are retried here, per message, rather than through the entity's defect retry policy:
  * that policy's backoff is shared by every person (built once per entity type), so one stuck person
- * would slow everyone else's recovery. The person's later pushes wait behind this one.
+ * would slow everyone else's recovery. The person's later updates wait behind this one.
  */
-const PushRetrySchedule = Schedule.min([
+const PushUpdateRetrySchedule = Schedule.min([
   Schedule.exponential("5 seconds"),
   Schedule.spaced("1 hour")
 ])
@@ -31,22 +31,22 @@ const DefectRetrySchedule = Schedule.min([
 
 const decodePersonId = S.decodeUnknownEffect(PersonId)
 
-const EntityLayerWithoutDependencies = PersonWorkOSSyncEntity.toLayer(
+const EntityLayerWithoutDependencies = PersonToWorkOSOutbox.Entity.toLayer(
   Effect.gen(function*() {
-    const { entityId } = yield* Entity.CurrentAddress
+    const { entityId } = yield* ClusterEntity.CurrentAddress
 
     const personId = yield* pipe(
       decodePersonId(entityId),
-      orDieWithUnexpectedError("A PersonWorkOSSync entity ID is not a person ID", { entityId })
+      orDieWithUnexpectedError("A PersonToWorkOSOutbox entity ID is not a person ID", { entityId })
     )
 
-    return PersonWorkOSSyncEntity.of({
-      Push: Effect.fnUntraced(
+    return PersonToWorkOSOutbox.Entity.of({
+      PushUpdate: Effect.fnUntraced(
         function*({ payload }) {
           const outcome = yield* pipe(
-            PersonWorkOSPush.push({ personId, expected: payload.expected }),
-            Effect.tapError((error) => Effect.logWarning("Failed to push a person change to WorkOS, retrying", error)),
-            Effect.retry(PushRetrySchedule),
+            PersonToWorkOS.pushUpdate({ personId, expected: payload.expected }),
+            Effect.tapError((error) => Effect.logWarning("Failed to push a person update to WorkOS, retrying", error)),
+            Effect.retry(PushUpdateRetrySchedule),
             /*
              * Unreachable: the schedule never ends. Narrows the error channel to `never`.
              */
@@ -54,7 +54,7 @@ const EntityLayerWithoutDependencies = PersonWorkOSSyncEntity.toLayer(
           )
 
           if (outcome._tag === "DriftDetected") {
-            yield* Effect.logWarning("The WorkOS user changed since the push was sent; skipped the push")
+            yield* Effect.log("The WorkOS user changed since the push was sent; skipped the push")
           }
 
           return outcome._tag

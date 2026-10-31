@@ -32,12 +32,12 @@
       "path": "../libs/domain"
     },
     {
-      "name": "@one-kilo/entities",
-      "path": "../libs/entities"
-    },
-    {
       "name": "@one-kilo/lib",
       "path": "../libs/lib"
+    },
+    {
+      "name": "@one-kilo/mailboxes",
+      "path": "../libs/mailboxes"
     },
     {
       "name": "@one-kilo/server-api",
